@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Workspace Translator Pro</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e0e0e0;
+      line-height: 1.7;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 48px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,206,201,0.12);
+      border: 1px solid rgba(0,206,201,0.3);
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: #00cec9;
+      margin-bottom: 24px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 0.95rem;
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin: 32px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 18px;
+      background: #00cec9;
+      border-radius: 2px;
+    }
+    p { margin-bottom: 12px; color: #ccc; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; color: #ccc; }
+    .highlight-box {
+      background: rgba(0,206,201,0.07);
+      border: 1px solid rgba(0,206,201,0.2);
+      border-left: 3px solid #00cec9;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.95rem;
+      color: #b2f5f5;
+    }
+    .contact {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.9rem;
+      color: #888;
+    }
+    a { color: #00cec9; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">Chrome Extension</div>
+    <h1>Privacy Policy</h1>
+    <p class="subtitle">
+      Workspace Translator Pro &nbsp;·&nbsp;
+      Last updated: June 2025
+    </p>
+
+    <div class="highlight-box">
+      🔒 We do <strong>not</strong> collect, store, or transmit any personal data to our own servers.
+      This extension operates entirely within your browser using your own API credentials.
+    </div>
+
+    <h2>What Data Is Stored Locally</h2>
+    <p>The following data is stored <strong>only in your browser's local storage</strong> (chrome.storage.local) and never leaves your device:</p>
+    <ul>
+      <li><strong>Google OAuth Client ID</strong> — entered by you in Settings</li>
+      <li><strong>LLM API Keys</strong> — entered by you (Gemini, OpenAI, Claude, or custom)</li>
+      <li><strong>Selected Model Name</strong> — your preferred AI model</li>
+      <li><strong>Translation History</strong> — Google Drive file IDs and document titles of your completed translations</li>
+      <li><strong>Debug Logs</strong> — temporary logs for the current translation session, stored per-session and not accumulated over time</li>
+    </ul>
+
+    <h2>What Data Is Processed</h2>
+    <p>When you initiate a translation, the extension does the following:</p>
+    <ul>
+      <li>Reads your document's text content via <strong>Google Workspace APIs</strong> (Slides, Docs, Sheets, or Forms)</li>
+      <li>Sends that text to the <strong>LLM API you configured</strong> (Google Gemini, OpenAI, Anthropic Claude, or your custom endpoint) for translation</li>
+      <li>Writes the translated text back to a <strong>copy</strong> of your document on Google Drive — your original is never modified</li>
+    </ul>
+
+    <h2>Third-Party Services</h2>
+    <p>Depending on your settings, your document text is sent to one of these external services for translation. Please review their privacy policies:</p>
+    <ul>
+      <li><a href="https://ai.google.dev/gemini-api/terms" target="_blank">Google Gemini API</a></li>
+      <li><a href="https://openai.com/policies/privacy-policy" target="_blank">OpenAI API</a></li>
+      <li><a href="https://www.anthropic.com/legal/privacy" target="_blank">Anthropic Claude API</a></li>
+      <li>Your custom endpoint (if configured by you)</li>
+    </ul>
+    <p>The <strong>Free Google Translate</strong> engine uses Google's public translation service without requiring an API key.</p>
+
+    <h2>Google Drive Access</h2>
+    <p>This extension requests Google Drive access through <strong>your own OAuth credentials</strong> (Client ID). The extension can:</p>
+    <ul>
+      <li>Create copies of documents you select for translation</li>
+      <li>Read and write content to those copies</li>
+      <li>Check whether previously translated files still exist in Drive (for History sync)</li>
+    </ul>
+    <p>The extension does <strong>not</strong> access any files beyond those you explicitly initiate translation on.</p>
+
+    <h2>No Analytics or Tracking</h2>
+    <p>This extension does not include any analytics, telemetry, crash reporting, or user tracking of any kind. We do not operate any backend servers.</p>
+
+    <h2>Data Retention</h2>
+    <p>All locally stored data persists in your browser until you:</p>
+    <ul>
+      <li>Clear the Translation History via the History panel</li>
+      <li>Uninstall the extension</li>
+      <li>Clear your browser's local storage</li>
+    </ul>
+
+    <h2>Changes to This Policy</h2>
+    <p>If we make significant changes to this privacy policy, we will update the "Last updated" date above. We encourage you to review this page periodically.</p>
+
+    <div class="contact">
+      <strong>Contact</strong><br>
+      If you have questions about this privacy policy, please open an issue on our
+      <a href="https://github.com/comeonchen-ship-it/workspace-translator-pro" target="_blank">GitHub repository</a>.
+    </div>
+  </div>
+</body>
+</html>

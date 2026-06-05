@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workspace Translator Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <div class="glass-bg"></div>
+  
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="icons/icon48.png" alt="Icon" class="brand-logo">
+        <div class="brand-name-group">
+          <span class="brand-name">Workspace Translator Pro</span>
+          <span class="brand-version" id="app-version"></span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btn-help" title="Setup Guide">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </button>
+        <button class="icon-btn" id="btn-history" title="Translation History">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" title="Settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Workspace File Warning Panel (Only visible if not on Google Slides/Docs/Sheets/Forms URL) -->
+    <div class="panel warning-panel" id="warning-panel">
+      <div class="warning-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#ffeaa7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h3>File Not Detected</h3>
+      <p>Please open a supported file in Google Drive to use this translator:</p>
+      <p style="font-size:11px; color: var(--text-muted); margin-top: 4px; line-height: 1.6;">
+        Google Slides / Docs / Sheets / Forms<br>
+        <span style="color: var(--accent);">Excel (.xlsx .xls) · Word (.docx .doc) · PowerPoint (.pptx .ppt)</span>
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; justify-content: center; width: 100%;">
+        <a href="https://slides.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-slides">New Slides</a>
+        <a href="https://docs.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-docs">New Doc</a>
+        <a href="https://sheets.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-sheets">New Sheets</a>
+        <a href="https://forms.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-forms">New Form</a>
+      </div>
+    </div>
+
+    <!-- Main Active Workspace Panel -->
+    <div class="panel active-panel" id="main-panel">
+      <!-- Active File Info -->
+      <div class="slide-info-card">
+        <div class="slide-icon" id="slide-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </div>
+        <div class="slide-meta">
+          <span class="meta-label" id="meta-label">Active Presentation</span>
+          <span class="meta-val" id="slide-title">Loading title...</span>
+        </div>
+      </div>
+
+      <!-- Selector Options -->
+      <div class="control-group">
+        <label for="select-lang">Translate Target Language</label>
+        <div class="select-wrapper">
+          <select id="select-lang">
+            <option value="zh-TW" selected>Traditional Chinese (繁體中文)</option>
+            <option value="zh-CN">Simplified Chinese (简体中文)</option>
+            <option value="en">English</option>
+            <option value="ja">Japanese (日本語)</option>
+            <option value="ko">Korean (한국어)</option>
+            <option value="es">Spanish (Español)</option>
+            <option value="fr">French (Français)</option>
+            <option value="de">German (Deutsch)</option>
+            <option value="vi">Vietnamese (Tiếng Việt)</option>
+            <option value="th">Thai (ไทย)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Submit / Trigger -->
+      <div class="action-trigger">
+        <button class="btn btn-primary btn-large" id="btn-translate">
+          <span>Translate & Copy</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+      </div>
+
+      <!-- Progress Tracking Panel (Hidden by Default) -->
+      <div class="progress-section" id="progress-section">
+        <div class="progress-header">
+          <span class="progress-status" id="progress-status">Preparing copy...</span>
+          <span class="progress-pct" id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+
+        <!-- Life-cycle warning tip for stress protection -->
+        <div class="progress-warning-banner">
+          <span class="warning-banner-icon">⚠️</span>
+          <span class="warning-banner-text">翻譯進行中，請勿關閉或切換此文件分頁，以防翻譯中斷。<br>Translation in progress. Please do not close or switch this tab to prevent interruption.</span>
+        </div>
+        
+        <!-- Steps Checklist -->
+        <ul class="progress-steps">
+          <li id="step-copy" class="pending">
+            <span class="step-bullet"></span>
+            <span>Duplicate original presentation/document</span>
+          </li>
+          <li id="step-extract" class="pending">
+            <span class="step-bullet"></span>
+            <span>Extract elements & text runs</span>
+          </li>
+          <li id="step-api" class="pending">
+            <span class="step-bullet"></span>
+            <span>Translate text runs via LLM API</span>
+          </li>
+          <li id="step-write" class="pending">
+            <span class="step-bullet"></span>
+            <span>Write back translations to copy</span>
+          </li>
+        </ul>
+
+        <!-- Stop Translation Button -->
+        <button class="btn btn-danger btn-large" id="btn-cancel-translation" style="margin-top: 12px; margin-bottom: 4px;">
+          <span>Stop Translation</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>
+        </button>
+
+        <!-- Debug Logs Console -->
+        <div class="log-console-wrapper" id="log-console-wrapper">
+          <div class="log-console-header">
+            <span>Debug Console Logs</span>
+            <button id="btn-toggle-logs" class="btn-toggle-logs">Show</button>
+          </div>
+          <div class="log-console-content hidden" id="log-console-content">Waiting for logs...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration / Settings View (Hidden by Default) -->
+    <div class="panel settings-panel" id="settings-panel">
+      <div class="settings-header-bar">
+        <h3>Extension Settings</h3>
+        <button class="close-btn" id="btn-close-settings">&times;</button>
+      </div>
+
+      <div class="settings-scroll-container">
+        <!-- Translation Engine settings -->
+        <div class="setting-group-card">
+          <h4>Translation Engine</h4>
+          
+          <div class="form-group">
+            <label for="select-engine">Translation Provider</label>
+            <div class="select-wrapper">
+              <select id="select-engine">
+                <option value="gemini">Gemini API (Recommended)</option>
+                <option value="openai">OpenAI API</option>
+                <option value="claude">Claude API</option>
+                <option value="custom">Custom (OpenAI-compatible)</option>
+                <option value="free">Free Google Translate</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" id="group-api-key">
+            <label for="api-key">API Key</label>
+            <div class="input-container password-container">
+              <input type="password" id="api-key" placeholder="Enter API Key">
+              <button type="button" class="eye-toggle-btn" id="btn-toggle-api-key" title="Show/Hide API Key">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+              <span class="val-indicator" id="api-key-indicator"></span>
+            </div>
+          </div>
+
+          <div class="form-group" id="group-model-name">
+            <label for="model-name">Model Name</label>
+            <input type="text" id="model-name" placeholder="gemini-3.1-flash-lite">
+            <div class="model-sunset-tip" id="model-sunset-tip">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Model names may be deprecated over time. Please verify the current available models at <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" class="tip-link">Google AI Docs</a> / <a href="https://platform.openai.com/docs/models" target="_blank" class="tip-link">OpenAI Docs</a> and update this field if needed.</span>
+            </div>
+          </div>
+
+          <div class="settings-quota-tip" id="group-quota-tip">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>For best results, choose a model with <strong>&ge;1,500 free requests/day (RPD)</strong> and <strong>&ge;30 requests/min (RPM)</strong> &mdash; this gives you the most quota headroom per translation session.</span>
+          </div>
+
+          <div class="form-group hidden" id="group-custom-url">
+            <label for="custom-url">Base Endpoint URL</label>
+            <input type="text" id="custom-url" placeholder="https://api.deepseek.com/v1">
+          </div>
+
+          <!-- API Key Test & Status -->
+          <div class="form-group" id="group-test-api">
+            <div class="api-test-row">
+              <div class="api-status-badge" id="api-status-badge">
+                <span class="status-dot status-unverified" id="api-status-dot"></span>
+                <span class="status-label" id="api-status-text">未驗證 · Unverified</span>
+              </div>
+              <button type="button" class="btn-test-connection" id="btn-test-api">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Test Connection
+              </button>
+            </div>
+            <div class="test-result-msg" id="test-result-msg"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="btn-cancel-settings">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-settings">Save Configurations</button>
+      </div>
+    </div>
+
+    <!-- Translation History View (Hidden by Default) -->
+    <div class="panel history-panel" id="history-panel">
+      <div class="settings-header-bar">
+        <h3>Translation History</h3>
+        <button class="close-btn" id="btn-close-history">&times;</button>
+      </div>
+      <div class="history-scroll-container" id="history-scroll-container">
+        <!-- History list items will be injected here dynamically -->
+        <div class="history-empty-state">No completed translations yet.</div>
+      </div>
+      <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr;">
+        <button class="btn btn-secondary btn-sm" id="btn-clear-history">Clear History</button>
+      </div>
+    </div>
+
+    <!-- Pre-translation API Warning Modal -->
+    <div class="modal-overlay hidden" id="api-warning-modal">
+      <div class="modal-dialog">
+        <div class="modal-emoji" id="modal-emoji">⚠️</div>
+        <h3 class="modal-title" id="modal-title">API Key Not Verified</h3>
+        <p class="modal-msg" id="modal-msg">Your API key has not been verified. Please go to Settings and click "Test Connection" to verify your credentials before translating.</p>
+        <div class="modal-btns">
+          <button class="btn btn-primary btn-sm" id="modal-go-settings">⚙️ Go to Settings</button>
+          <button class="btn btn-secondary btn-sm" id="modal-dismiss">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
