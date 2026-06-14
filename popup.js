@@ -516,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         newStatus = 'unverified';
         testResultMsg.className = 'test-result-msg result-warning';
+      }
       testResultMsg.innerHTML = result.message +
         (result.suggestion ? `<br><span class="test-suggestion">${result.suggestion}</span>` : '');
       updateStatusBadge(newStatus);

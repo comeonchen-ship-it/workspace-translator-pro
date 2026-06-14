@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Workspace Translator Pro",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Translate Google Slides, Docs, Sheets, and Forms while preserving layouts. Supports Gemini, OpenAI, Claude, and custom LLM APIs.",
   "permissions": [
     "activeTab",
