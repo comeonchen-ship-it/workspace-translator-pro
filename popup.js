@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const batchSelectedTargetName = document.getElementById('batch-selected-target-name');
   const batchTargetIcon = document.getElementById('batch-target-icon');
   const batchPresetBtns = document.getElementById('batch-preset-btns');
+  const presetTimePickerRow = document.getElementById('preset-time-picker-row');
+  const presetAdjustTimeInput = document.getElementById('preset-adjust-time-input');
   
   // Folder Detected banner elements
   const folderDetectedBanner = document.getElementById('folder-detected-banner');
@@ -811,6 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const presetButtons = batchPresetBtns.querySelectorAll('.preset-btn');
       presetButtons.forEach(b => b.classList.remove('active'));
       selectedPreset = 'custom';
+      if (presetTimePickerRow) presetTimePickerRow.classList.add('hidden');
       
       if (selectedFrequency === 'minute' || selectedFrequency === 'hour') {
         groupScheduleInterval.classList.remove('hidden');
@@ -846,6 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           groupScheduleInterval.classList.add('hidden');
           groupScheduleTime.classList.add('hidden');
+          if (presetTimePickerRow) presetTimePickerRow.classList.add('hidden');
         } else if (selectedPreset === 'tonight') {
           selectedFrequency = 'daily';
           freqButtons.forEach(b => {
@@ -853,8 +857,10 @@ document.addEventListener('DOMContentLoaded', () => {
             else b.classList.remove('active');
           });
           if (scheduleTime) scheduleTime.value = '23:00';
+          if (presetAdjustTimeInput) presetAdjustTimeInput.value = '23:00';
           groupScheduleInterval.classList.add('hidden');
           groupScheduleTime.classList.remove('hidden');
+          if (presetTimePickerRow) presetTimePickerRow.classList.remove('hidden');
         } else if (selectedPreset === 'weekly') {
           selectedFrequency = 'weekly';
           freqButtons.forEach(b => {
@@ -862,10 +868,21 @@ document.addEventListener('DOMContentLoaded', () => {
             else b.classList.remove('active');
           });
           if (scheduleTime) scheduleTime.value = '09:00';
+          if (presetAdjustTimeInput) presetAdjustTimeInput.value = '09:00';
           groupScheduleInterval.classList.add('hidden');
           groupScheduleTime.classList.remove('hidden');
+          if (presetTimePickerRow) presetTimePickerRow.classList.remove('hidden');
         }
       });
+    });
+  }
+
+  // Bind change event to the inline time picker to sync time to advanced settings
+  if (presetAdjustTimeInput) {
+    presetAdjustTimeInput.addEventListener('change', () => {
+      if (scheduleTime) {
+        scheduleTime.value = presetAdjustTimeInput.value;
+      }
     });
   }
 
@@ -2204,7 +2221,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'Select',
         btnChoose: '📁 Choose...',
         activeDocument: 'Active Document',
-        promptPlaceholder: 'Input prompt that the agent will receive at scheduled time...'
+        promptPlaceholder: 'Input prompt that the agent will receive at scheduled time...',
+        adjustTime: '⏰ Adjust Time:'
       },
       'zh-TW': {
         selectedSource: '已選擇來源',
@@ -2218,7 +2236,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: '選擇',
         btnChoose: '📁 選擇...',
         activeDocument: '目前文件',
-        promptPlaceholder: '請輸入代理人在排程時間執行時所接收的提示詞指令...'
+        promptPlaceholder: '請輸入代理人在排程時間執行時所接收的提示詞指令...',
+        adjustTime: '⏰ 調整時間:'
       },
       'zh-CN': {
         selectedSource: '已选择来源',
@@ -2232,7 +2251,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: '选择',
         btnChoose: '📁 选择...',
         activeDocument: '当前文档',
-        promptPlaceholder: '请输入代理人在日程时间执行时所接收的提示词指令...'
+        promptPlaceholder: '请输入代理人在日程时间执行时所接收的提示词指令...',
+        adjustTime: '⏰ 调整时间:'
       },
       'ja': {
         selectedSource: '選択されたソース',
@@ -2246,7 +2266,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: '選択',
         btnChoose: '📁 選択...',
         activeDocument: '現在ドキュメント',
-        promptPlaceholder: 'スケジュール実行時にエージェントが受け取るプロンプトを入力してください...'
+        promptPlaceholder: 'スケジュール実行時にエージェントが受け取るプロンプトを入力してください...',
+        adjustTime: '⏰ 時間調整:'
       },
       'ko': {
         selectedSource: '선택된 소스',
@@ -2256,11 +2277,12 @@ document.addEventListener('DOMContentLoaded', () => {
         presetWeekly: '📅 매주 (월요일 오전 9:00)',
         advancedSettings: '⚙️ 고급 설정',
         explorerTitle: 'Google 드라이브 탐색기',
-        loadingFiles: '파일 로ด 중...',
+        loadingFiles: '파일 로드 중...',
         btnSelect: '선택',
         btnChoose: '📁 선택...',
         activeDocument: '현재 문서',
-        promptPlaceholder: '예약된 시간에 에이전트가 수신할 프롬프트를 입력하세요...'
+        promptPlaceholder: '예약된 시간에 에이전트가 수신할 프롬프트를 입력하세요...',
+        adjustTime: '⏰ 시간 조정:'
       },
       'es': {
         selectedSource: 'Origen Seleccionado',
@@ -2274,7 +2296,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'Seleccionar',
         btnChoose: '📁 Elegir...',
         activeDocument: 'Documento Activo',
-        promptPlaceholder: 'Ingrese las instrucciones que el agente recibirá en el momento programado...'
+        promptPlaceholder: 'Ingrese las instrucciones que el agente recibirá en el momento programado...',
+        adjustTime: '⏰ Ajustar hora:'
       },
       'fr': {
         selectedSource: 'Source Sélectionnée',
@@ -2288,7 +2311,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'Sélectionner',
         btnChoose: '📁 Choisir...',
         activeDocument: 'Document Actif',
-        promptPlaceholder: 'Saisissez les instructions que l\'agent recevra à l\'heure programmée...'
+        promptPlaceholder: 'Saisissez les instructions que l\'agent recevra à l\'heure programmée...',
+        adjustTime: '⏰ Ajuster l\'heure:'
       },
       'de': {
         selectedSource: 'Ausgewählte Quelle',
@@ -2302,7 +2326,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'Auswählen',
         btnChoose: '📁 Auswählen...',
         activeDocument: 'Aktives Dokument',
-        promptPlaceholder: 'Geben Sie die Anweisungen ein, die der Agent zum geplanten Zeitpunkt erhält...'
+        promptPlaceholder: 'Geben Sie die Anweisungen ein, die der Agent zum geplanten Zeitpunkt erhält...',
+        adjustTime: '⏰ Uhrzeit anpassen:'
       },
       'vi': {
         selectedSource: 'Nguồn Đã Chọn',
@@ -2316,7 +2341,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'Chọn',
         btnChoose: '📁 Chọn...',
         activeDocument: 'Tài liệu Hiện tại',
-        promptPlaceholder: 'Nhập câu lệnh hướng dẫn mà tác nhân sẽ nhận vào thời gian lên lịch...'
+        promptPlaceholder: 'Nhập câu lệnh hướng dẫn mà tác nhân sẽ nhận vào thời gian lên lịch...',
+        adjustTime: '⏰ Điều chỉnh thời gian:'
       },
       'th': {
         selectedSource: 'แหล่งข้อมูลที่เลือก',
@@ -2330,7 +2356,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSelect: 'เลือก',
         btnChoose: '📁 เลือก...',
         activeDocument: 'เอกสารปัจจุบัน',
-        promptPlaceholder: 'กรอกคำสั่งที่เอเจนต์จะได้รับเมื่อถึงเวลาที่กำหนดไว้...'
+        promptPlaceholder: 'กรอกคำสั่งที่เอเจนต์จะได้รับเมื่อถึงเวลาที่กำหนดไว้...',
+        adjustTime: '⏰ ปรับเวลา:'
       }
     };
 
@@ -2348,6 +2375,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnPresetTonight) btnPresetTonight.textContent = driveTrans.presetTonight;
     const btnPresetWeekly = document.getElementById('btn-preset-weekly');
     if (btnPresetWeekly) btnPresetWeekly.textContent = driveTrans.presetWeekly;
+    
+    const labelAdjustTime = document.getElementById('label-adjust-time');
+    if (labelAdjustTime) labelAdjustTime.textContent = driveTrans.adjustTime;
     
     const labelAdvancedSettings = document.getElementById('label-advanced-settings');
     if (labelAdvancedSettings) labelAdvancedSettings.textContent = driveTrans.advancedSettings;

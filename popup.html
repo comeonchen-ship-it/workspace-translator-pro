@@ -304,6 +304,10 @@
             <button type="button" class="preset-btn" data-preset="tonight" id="btn-preset-tonight">🌙 Tonight (11:00 PM)</button>
             <button type="button" class="preset-btn" data-preset="weekly" id="btn-preset-weekly">📅 Weekly (Mon 9:00 AM)</button>
           </div>
+          <div class="preset-time-picker-row hidden" id="preset-time-picker-row" style="margin-top: 8px; display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--border-color); width: 100%; box-sizing: border-box;">
+            <span style="font-size: 11px; color: var(--text-muted);" id="label-adjust-time">⏰ Adjust Time:</span>
+            <input type="time" id="preset-adjust-time-input" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: #fff; font-size: 11.5px; padding: 4px 8px; border-radius: 6px; font-family: inherit; outline: none; cursor: pointer;">
+          </div>
         </div>
 
         <!-- Section 3: Translation Target Languages -->
