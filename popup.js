@@ -396,14 +396,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const isFailed = dot && dot.classList.contains('status-invalid');
       
       if (!isVerified) {
-        // Show dynamic warning banner at the top of scroll container
+        // Show dynamic warning banner fixed at the top of the settings panel (outside scroll container)
         const scrollContainer = document.querySelector('.settings-scroll-container');
         let errorBanner = document.getElementById('settings-error-banner');
         if (!errorBanner) {
           errorBanner = document.createElement('div');
           errorBanner.id = 'settings-error-banner';
           errorBanner.className = 'settings-error-banner';
-          scrollContainer.insertBefore(errorBanner, scrollContainer.firstChild);
+          settingsPanel.insertBefore(errorBanner, scrollContainer);
         }
         
         if (isFailed) {
@@ -423,14 +423,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnTestApi = document.getElementById('btn-test-api');
         if (btnTestApi) btnTestApi.classList.add('validation-highlight');
         
-        // Scroll to group-api-key or group-test-api
-        const groupApiKey = document.getElementById('group-api-key');
-        if (groupApiKey) {
-          groupApiKey.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Scroll to group-test-api so user sees the failure message
+        const groupTestApi = document.getElementById('group-test-api');
+        if (groupTestApi) {
+          groupTestApi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         
-        // Focus input field
-        inputApiKey.focus();
+        // Focus input field without letting browser auto-scroll back to top
+        inputApiKey.focus({ preventScroll: true });
         
         // Clear warnings when they start typing or click test
         const clearWarnings = () => {
