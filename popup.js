@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetApiStatus() {
     if (selectEngine.value === 'free') return;
-    chrome.storage.local.set({ apiKeyStatus: 'unverified' });
     updateStatusBadge('unverified');
     const msg = document.getElementById('test-result-msg');
     if (msg) { msg.textContent = ''; msg.className = 'test-result-msg'; }
@@ -456,7 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
       translationEngine,
       apiKey,
       modelName,
-      customUrl
+      customUrl,
+      apiKeyStatus: (translationEngine === 'free') ? 'unverified' : 'active'
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       closeSettings();
@@ -516,11 +516,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         newStatus = 'unverified';
         testResultMsg.className = 'test-result-msg result-warning';
-      }
       testResultMsg.innerHTML = result.message +
         (result.suggestion ? `<br><span class="test-suggestion">${result.suggestion}</span>` : '');
-
-      chrome.storage.local.set({ apiKeyStatus: newStatus });
       updateStatusBadge(newStatus);
     });
   }
