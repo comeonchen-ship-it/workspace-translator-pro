@@ -2203,7 +2203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'Loading files...',
         btnSelect: 'Select',
         btnChoose: '📁 Choose...',
-        activeDocument: 'Active Document'
+        activeDocument: 'Active Document',
+        promptPlaceholder: 'Input prompt that the agent will receive at scheduled time...'
       },
       'zh-TW': {
         selectedSource: '已選擇來源',
@@ -2216,7 +2217,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: '載入檔案中...',
         btnSelect: '選擇',
         btnChoose: '📁 選擇...',
-        activeDocument: '目前文件'
+        activeDocument: '目前文件',
+        promptPlaceholder: '請輸入代理人在排程時間執行時所接收的提示詞指令...'
       },
       'zh-CN': {
         selectedSource: '已选择来源',
@@ -2229,7 +2231,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: '正在加载文件...',
         btnSelect: '选择',
         btnChoose: '📁 选择...',
-        activeDocument: '当前文档'
+        activeDocument: '当前文档',
+        promptPlaceholder: '请输入代理人在日程时间执行时所接收的提示词指令...'
       },
       'ja': {
         selectedSource: '選択されたソース',
@@ -2242,7 +2245,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'ファイルを読み込み中...',
         btnSelect: '選択',
         btnChoose: '📁 選択...',
-        activeDocument: '現在ドキュメント'
+        activeDocument: '現在ドキュメント',
+        promptPlaceholder: 'スケジュール実行時にエージェントが受け取るプロンプトを入力してください...'
       },
       'ko': {
         selectedSource: '선택된 소스',
@@ -2255,7 +2259,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: '파일 로ด 중...',
         btnSelect: '선택',
         btnChoose: '📁 선택...',
-        activeDocument: '현재 문서'
+        activeDocument: '현재 문서',
+        promptPlaceholder: '예약된 시간에 에이전트가 수신할 프롬프트를 입력하세요...'
       },
       'es': {
         selectedSource: 'Origen Seleccionado',
@@ -2268,7 +2273,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'Cargando archivos...',
         btnSelect: 'Seleccionar',
         btnChoose: '📁 Elegir...',
-        activeDocument: 'Documento Activo'
+        activeDocument: 'Documento Activo',
+        promptPlaceholder: 'Ingrese las instrucciones que el agente recibirá en el momento programado...'
       },
       'fr': {
         selectedSource: 'Source Sélectionnée',
@@ -2281,7 +2287,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'Chargement des fichiers...',
         btnSelect: 'Sélectionner',
         btnChoose: '📁 Choisir...',
-        activeDocument: 'Document Actif'
+        activeDocument: 'Document Actif',
+        promptPlaceholder: 'Saisissez les instructions que l\'agent recevra à l\'heure programmée...'
       },
       'de': {
         selectedSource: 'Ausgewählte Quelle',
@@ -2294,7 +2301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'Dateien werden geladen...',
         btnSelect: 'Auswählen',
         btnChoose: '📁 Auswählen...',
-        activeDocument: 'Aktives Dokument'
+        activeDocument: 'Aktives Dokument',
+        promptPlaceholder: 'Geben Sie die Anweisungen ein, die der Agent zum geplanten Zeitpunkt erhält...'
       },
       'vi': {
         selectedSource: 'Nguồn Đã Chọn',
@@ -2307,7 +2315,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'Đang tải tệp...',
         btnSelect: 'Chọn',
         btnChoose: '📁 Chọn...',
-        activeDocument: 'Tài liệu Hiện tại'
+        activeDocument: 'Tài liệu Hiện tại',
+        promptPlaceholder: 'Nhập câu lệnh hướng dẫn mà tác nhân sẽ nhận vào thời gian lên lịch...'
       },
       'th': {
         selectedSource: 'แหล่งข้อมูลที่เลือก',
@@ -2320,7 +2329,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingFiles: 'กำลังโหลดไฟล์...',
         btnSelect: 'เลือก',
         btnChoose: '📁 เลือก...',
-        activeDocument: 'เอกสารปัจจุบัน'
+        activeDocument: 'เอกสารปัจจุบัน',
+        promptPlaceholder: 'กรอกคำสั่งที่เอเจนต์จะได้รับเมื่อถึงเวลาที่กำหนดไว้...'
       }
     };
 
@@ -2371,6 +2381,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                                  lang === 'ja' ? '📁 フォルダを翻訳' :
                                                  lang === 'ko' ? '📁 폴더 번역' :
                                                  '📁 Translate Folder';
+    }
+    
+    if (batchTriggerPrompt) {
+      batchTriggerPrompt.placeholder = driveTrans.promptPlaceholder;
     }
 
     // Update selected target text if it matches current document/presentation default text
