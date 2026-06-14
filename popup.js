@@ -147,15 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
     dot.className = 'status-dot';
     if (status === 'active') {
       dot.classList.add('status-active');
-      text.textContent = '生效 · Active';
+      text.textContent = 'Active';
       text.style.color = 'var(--accent)';
     } else if (status === 'invalid') {
       dot.classList.add('status-invalid');
-      text.textContent = '失效 · Invalid';
+      text.textContent = 'Invalid';
       text.style.color = '#ff7675';
     } else {
       dot.classList.add('status-unverified');
-      text.textContent = '未验证 · Unverified';
+      text.textContent = 'Unverified';
       text.style.color = 'var(--text-muted)';
     }
   }
@@ -408,12 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isFailed) {
           errorBanner.innerHTML = `
             <strong>⚠️ API Key Verification Failed</strong>
-            <span>您的 API 金鑰連線測試失敗。請確認輸入正確的金鑰與模型名稱，並重新測試。<br>Connection test failed for your API key. Please verify the key and model name, then test again.</span>
+            <span>Connection test failed for your API key. Please verify the key and model name, then test again.</span>
           `;
         } else {
           errorBanner.innerHTML = `
             <strong>⚠️ API Key Not Verified</strong>
-            <span>請先點擊下方<strong>「Test Connection」</strong>按鈕以驗證您的 API 金鑰。未經驗證的金鑰無法儲存設定。<br>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
+            <span>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
           `;
         }
         
