@@ -41,6 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
   const apiKeyIndicator = document.getElementById('api-key-indicator');
   
+  // Batch & Schedule Elements
+  const btnBatchSchedule = document.getElementById('btn-batch-schedule');
+  const batchPanel = document.getElementById('batch-panel');
+  const btnCloseBatch = document.getElementById('btn-close-batch');
+  const btnCancelBatch = document.getElementById('btn-cancel-batch');
+  const btnSaveBatch = document.getElementById('btn-save-batch');
+  
+  const batchSourceType = document.getElementById('batch-source-type');
+  const groupFolderId = document.getElementById('group-folder-id');
+  const batchFolderId = document.getElementById('batch-folder-id');
+  
+  const batchOutputMode = document.getElementById('batch-output-mode');
+  const groupTargetFolderId = document.getElementById('group-target-folder-id');
+  const batchTargetFolderId = document.getElementById('batch-target-folder-id');
+  
+  const batchLangCheckboxes = document.getElementById('batch-lang-checkboxes');
+  const batchFrequencyBtns = document.getElementById('batch-frequency-btns');
+  const groupScheduleInterval = document.getElementById('group-schedule-interval');
+  const scheduleIntervalVal = document.getElementById('schedule-interval-val');
+  const groupScheduleTime = document.getElementById('group-schedule-time');
+  const scheduleTime = document.getElementById('schedule-time');
+  const scheduleTimezone = document.getElementById('schedule-timezone');
+  const batchTriggerPrompt = document.getElementById('batch-trigger-prompt');
+  const batchJobList = document.getElementById('batch-job-list');
+  
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
   const progressStatus = document.getElementById('progress-status');
@@ -152,18 +177,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = document.getElementById('api-status-text');
     if (!dot || !text) return;
     dot.className = 'status-dot';
-    if (status === 'active') {
+    
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || {
+      statusActive: 'Active',
+      statusInvalid: 'Invalid',
+      statusUnverified: 'Unverified'
+    };
+
+    let resolvedStatus = status;
+    const engine = selectEngine ? selectEngine.value : 'gemini';
+    const key = inputApiKey ? inputApiKey.value.trim() : '';
+    if (engine === 'free' || !key) {
+      resolvedStatus = 'unverified';
+    }
+
+    if (inputApiKey) {
+      inputApiKey.classList.remove('key-status-active', 'key-status-invalid', 'key-status-unverified');
+    }
+
+    if (resolvedStatus === 'active') {
       dot.classList.add('status-active');
-      text.textContent = 'Active';
+      text.textContent = translations.statusActive || 'Active';
       text.style.color = 'var(--accent)';
-    } else if (status === 'invalid') {
+      if (inputApiKey) inputApiKey.classList.add('key-status-active');
+    } else if (resolvedStatus === 'invalid') {
       dot.classList.add('status-invalid');
-      text.textContent = 'Invalid';
+      text.textContent = translations.statusInvalid || 'Invalid';
       text.style.color = '#ff7675';
+      if (inputApiKey) inputApiKey.classList.add('key-status-invalid');
     } else {
       dot.classList.add('status-unverified');
-      text.textContent = 'Unverified';
-      text.style.color = 'var(--text-muted)';
+      text.textContent = translations.statusUnverified || 'Unverified';
+      text.style.color = '#fdcb6e';
+      if (inputApiKey) inputApiKey.classList.add('key-status-unverified');
     }
   }
 
@@ -174,8 +222,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (msg) { msg.textContent = ''; msg.className = 'test-result-msg'; }
   }
 
+  function localizeApiError(errMsg, lang) {
+    if (!errMsg) return '';
+    const lower = errMsg.toLowerCase();
+    
+    // Gemini/OpenAI invalid key
+    if (lower.includes('api key not valid') || lower.includes('key not valid') || lower.includes('api key is invalid') || lower.includes('invalid api key')) {
+      const translations = {
+        'en': 'API key not valid. Please pass a valid API key.',
+        'zh-TW': 'API 金鑰無效。請輸入有效的 API 金鑰。',
+        'zh-CN': 'API 密钥无效。请输入有效的 API 密钥。',
+        'ja': 'API キーが無効です。有効な API キーを入力してください。',
+        'ko': 'API 키가 유효하지 않습니다. 유효한 API 키를 입력하십시오.',
+        'es': 'Clave API no válida. Por favor, introduzca una clave API válida.',
+        'fr': 'Clé API non valide. Veuillez saisir une clé API valide.',
+        'de': 'API-Schlüssel nicht gültig. Bitte geben Sie einen gültigen API-Schlüssel ein.',
+        'vi': 'Khóa API không hợp lệ. Vui lòng nhập khóa API hợp lệ.',
+        'th': 'คีย์ API ไม่ถูกต้อง โปรดป้อนคีย์ API ที่ถูกต้อง'
+      };
+      return translations[lang] || translations['en'];
+    }
+    
+    // Model not found / deprecated
+    if (lower.includes('model') && (lower.includes('not found') || lower.includes('does not exist') || lower.includes('not exist'))) {
+      const translations = {
+        'en': 'Model not found or not accessible.',
+        'zh-TW': '找不到該模型或無法存取。',
+        'zh-CN': '找不到该模型或无法访问。',
+        'ja': 'モデルが見つからないか、アクセスできません。',
+        'ko': '모델을 찾을 수 없거나 액세스할 수 없습니다.',
+        'es': 'Modelo no encontrado o no accesible.',
+        'fr': 'Modèle introuvable ou inaccessible.',
+        'de': 'Modell nicht gefunden oder nicht zugänglich.',
+        'vi': 'Không tìm thấy mô hình hoặc không thể truy cập.',
+        'th': 'ไม่พบรุ่นหรือไม่สามารถเข้าถึงได้'
+      };
+      return translations[lang] || translations['en'];
+    }
+
+    // Quota/billing issues
+    if (lower.includes('quota') || lower.includes('billing') || lower.includes('rate limit')) {
+      const translations = {
+        'en': 'Quota exceeded or billing account issue.',
+        'zh-TW': '已超出配額或帳單帳戶問題。',
+        'zh-CN': '已超出配额或账单账户问题。',
+        'ja': 'クォータを超過したか、支払いアカウントの問題です。',
+        'ko': '할당량이 초과되었거나 결제 계정 문제입니다.',
+        'es': 'Cuota excedida o problema con la cuenta de facturación.',
+        'fr': 'Quota dépassé ou problème de compte de facturation.',
+        'de': 'Kontingent überschritten oder Problem mit dem Abrechnungskonto.',
+        'vi': 'Đã vượt quá hạn mức hoặc sự cố tài khoản thanh toán.',
+        'th': 'เกินโควตาหรือมีปัญหาเกี่ยวกับบัญชีการชำระเงิน'
+      };
+      return translations[lang] || translations['en'];
+    }
+
+    return errMsg;
+  }
+
   // ── Real API Connection Test ──────────────────────────────────────────────
-  async function testApiConnection(engine, apiKey, modelName, customUrl) {
+  async function testApiConnection(engine, apiKey, modelName, customUrl, lang = 'en') {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
     try {
@@ -207,25 +313,26 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ model: modelName, messages: [{ role: 'user', content: 'Reply ok.' }], max_tokens: 5 }) }
         );
       } else {
-        return { success: null, message: '⚠ Unsupported engine.', suggestion: '' };
+        return { success: null, code: 'conn_bad_request', params: { error: 'Unsupported engine' }, message: '⚠ Unsupported engine.', suggestion: '' };
       }
       clearTimeout(timer);
 
       // 429 = quota hit but key is valid ─ treat as success
       if (resp.ok || resp.status === 429) {
         const suffix = resp.status === 429 ? ' (Rate limit reached, but credentials are valid.)' : '';
-        return { success: true, message: `✅ Connection successful! API key and model are working.${suffix}`, suggestion: '' };
+        return {
+          success: true,
+          code: 'conn_success',
+          params: {},
+          message: `✅ Connection successful! API key and model are working.${suffix}`,
+          suggestion: ''
+        };
       }
 
       let body = {};
       try { body = await resp.json(); } catch (_) {}
       const errMsg = body?.error?.message || body?.message || resp.statusText || `HTTP ${resp.status}`;
-      const modelLinks = {
-        gemini: 'https://ai.google.dev/gemini-api/docs/models',
-        openai: 'https://platform.openai.com/docs/models',
-        claude: 'https://docs.anthropic.com/claude/docs/models-overview',
-        custom: 'your provider’s documentation'
-      };
+      
       const keyHints = {
         gemini: 'Get/check your key at aistudio.google.com → "Get API key". Keys start with AIzaSy...',
         openai: 'Get/check your key at platform.openai.com/api-keys. Keys start with sk-...',
@@ -233,25 +340,79 @@ document.addEventListener('DOMContentLoaded', () => {
         custom: 'Verify the API key format required by your custom LLM provider.'
       };
 
-      if (resp.status === 401 || resp.status === 403) {
-        return { success: false, message: `❌ Invalid API key: ${errMsg}`, suggestion: keyHints[engine] || '' };
+      const lowerErr = errMsg.toLowerCase();
+      const isInvalidKey = resp.status === 401 || resp.status === 403 || lowerErr.includes('key not valid') || lowerErr.includes('api key not valid') || lowerErr.includes('invalid api key');
+
+      if (isInvalidKey) {
+        return {
+          success: false,
+          code: 'conn_invalid_key',
+          params: { error: localizeApiError(errMsg, lang) },
+          message: `❌ Invalid API key: ${errMsg}`,
+          suggestionCode: 'conn_hint_key',
+          suggestion: keyHints[engine] || ''
+        };
       } else if (resp.status === 404) {
-        return { success: false, message: `❌ Model not found: "${modelName}"`, suggestion: `Verify model name at ${modelLinks[engine] || 'your provider docs'}.` };
+        return {
+          success: false,
+          code: 'conn_model_not_found',
+          params: { model: modelName },
+          message: `❌ Model not found: "${modelName}"`,
+          suggestion: `Verify model name at Google AI / OpenAI / Anthropic documentation.`
+        };
       } else if (resp.status === 400) {
-        return { success: false, message: `❌ Bad request: ${errMsg}`, suggestion: 'Double-check the API key and model name are correctly entered.' };
+        return {
+          success: false,
+          code: 'conn_bad_request',
+          params: { error: localizeApiError(errMsg, lang) },
+          message: `❌ Bad request: ${errMsg}`,
+          suggestionCode: 'conn_hint_key',
+          suggestion: 'Double-check the API key and model name are correctly entered.'
+        };
       } else if (resp.status === 402) {
-        return { success: true, message: '✅ API key is valid (billing issue detected, but key itself works).', suggestion: 'Add credits to your account to use this API.' };
+        return {
+          success: true,
+          code: 'conn_billing_issue',
+          params: {},
+          message: '✅ API key is valid (billing issue detected, but key itself works).',
+          suggestionCode: 'conn_billing_suggestion',
+          suggestion: 'Add credits to your account to use this API.'
+        };
       } else if (resp.status >= 500) {
-        return { success: null, message: `⚠ Server error (${resp.status}): ${errMsg}. The service may be temporarily unavailable. Try again later.`, suggestion: '' };
+        return {
+          success: null,
+          code: 'conn_server_error',
+          params: {},
+          message: `⚠ Server error (${resp.status}): ${errMsg}. The service may be temporarily unavailable. Try again later.`,
+          suggestion: ''
+        };
       }
-      return { success: false, message: `❌ Error (${resp.status}): ${errMsg}`, suggestion: '' };
+      return {
+        success: false,
+        code: 'conn_bad_request',
+        params: { error: localizeApiError(errMsg, lang) },
+        message: `❌ Error (${resp.status}): ${errMsg}`,
+        suggestion: ''
+      };
 
     } catch (err) {
       clearTimeout(timer);
       if (err.name === 'AbortError') {
-        return { success: null, message: '⚠ Request timed out (15s). Check your internet connection.', suggestion: '' };
+        return {
+          success: null,
+          code: 'conn_timeout',
+          params: {},
+          message: '⚠ Request timed out (15s). Check your internet connection.',
+          suggestion: ''
+        };
       }
-      return { success: null, message: `⚠ Network error: ${err.message}`, suggestion: 'Check your internet connection or the custom endpoint URL.' };
+      return {
+        success: null,
+        code: 'conn_network_error',
+        params: { error: err.message },
+        message: `⚠ Network error: ${err.message}`,
+        suggestion: 'Check your internet connection or the custom endpoint URL.'
+      };
     }
   }
 
@@ -261,14 +422,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('modal-title');
     const msg = document.getElementById('modal-msg');
     if (!modal) return;
-    if (reason === 'missing' || reason === 'unverified') {
-      title.textContent = reason === 'missing' ? 'API Key Required' : 'API Key Not Verified';
-      msg.textContent = reason === 'missing'
-        ? 'An API key is required for the selected translation provider. Please go to Settings, enter your API key, and click "Test Connection" to verify.'
-        : 'Your API key has not been tested yet. Please go to Settings and click "Test Connection" to verify your credentials before translating.';
+
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
+    if (reason === 'missing') {
+      title.textContent = translations.modalTitleMissing || 'API Key Required';
+      msg.textContent = translations.modalMsgMissing || 'An API key is required...';
+    } else if (reason === 'unverified') {
+      title.textContent = translations.modalTitleNotVerified || 'API Key Not Verified';
+      msg.textContent = translations.modalMsgNotVerified || 'Your API key has not been tested...';
     } else {
-      title.textContent = 'API Key Invalid';
-      msg.textContent = 'Your API key is marked as invalid or the model name is incorrect. Please go to Settings, fix the issue, and run "Test Connection" again.';
+      title.textContent = translations.modalTitleInvalid || 'API Key Invalid';
+      msg.textContent = translations.modalMsgInvalid || 'Your API key is marked as invalid...';
     }
     modal.classList.remove('hidden');
   }
@@ -284,37 +451,61 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
+    const engineNameMap = {
+      gemini: 'Gemini',
+      openai: 'OpenAI',
+      claude: 'Claude',
+      custom: 'Custom'
+    };
+    const engineDisplayName = engineNameMap[engine] || 'API';
+
     if (engine === 'gemini') {
       if (key.startsWith('AIzaSy') && key.length >= 35) {
         apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ Gemini API Key format matches specifications';
+        apiKeyIndicator.textContent = translations.valKeyFormatMatch
+          ? translations.valKeyFormatMatch.replace('{engine}', engineDisplayName)
+          : `✓ ${engineDisplayName} API Key format matches specifications`;
       } else {
         apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: Gemini keys typically start with AIzaSy';
+        apiKeyIndicator.textContent = translations.valKeyFormatMismatch
+          ? translations.valKeyFormatMismatch.replace('{engine}', engineDisplayName).replace('{prefix}', 'AIzaSy')
+          : `⚠ Format mismatch: ${engineDisplayName} keys typically start with AIzaSy`;
       }
     } else if (engine === 'openai') {
       if ((key.startsWith('sk-') || key.startsWith('sk-proj-')) && key.length >= 20) {
         apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ OpenAI API Key format matches specifications';
+        apiKeyIndicator.textContent = translations.valKeyFormatMatch
+          ? translations.valKeyFormatMatch.replace('{engine}', engineDisplayName)
+          : `✓ ${engineDisplayName} API Key format matches specifications`;
       } else {
         apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: OpenAI keys typically start with sk-';
+        apiKeyIndicator.textContent = translations.valKeyFormatMismatch
+          ? translations.valKeyFormatMismatch.replace('{engine}', engineDisplayName).replace('{prefix}', 'sk-')
+          : `⚠ Format mismatch: ${engineDisplayName} keys typically start with sk-`;
       }
     } else if (engine === 'claude') {
       if (key.startsWith('sk-ant-') && key.length >= 25) {
         apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ Claude API Key format matches specifications';
+        apiKeyIndicator.textContent = translations.valKeyFormatMatch
+          ? translations.valKeyFormatMatch.replace('{engine}', engineDisplayName)
+          : `✓ ${engineDisplayName} API Key format matches specifications`;
       } else {
         apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: Claude keys typically start with sk-ant-';
+        apiKeyIndicator.textContent = translations.valKeyFormatMismatch
+          ? translations.valKeyFormatMismatch.replace('{engine}', engineDisplayName).replace('{prefix}', 'sk-ant-')
+          : `⚠ Format mismatch: ${engineDisplayName} keys typically start with sk-ant-`;
       }
     } else {
       if (key.length >= 10) {
         apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ API Key looks valid';
+        apiKeyIndicator.textContent = translations.valKeyLooksValid || '✓ API Key looks valid';
       } else {
         apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ API Key is extremely short';
+        apiKeyIndicator.textContent = translations.valKeyTooShort || '⚠ API Key is extremely short';
       }
     }
   }
@@ -392,6 +583,194 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  // Batch & Schedule Panel Event Handlers
+  batchSourceType.addEventListener('change', () => {
+    if (batchSourceType.value === 'folder') {
+      groupFolderId.classList.remove('hidden');
+    } else {
+      groupFolderId.classList.add('hidden');
+    }
+  });
+
+  batchOutputMode.addEventListener('change', () => {
+    if (batchOutputMode.value === 'target') {
+      groupTargetFolderId.classList.remove('hidden');
+    } else {
+      groupTargetFolderId.classList.add('hidden');
+    }
+  });
+
+  let selectedFrequency = 'once';
+  const freqButtons = batchFrequencyBtns.querySelectorAll('.freq-btn');
+  freqButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      freqButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedFrequency = btn.getAttribute('data-freq');
+      
+      if (selectedFrequency === 'minute' || selectedFrequency === 'hour') {
+        groupScheduleInterval.classList.remove('hidden');
+        groupScheduleTime.classList.add('hidden');
+        const hintEl = document.getElementById('hint-schedule-interval');
+        if (hintEl) {
+          hintEl.textContent = selectedFrequency === 'minute' ? 'Run every N minutes' : 'Run every N hours';
+        }
+      } else if (selectedFrequency === 'once') {
+        groupScheduleInterval.classList.add('hidden');
+        groupScheduleTime.classList.add('hidden');
+      } else {
+        groupScheduleInterval.classList.add('hidden');
+        groupScheduleTime.classList.remove('hidden');
+      }
+    });
+  });
+
+  btnBatchSchedule.addEventListener('click', () => {
+    settingsPanel.classList.remove('active');
+    historyPanel.classList.remove('active');
+    batchPanel.classList.add('active');
+    loadBatchJobs();
+  });
+
+  const closeBatch = () => {
+    batchPanel.classList.remove('active');
+  };
+
+  btnCloseBatch.addEventListener('click', closeBatch);
+  btnCancelBatch.addEventListener('click', closeBatch);
+
+  btnSaveBatch.addEventListener('click', () => {
+    const sourceType = batchSourceType.value;
+    const folderId = batchFolderId.value.trim();
+    if (sourceType === 'folder' && !folderId) {
+      alert('Please enter a Folder ID.');
+      return;
+    }
+    
+    const outputMode = batchOutputMode.value;
+    const targetFolderId = batchTargetFolderId.value.trim();
+    if (outputMode === 'target' && !targetFolderId) {
+      alert('Please enter a Target Folder ID.');
+      return;
+    }
+
+    const selectedLangs = [];
+    const checkboxes = batchLangCheckboxes.querySelectorAll('input[type="checkbox"]:checked');
+    checkboxes.forEach(cb => selectedLangs.push(cb.value));
+    if (selectedLangs.length === 0) {
+      alert('Please select at least one target language.');
+      return;
+    }
+
+    const intervalVal = parseInt(scheduleIntervalVal.value) || 15;
+    const startTime = scheduleTime.value;
+    const timezone = scheduleTimezone.value;
+    const prompt = batchTriggerPrompt.value.trim();
+
+    const job = {
+      id: 'job_' + Date.now(),
+      sourceType,
+      folderId: sourceType === 'folder' ? folderId : (currentPresentationId || 'active'),
+      folderTitle: sourceType === 'folder' ? 'Drive Folder' : (currentPresentationTitle || 'Active Document'),
+      fileType: currentFileType || 'presentation',
+      outputMode,
+      targetFolderId: outputMode === 'target' ? targetFolderId : '',
+      targetLangs: selectedLangs,
+      schedule: {
+        frequency: selectedFrequency,
+        interval: intervalVal,
+        startTime,
+        timezone,
+        prompt
+      },
+      status: 'idle',
+      progress: 0,
+      createdAt: Date.now()
+    };
+
+    chrome.runtime.sendMessage({ action: 'createBatchJob', job }, (response) => {
+      if (response && response.success) {
+        closeBatch();
+        chrome.runtime.sendMessage({ action: 'syncSchedules' });
+      } else {
+        alert('Failed to save batch job.');
+      }
+    });
+  });
+
+  function loadBatchJobs() {
+    chrome.storage.local.get(['batchJobs'], (data) => {
+      const jobs = data.batchJobs || {};
+      renderJobList(Object.values(jobs));
+    });
+  }
+
+  function renderJobList(jobs) {
+    if (jobs.length === 0) {
+      batchJobList.innerHTML = '<div class="job-empty-state">No scheduled jobs.</div>';
+      return;
+    }
+    batchJobList.innerHTML = '';
+    jobs.forEach(job => {
+      const card = document.createElement('div');
+      card.className = 'job-card';
+      
+      const percent = Math.round(job.progress || 0);
+      const freqLabel = job.schedule.frequency === 'once' ? 'One-Time' : job.schedule.frequency;
+      
+      card.innerHTML = `
+        <div class="job-card-header">
+          <div class="job-card-title">${job.sourceType === 'folder' ? 'Folder: ' + job.folderId : job.folderTitle}</div>
+          <span class="job-card-badge badge-${job.status}">${job.status}</span>
+        </div>
+        <div class="job-card-meta">
+          Langs: ${job.targetLangs.join(', ')} | Mode: ${freqLabel}
+        </div>
+        <div class="job-card-progress">
+          <div class="job-progress-bar-container">
+            <div class="job-progress-bar-fill" style="width: ${percent}%"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted);">
+            <span>Progress: ${percent}%</span>
+            <span>${job.schedule.startTime || ''}</span>
+          </div>
+        </div>
+        <div class="job-card-actions">
+          ${job.status === 'running' || job.status === 'idle' ? 
+            `<button class="job-action-btn" data-action="pause" data-id="${job.id}">Pause</button>` : 
+            job.status === 'paused' ? 
+            `<button class="job-action-btn" data-action="resume" data-id="${job.id}">Resume</button>` : ''
+          }
+          <button class="job-action-btn danger" data-action="delete" data-id="${job.id}">Delete</button>
+        </div>
+      `;
+      
+      card.querySelectorAll('.job-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const action = e.target.getAttribute('data-action');
+          const jobId = e.target.getAttribute('data-id');
+          if (action === 'delete') {
+            if (confirm('Delete this job?')) {
+              chrome.runtime.sendMessage({ action: 'deleteBatchJob', jobId }, () => {
+                loadBatchJobs();
+              });
+            }
+          } else if (action === 'pause') {
+            chrome.runtime.sendMessage({ action: 'pauseBatchJob', jobId }, () => {
+              loadBatchJobs();
+            });
+          } else if (action === 'resume') {
+            chrome.runtime.sendMessage({ action: 'resumeBatchJob', jobId }, () => {
+              loadBatchJobs();
+            });
+          }
+        });
+      });
+      
+      batchJobList.appendChild(card);
+    });
+  }
+
   btnCloseSettings.addEventListener('click', closeSettings);
   btnCancelSettings.addEventListener('click', closeSettings);
 
@@ -465,7 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
       modelName,
       customUrl,
       uiLang,
-      apiKeyStatus: (translationEngine === 'free') ? 'unverified' : 'active'
+      apiKeyStatus: (translationEngine === 'free' || !apiKey) ? 'unverified' : (document.getElementById('api-status-dot')?.classList.contains('status-active') ? 'active' : 'unverified')
     }, () => {
       applyLanguage(uiLang);
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
@@ -488,32 +867,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const apiKey = inputApiKey.value.trim();
       const modelName = inputModelName.value.trim();
       const customUrl = inputCustomUrl.value.trim();
+      const selectUiLang = document.getElementById('select-ui-lang');
+      const lang = (selectUiLang && selectUiLang.value) || 'en';
+      const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
       if (!apiKey) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter your API key first.';
+        testResultMsg.textContent = translations.errEnterKey || '⚠️ Please enter your API key first.';
         return;
       }
       if (!modelName) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter a model name first.';
+        testResultMsg.textContent = translations.errEnterModel || '⚠️ Please enter a model name first.';
         return;
       }
       if (engine === 'custom' && !customUrl) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter a Base Endpoint URL first.';
+        testResultMsg.textContent = translations.errEnterUrl || '⚠️ Please enter a Base Endpoint URL first.';
         return;
       }
       // Show loading state
       btnTestApi.disabled = true;
-      btnTestApi.innerHTML = '<svg class="btn-icon-spin" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg> Testing...';
+      btnTestApi.innerHTML = `<svg class="btn-icon-spin" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg> ${translations.btnTesting || 'Testing...'}`;
       testResultMsg.className = 'test-result-msg';
       testResultMsg.textContent = '';
 
-      const result = await testApiConnection(engine, apiKey, modelName, customUrl);
+      const result = await testApiConnection(engine, apiKey, modelName, customUrl, lang);
 
       // Restore button
       btnTestApi.disabled = false;
-      btnTestApi.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Test Connection';
+      btnTestApi.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ${translations.btnTestConnection || 'Test Connection'}`;
 
       // Determine new status
       let newStatus;
@@ -527,8 +910,38 @@ document.addEventListener('DOMContentLoaded', () => {
         newStatus = 'unverified';
         testResultMsg.className = 'test-result-msg result-warning';
       }
-      testResultMsg.innerHTML = result.message +
-        (result.suggestion ? `<br><span class="test-suggestion">${result.suggestion}</span>` : '');
+
+      // Store in dataset for dynamic re-translation on UI language change
+      testResultMsg.dataset.code = result.code || '';
+      testResultMsg.dataset.params = result.params ? JSON.stringify(result.params) : '';
+      testResultMsg.dataset.suggestionCode = result.suggestionCode || '';
+      testResultMsg.dataset.fallbackMessage = result.message || '';
+      testResultMsg.dataset.fallbackSuggestion = result.suggestion || '';
+
+      // Format initial message in current language
+      let translatedMsg = '';
+      if (result.code) {
+        let template = translations[result.code] || result.message;
+        if (result.params) {
+          for (const [k, v] of Object.entries(result.params)) {
+            template = template.replace(`{${k}}`, v);
+          }
+        }
+        translatedMsg = template;
+      } else {
+        translatedMsg = result.message;
+      }
+
+      let translatedSuggestion = '';
+      if (result.suggestionCode) {
+        translatedSuggestion = translations[result.suggestionCode] || result.suggestion;
+      } else {
+        translatedSuggestion = result.suggestion;
+      }
+
+      testResultMsg.innerHTML = translatedMsg +
+        (translatedSuggestion ? `<br><span class="test-suggestion">${translatedSuggestion}</span>` : '');
+
       updateStatusBadge(newStatus);
     });
   }
@@ -676,17 +1089,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const tabTitle = tab.title || '';
-      const suffixes = [
-        " - Google Docs", " - Google 文件",
-        " - Google Slides", " - Google 簡報",
-        " - Google Sheets", " - Google 試算表",
-        " - Google Forms", " - Google 表單",
-        ".xlsx", ".xls", ".docx", ".doc", ".pptx", ".ppt"  // Strip all Office file extensions from Drive viewer titles
-      ];
-      
+      // Clean Google Workspace / Office suffixes from the tab title across all 10 supported languages
       let cleanTitle = tabTitle;
-      for (const suffix of suffixes) {
-        cleanTitle = cleanTitle.replace(suffix, "");
+      const googleSuffixRegex = /\s*-\s*Google\s+(Slides|Docs|Sheets|Forms|簡報|文件|試算表|表單|幻灯片|文档|表格|表单|スライド|ドキュメント|スプレッドシート|フォーム|프레젠테이션|문서|스프레드시트|설문지|Presentaciones|Documentos|Hojas de cálculo|Formularios|Présentations|Documents|Feuilles de calcul|Formulaires|Präsentationen|Dokumente|Tabellen|Formulare|Trang trình bày|Tài liệu|Trang tính|Biểu mẫu|สไลด์|เอกสาร|ชีต|ฟอร์ม)$/i;
+      cleanTitle = cleanTitle.replace(googleSuffixRegex, "");
+      
+      // Also strip Office extensions from Drive viewer titles
+      const officeExtensions = [".xlsx", ".xls", ".docx", ".doc", ".pptx", ".ppt"];
+      for (const ext of officeExtensions) {
+        if (cleanTitle.toLowerCase().endsWith(ext)) {
+          cleanTitle = cleanTitle.slice(0, -ext.length);
+        }
       }
 
       // ── Second-layer guard ────────────────────────────────────────────────
@@ -769,6 +1182,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Apply localization
         applyLanguage((selectUiLang && selectUiLang.value) || 'en');
+      } else if (currentPresentationTitle !== newPresentationTitle) {
+        currentPresentationTitle = newPresentationTitle;
+        slideTitleEl.textContent = currentPresentationTitle;
       }
       
       warningPanel.style.display = 'none';
@@ -788,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function checkCurrentTab() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       if (tabs && tabs.length > 0) {
         handleTabChange(tabs[0]);
       }
@@ -802,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.tabs.onActivated.addListener((activeInfo) => {
     // User manually switched tabs — always unlock and respond immediately
     tabChangeLocked = false;
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       if (tabs && tabs.length > 0 && tabs[0].id === activeInfo.tabId) {
         handleTabChange(tabs[0]);
       }
@@ -813,7 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only respond if the updated tab is the active tab in the current window of the side panel
     // Also respect the post-translation lock (prevents bad auto-loaded titles like 管理員警告)
     if (tabChangeLocked) return;
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       if (tabs && tabs.length > 0 && tabs[0].id === tabId) {
         if (changeInfo.status === 'complete' || changeInfo.url || changeInfo.title) {
           handleTabChange(tabs[0]);
@@ -838,19 +1254,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnToggleLogs = document.getElementById('btn-toggle-logs');
 
   btnToggleLogs.addEventListener('click', () => {
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
     const isHidden = logConsoleContent.classList.contains('hidden');
     if (isHidden) {
       logConsoleContent.classList.remove('hidden');
-      btnToggleLogs.textContent = 'Hide';
+      btnToggleLogs.textContent = translations.btnHide || 'Hide';
     } else {
       logConsoleContent.classList.add('hidden');
-      btnToggleLogs.textContent = 'Show';
+      btnToggleLogs.textContent = translations.btnShow || 'Show';
     }
   });
 
   function updateLogDisplay(logs) {
     if (!logs || logs.length === 0) {
-      logConsoleContent.textContent = 'Waiting for logs...';
+      const selectUiLang = document.getElementById('select-ui-lang');
+      const lang = (selectUiLang && selectUiLang.value) || 'en';
+      const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+      logConsoleContent.textContent = translations.waitingForLogs || 'Waiting for logs...';
       return;
     }
     logConsoleContent.textContent = logs.join('\n');
@@ -880,7 +1303,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     resetProgress();
     
-    logConsoleContent.textContent = 'Waiting for logs...';
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+    logConsoleContent.textContent = translations.waitingForLogs || 'Waiting for logs...';
     
     // Start periodic log polling for this specific presentation
     lastProgressTime = Date.now();
@@ -893,7 +1319,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // If no progress update for 12 seconds, display warning
       if (Date.now() - lastProgressTime > 12000 && btnTranslate.disabled) {
-        progressStatus.textContent = 'Taking longer than expected. Check connection/logs...';
+        const selectUiLangInner = document.getElementById('select-ui-lang');
+        const langInner = (selectUiLangInner && selectUiLangInner.value) || 'en';
+        const translationsInner = (typeof LOCALES !== 'undefined' && LOCALES[langInner]) || LOCALES['en'];
+        progressStatus.textContent = translationsInner.takingLonger || 'Taking longer than expected. Check connection/logs...';
         progressStatus.style.color = 'var(--text-warning)';
       }
     }, 1500);
@@ -933,7 +1362,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const key = `debugLogs_${currentPresentationId}`;
       chrome.storage.local.set({ [key]: [] }, () => {
-        logConsoleContent.textContent = 'Initiating connection...';
+        const selectUiLang = document.getElementById('select-ui-lang');
+        const lang = (selectUiLang && selectUiLang.value) || 'en';
+        const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+        logConsoleContent.textContent = translations.initiatingConnection || 'Initiating connection...';
         lastProgressTime = Date.now();
         
         // Send start translation message to service worker
@@ -955,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           } catch (err) {
             console.error('Failed to post startTranslation message:', err);
-            alert('Communication with background worker failed. Please try again.');
+            alert(translations.errUnknown || 'Communication with background worker failed. Please try again.');
           }
         } else {
           alert('Not connected to background service. Attempting to reconnect...');
@@ -969,7 +1401,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancelTranslation.addEventListener('click', () => {
       if (!currentPresentationId) return;
       btnCancelTranslation.disabled = true;
-      btnCancelTranslation.textContent = 'Stopping...';
+      const selectUiLang = document.getElementById('select-ui-lang');
+      const lang = (selectUiLang && selectUiLang.value) || 'en';
+      const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+      btnCancelTranslation.textContent = translations.stopping || 'Stopping...';
       if (port) {
         try {
           port.postMessage({
@@ -984,7 +1419,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetProgress() {
-    progressStatus.textContent = 'Connecting...';
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
+    progressStatus.textContent = translations.connecting || 'Connecting...';
     progressStatus.style.color = 'var(--text-muted)';
     progressPct.textContent = '0%';
     progressBarFill.style.width = '0%';
@@ -992,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCancelTranslation) {
       btnCancelTranslation.disabled = false;
       btnCancelTranslation.style.display = 'block';
-      btnCancelTranslation.innerHTML = '<span>Stop Translation</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>';
+      btnCancelTranslation.innerHTML = `<span>${translations.btnCancelTranslation || 'Stop Translation'}</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>`;
     }
 
     stepCopy.className = 'pending';
@@ -1003,7 +1442,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Helper to translate raw developer API error stacks into actionable human-friendly bilingual messages
   function translateErrorToHuman(errorStr, engine) {
-    if (!errorStr) return "發生未知錯誤，請重試。\nAn unknown error occurred. Please try again.";
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
+
+    if (!errorStr) return translations.errUnknown || "發生未知錯誤，請重試。";
     
     const err = errorStr.toString();
     const upperEngine = engine.toUpperCase();
@@ -1011,93 +1454,88 @@ document.addEventListener('DOMContentLoaded', () => {
     // 429 Rate Limit / Quota Exceeded
     if (err.includes("429") || err.includes("RESOURCE_EXHAUSTED") || err.includes("quota")) {
       if (engine === 'gemini') {
-        return `[繁體中文]
-Gemini API 每日免費額度已達上限 (429)。
-建議您至設定 (⚙️) 將引擎切換為免金鑰的 'Free Google Translate' 繼續翻譯，或至 Google AI Studio 綁定信用卡提升配額。
-
-───────────────────────────────────
-[English]
-Gemini API daily free quota limit reached (429).
-We suggest going to Settings (⚙️) and switching the provider to keyless 'Free Google Translate' to continue, or upgrade your key on Google AI Studio.`;
+        return translations.errGeminiQuota || "Gemini API 每日免費額度已達上限 (429)。";
       }
-      return `[繁體中文]
-${upperEngine} API 呼叫頻率已達上限 (429)。
-請稍候重試，或至設定切換為 'Free Google Translate' 繼續翻譯。
-
-───────────────────────────────────
-[English]
-${upperEngine} API rate limit reached (429).
-Please wait and try again, or go to settings and switch to 'Free Google Translate' to continue.`;
+      return (translations.errGeneralQuota || "{engine} API 呼叫頻率已達上限 (429)。").replace('{engine}', upperEngine);
     }
     
     // 403 Forbidden / Invalid API Key / API Not Enabled
     if (err.includes("403") || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
-      return `[繁體中文]
-API 金鑰無效或未啟用 (403)。
-請點擊設定 (⚙️) 檢查金鑰是否填寫正確，並確認已在 Google Cloud 控制台啟用對應的 API 服務。
-
-───────────────────────────────────
-[English]
-API Key invalid or not activated (403).
-Please click Settings (⚙️) to check your key format, and ensure the corresponding APIs are enabled on your Google Cloud Console.`;
+      return translations.errForbidden || "API 金鑰無效或未啟用 (403)。";
     }
     
     // 400 Bad Request
     if (err.includes("400") || err.includes("INVALID_ARGUMENT") || err.includes("Invalid value")) {
-      return `[繁體中文]
-檔案結構或屬性要求無效 (400)。
-這可能是由於文件包含特殊不相容樣式所致。建議切換為 'Free Google Translate' 引擎繞過格式限制。
-
-───────────────────────────────────
-[English]
-Invalid file structure or API parameter error (400).
-This usually happens due to incompatible custom document styles. Try switching to 'Free Google Translate' to bypass formatting limits.`;
+      return translations.errBadRequest || "檔案結構或屬性要求無效 (400)。";
     }
     
     // Network Timeout
     if (err.includes("timed out") || err.includes("Timeout") || err.includes("Abort")) {
-      return `[繁體中文]
-API 請求連線逾時。
-請檢查您的網際網路連線，或於稍後網路通暢時再次嘗試。
-
-───────────────────────────────────
-[English]
-API request timed out.
-Please check your internet connection, or try again later when the network is stable.`;
+      return translations.errTimeout || "API 請求連線逾時。";
     }
     
     // Browser or Extension Restart Interruption
     if (err.includes("interrupted") || err.includes("restart")) {
-      return `[繁體中文]
-翻譯已被瀏覽器或擴充功能重啟中斷。
-請點擊頂部的「開始翻譯」按鈕以重新發起翻譯。
-
-───────────────────────────────────
-[English]
-Translation was interrupted by browser or extension restart.
-Please click the "Start Translation" button at the top to retry.`;
+      return translations.errInterrupted || "翻譯已被瀏覽器或擴充功能重啟中斷。";
     }
 
     // User Stop / Cancellation
     if (err.includes("stopped by user") || err.includes("Stop")) {
-      return `[繁體中文]
-翻譯已由使用者停止。
-如果您需要再次翻譯，請重新點擊「開始翻譯」按鈕。
-
-───────────────────────────────────
-[English]
-Translation stopped by user.
-If you need to translate again, please click the "Start Translation" button.`;
+      return translations.errUserStop || "翻譯已由使用者停止。";
     }
     
     // Default fallback but clean
     const cleanErr = errorStr.replace(/^Error:\s*/i, '');
-    return `[繁體中文]
-翻譯失敗: ${cleanErr}
+    return (translations.errFailed || "翻譯失敗: {error}").replace('{error}', cleanErr);
+  }
 
-───────────────────────────────────
-[English]
-Translation Failed: ${cleanErr}`;
+  function localizeProgressStatus(status, translations) {
+    if (!status) return '';
+    const lower = status.toLowerCase();
+    
+    if (lower.includes('authenticating')) {
+      return translations.statusAuth || 'Authenticating with Google...';
+    }
+    if (lower.includes('duplicating')) {
+      let typeTranslated = '';
+      if (lower.includes('presentation') || lower.includes('slide')) typeTranslated = translations.presentation || 'presentation';
+      else if (lower.includes('document')) typeTranslated = translations.document || 'document';
+      else if (lower.includes('spreadsheet')) typeTranslated = translations.spreadsheet || 'spreadsheet';
+      else if (lower.includes('form')) typeTranslated = translations.form || 'form';
+      return (translations.statusDuplicating || 'Duplicating {type} on Google Drive...').replace('{type}', typeTranslated);
+    }
+    if (lower.includes('extracting spreadsheet')) {
+      return translations.statusExtractSpreadsheet || 'Extracting spreadsheet structure...';
+    }
+    if (lower.includes('extracting form')) {
+      return translations.statusExtractForm || 'Extracting form structure...';
+    }
+    if (lower.includes('extracting document')) {
+      return translations.statusExtractDoc || 'Extracting document elements & text...';
+    }
+    if (lower.includes('extracting layout')) {
+      return translations.statusExtractLayout || 'Extracting layout elements & text...';
+    }
+    if (lower.includes('no translatable text')) {
+      return translations.statusNoText || 'No translatable text found. Opening copy...';
+    }
+    if (lower.includes('translating texts using')) {
+      const engine = status.split('using').pop().trim();
+      return (translations.statusTranslating || 'Translating texts using {engine}...').replace('{engine}', engine);
+    }
+    if (lower.includes('applying translations')) {
+      return translations.statusApplying || 'Applying translations and formatting preservation...';
+    }
+    if (lower.includes('opening translated')) {
+      let typeTranslated = '';
+      if (lower.includes('presentation') || lower.includes('slide')) typeTranslated = translations.presentation || 'presentation';
+      else if (lower.includes('document')) typeTranslated = translations.document || 'document';
+      else if (lower.includes('spreadsheet')) typeTranslated = translations.spreadsheet || 'spreadsheet';
+      else if (lower.includes('form')) typeTranslated = translations.form || 'form';
+      return (translations.statusOpening || 'Opening translated {type}!').replace('{type}', typeTranslated);
+    }
+    
+    return status;
   }
 
   // Progress message handler
@@ -1107,6 +1545,10 @@ Translation Failed: ${cleanErr}`;
     const { step, status, pct, error, finalUrl } = message;
 
     lastProgressTime = Date.now(); // Reset warning timer
+
+    const selectUiLang = document.getElementById('select-ui-lang');
+    const lang = (selectUiLang && selectUiLang.value) || 'en';
+    const translations = (typeof LOCALES !== 'undefined' && LOCALES[lang]) || LOCALES['en'];
 
     if (error) {
       if (logCheckInterval) clearInterval(logCheckInterval);
@@ -1132,7 +1574,7 @@ Translation Failed: ${cleanErr}`;
       }
       
       logConsoleContent.classList.remove('hidden');
-      btnToggleLogs.textContent = 'Hide';
+      btnToggleLogs.textContent = translations.btnHide || 'Hide';
       
       if (step === 'copy') {
         stepCopy.className = 'active';
@@ -1158,7 +1600,7 @@ Translation Failed: ${cleanErr}`;
     btnHelp.disabled = true;
 
     progressStatus.style.color = 'var(--text-muted)';
-    progressStatus.textContent = status;
+    progressStatus.textContent = localizeProgressStatus(status, translations);
     progressPct.textContent = `${pct}%`;
     progressBarFill.style.width = `${pct}%`;
 
@@ -1187,7 +1629,7 @@ Translation Failed: ${cleanErr}`;
         btnCancelTranslation.style.display = 'none';
       }
       
-      progressStatus.textContent = 'Translation Complete!';
+      progressStatus.textContent = translations.translationComplete || 'Translation Complete!';
       progressStatus.style.color = 'var(--accent)';
       
       // final fetch of logs to show complete history for this presentation
@@ -1442,6 +1884,42 @@ Translation Failed: ${cleanErr}`;
     chrome.storage.local.get('apiKeyStatus', (items) => {
       updateStatusBadge(items.apiKeyStatus || 'unverified');
     });
+
+    // Translate format validation indicator
+    validateApiKey();
+
+    // Translate connection test result message if present
+    const testResultMsg = document.getElementById('test-result-msg');
+    if (testResultMsg && testResultMsg.dataset.code) {
+      const code = testResultMsg.dataset.code;
+      const paramsStr = testResultMsg.dataset.params;
+      const suggestionCode = testResultMsg.dataset.suggestionCode;
+      
+      let template = translations[code] || testResultMsg.dataset.fallbackMessage;
+      if (paramsStr) {
+        try {
+          const params = JSON.parse(paramsStr);
+          for (const [k, v] of Object.entries(params)) {
+            template = template.replace(`{${k}}`, v);
+          }
+        } catch(e) {}
+      }
+      
+      let suggestion = '';
+      if (suggestionCode) {
+        suggestion = translations[suggestionCode] || testResultMsg.dataset.fallbackSuggestion;
+      } else {
+        suggestion = testResultMsg.dataset.fallbackSuggestion;
+      }
+      
+      testResultMsg.innerHTML = template + (suggestion ? `<br><span class="test-suggestion">${suggestion}</span>` : '');
+    }
+
+    // Translate the Show/Hide logs button text based on current visibility state
+    if (btnToggleLogs && logConsoleContent) {
+      const isHidden = logConsoleContent.classList.contains('hidden');
+      btnToggleLogs.textContent = isHidden ? (translations.btnShow || 'Show') : (translations.btnHide || 'Hide');
+    }
   }
 
   function updateStepLanguage(translations) {

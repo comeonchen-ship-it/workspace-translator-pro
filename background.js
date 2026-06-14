@@ -281,6 +281,72 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         logDebug(`History sync failed: ${err.message}`);
       }
     })();
+    return true;
+  } else if (message.action === 'createBatchJob') {
+    (async () => {
+      try {
+        const data = await chrome.storage.local.get('batchJobs');
+        const batchJobs = data.batchJobs || {};
+        batchJobs[message.job.id] = message.job;
+        await chrome.storage.local.set({ batchJobs });
+        await scheduleAlarmForJob(message.job);
+        sendResponse({ success: true });
+      } catch (e) {
+        sendResponse({ success: false, error: e.message });
+      }
+    })();
+    return true;
+  } else if (message.action === 'deleteBatchJob') {
+    (async () => {
+      const data = await chrome.storage.local.get('batchJobs');
+      const batchJobs = data.batchJobs || {};
+      const job = batchJobs[message.jobId];
+      if (job) {
+        delete batchJobs[message.jobId];
+        await chrome.storage.local.set({ batchJobs });
+        await chrome.alarms.clear(`batch_job_${message.jobId}`);
+        await chrome.alarms.clear(`resume_job_${message.jobId}`);
+      }
+      sendResponse({ success: true });
+    })();
+    return true;
+  } else if (message.action === 'pauseBatchJob') {
+    (async () => {
+      const data = await chrome.storage.local.get('batchJobs');
+      const batchJobs = data.batchJobs || {};
+      const job = batchJobs[message.jobId];
+      if (job) {
+        job.status = 'paused';
+        await chrome.storage.local.set({ batchJobs });
+        await chrome.alarms.clear(`batch_job_${message.jobId}`);
+        await chrome.alarms.clear(`resume_job_${message.jobId}`);
+      }
+      sendResponse({ success: true });
+    })();
+    return true;
+  } else if (message.action === 'resumeBatchJob') {
+    (async () => {
+      const data = await chrome.storage.local.get('batchJobs');
+      const batchJobs = data.batchJobs || {};
+      const job = batchJobs[message.jobId];
+      if (job) {
+        job.status = 'idle';
+        await chrome.storage.local.set({ batchJobs });
+        await scheduleAlarmForJob(job);
+      }
+      sendResponse({ success: true });
+    })();
+    return true;
+  } else if (message.action === 'syncSchedules') {
+    (async () => {
+      const data = await chrome.storage.local.get('batchJobs');
+      const jobs = Object.values(data.batchJobs || {});
+      for (const job of jobs) {
+        await scheduleAlarmForJob(job);
+      }
+      sendResponse({ success: true });
+    })();
+    return true;
   }
 });
 
@@ -817,22 +883,26 @@ function isTranslatable(text) {
 /**
  * Generic copy function for Google Workspace files (Google Drive API v3)
  */
-async function duplicateGoogleFile(fileId, newName, mimeType, token) {
+async function duplicateGoogleFile(fileId, newName, mimeType, token, targetParentFolderId = null) {
   // Fetch original file's parents so we can copy it into the same folder
   let parents = [];
-  try {
-    const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
-    const getRes = await fetch(getFileUrl, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (getRes.ok) {
-      const fileMeta = await getRes.json();
-      if (fileMeta.parents && fileMeta.parents.length > 0) {
-        parents = fileMeta.parents;
+  if (targetParentFolderId) {
+    parents = [targetParentFolderId];
+  } else {
+    try {
+      const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
+      const getRes = await fetch(getFileUrl, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (getRes.ok) {
+        const fileMeta = await getRes.json();
+        if (fileMeta.parents && fileMeta.parents.length > 0) {
+          parents = fileMeta.parents;
+        }
       }
+    } catch (err) {
+      console.error('Failed to fetch parents of original file:', err);
     }
-  } catch (err) {
-    console.error('Failed to fetch parents of original file:', err);
   }
 
   const url = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
@@ -1781,4 +1851,260 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     // Ignore
   }
 });
+
+/**
+ * ── BATCH TRANSLATION & SCHEDULING SYSTEM ────────────────────────────────────
+ */
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name.startsWith('batch_job_')) {
+    const jobId = alarm.name.replace('batch_job_', '');
+    await processBatchJob(jobId);
+  } else if (alarm.name.startsWith('resume_job_')) {
+    const jobId = alarm.name.replace('resume_job_', '');
+    await processBatchJob(jobId);
+  }
+});
+
+async function scheduleAlarmForJob(job) {
+  const alarmName = `batch_job_${job.id}`;
+  await chrome.alarms.clear(alarmName);
+  
+  if (job.status === 'paused' || job.status === 'completed') {
+    return;
+  }
+  
+  if (job.schedule.frequency === 'once') {
+    // One-time run triggers immediately in background
+    setTimeout(() => {
+      processBatchJob(job.id);
+    }, 100);
+  } else if (job.schedule.frequency === 'minute') {
+    chrome.alarms.create(alarmName, {
+      delayInMinutes: job.schedule.interval,
+      periodInMinutes: job.schedule.interval
+    });
+  } else if (job.schedule.frequency === 'hour') {
+    chrome.alarms.create(alarmName, {
+      delayInMinutes: job.schedule.interval * 60,
+      periodInMinutes: job.schedule.interval * 60
+    });
+  } else {
+    // daily, weekly, monthly
+    const nextTime = calculateNextTriggerTime(job.schedule.startTime, job.schedule.frequency);
+    chrome.alarms.create(alarmName, {
+      when: nextTime
+    });
+  }
+}
+
+function calculateNextTriggerTime(startTimeStr, frequency) {
+  const [hour, minute] = (startTimeStr || "09:00").split(':').map(Number);
+  const now = new Date();
+  const target = new Date();
+  target.setHours(hour, minute, 0, 0);
+  
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+  
+  if (frequency === 'weekly') {
+    // Add 7 days
+    target.setDate(target.getDate() + 7);
+  } else if (frequency === 'monthly') {
+    // Add 1 month
+    target.setMonth(target.getMonth() + 1);
+  }
+  
+  return target.getTime();
+}
+
+async function listFilesInFolder(folderId, token) {
+  const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&pageSize=1000`;
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to list folder contents: ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.files || [];
+}
+
+async function getFileInfo(fileId, token) {
+  const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,parents`;
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to get file info: ${await res.text()}`);
+  }
+  return await res.json();
+}
+
+async function createFolder(folderName, parentFolderId, token) {
+  const checkUrl = `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(folderName)}'+and+'${parentFolderId}'+in+parents+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id)`;
+  const checkRes = await fetch(checkUrl, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (checkRes.ok) {
+    const data = await checkRes.json();
+    if (data.files && data.files.length > 0) {
+      return data.files[0].id;
+    }
+  }
+
+  const url = 'https://www.googleapis.com/drive/v3/files';
+  const body = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: [parentFolderId]
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to create folder: ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.id;
+}
+
+async function processBatchJob(jobId) {
+  const data = await chrome.storage.local.get('batchJobs');
+  const batchJobs = data.batchJobs || {};
+  const job = batchJobs[jobId];
+  if (!job || job.status === 'paused' || job.status === 'completed') return;
+  
+  job.status = 'running';
+  job.progress = job.progress || 0;
+  await chrome.storage.local.set({ batchJobs });
+  
+  try {
+    const token = await getAuthToken();
+    let fileIds = [];
+    
+    if (job.sourceType === 'current') {
+      fileIds = [job.folderId];
+    } else if (job.sourceType === 'folder') {
+      const folderFiles = await listFilesInFolder(job.folderId, token);
+      fileIds = folderFiles.map(f => f.id);
+    }
+    
+    if (fileIds.length === 0) {
+      job.status = 'completed';
+      job.progress = 100;
+      await chrome.storage.local.set({ batchJobs });
+      return;
+    }
+    
+    const storageConfig = await chrome.storage.local.get([
+      'translationEngine', 'apiKey', 'modelName', 'customUrl'
+    ]);
+    const config = {
+      translationEngine: storageConfig.translationEngine || 'free',
+      apiKey: storageConfig.apiKey || '',
+      modelName: storageConfig.modelName || 'gemini-3.1-flash-lite',
+      customUrl: storageConfig.customUrl || '',
+      prompt: job.schedule.prompt || ''
+    };
+
+    const totalTasks = fileIds.length * job.targetLangs.length;
+    let completedTasks = Math.floor((job.progress / 100) * totalTasks);
+    
+    for (let fIdx = 0; fIdx < fileIds.length; fIdx++) {
+      const fileId = fileIds[fIdx];
+      for (let lIdx = 0; lIdx < job.targetLangs.length; lIdx++) {
+        const targetLang = job.targetLangs[lIdx];
+        
+        const currentTaskIndex = fIdx * job.targetLangs.length + lIdx;
+        if (currentTaskIndex < completedTasks) {
+          continue;
+        }
+
+        const liveData = await chrome.storage.local.get('batchJobs');
+        const liveJob = (liveData.batchJobs || {})[jobId];
+        if (!liveJob || liveJob.status === 'paused') {
+          return;
+        }
+        
+        try {
+          const fileInfo = await getFileInfo(fileId, token);
+          const name = fileInfo.name;
+          const mimeType = fileInfo.mimeType;
+          
+          let fileType = '';
+          if (mimeType === 'application/vnd.google-apps.document') fileType = 'document';
+          else if (mimeType === 'application/vnd.google-apps.spreadsheet') fileType = 'spreadsheet';
+          else if (mimeType === 'application/vnd.google-apps.form') fileType = 'form';
+          else if (mimeType === 'application/vnd.google-apps.presentation') fileType = 'presentation';
+          
+          if (!fileType) {
+            completedTasks++;
+            job.progress = (completedTasks / totalTasks) * 100;
+            await chrome.storage.local.set({ batchJobs });
+            continue;
+          }
+          
+          let parentFolderId = null;
+          if (job.outputMode === 'target') {
+            parentFolderId = job.targetFolderId;
+          } else if (job.outputMode === 'subfolder') {
+            const parent = fileInfo.parents ? fileInfo.parents[0] : null;
+            if (parent) {
+              parentFolderId = await createFolder(`[Translated - ${targetLang}]`, parent, token);
+            }
+          }
+          
+          const LANG_LABELS = {
+            'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
+            'ja': '日本語', 'ko': '한국어', 'es': 'Español',
+            'fr': 'Français', 'de': 'Deutsch', 'vi': 'Tiếng Việt', 'th': 'ไทย'
+          };
+          const langLabel = LANG_LABELS[targetLang] || targetLang;
+          const translatedName = `[Translated - ${langLabel}] ${name}`;
+          
+          const copyId = await duplicateGoogleFile(fileId, translatedName, mimeType, token, parentFolderId);
+          
+          const dummyProgress = (step, pct, status, error, finalUrl) => {
+            logDebug(`[BatchJob ${jobId}] File ${copyId} Progress: ${step} (${pct}%) - ${status}`);
+          };
+          
+          await runTranslationWorkflow(copyId, translatedName, fileType, targetLang, config, dummyProgress);
+          
+        } catch (err) {
+          console.error(`Batch job file translation failed:`, err);
+          
+          if (err.message.includes('429') || err.message.includes('quota') || err.message.includes('Limit') || err.message.includes('Too Many Requests')) {
+            job.status = 'paused';
+            job.progress = (currentTaskIndex / totalTasks) * 100;
+            await chrome.storage.local.set({ batchJobs });
+            
+            chrome.alarms.create(`resume_job_${job.id}`, { delayInMinutes: 5 });
+            logDebug(`[BatchJob ${jobId}] Rate limit hit. Paused queue. Rescheduled in 5 mins.`);
+            return;
+          }
+        }
+        
+        completedTasks++;
+        job.progress = (completedTasks / totalTasks) * 100;
+        await chrome.storage.local.set({ batchJobs });
+      }
+    }
+    
+    job.status = 'completed';
+    job.progress = 100;
+    await chrome.storage.local.set({ batchJobs });
+    
+  } catch (err) {
+    console.error('Batch job main processor failed:', err);
+    job.status = 'paused';
+    await chrome.storage.local.set({ batchJobs });
+  }
+}
 

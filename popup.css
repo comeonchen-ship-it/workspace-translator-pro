@@ -1084,7 +1084,11 @@ body.theme-form {
   transition: var(--transition);
 }
 
-.status-dot.status-unverified { background: var(--text-muted); opacity: 0.7; }
+.status-dot.status-unverified {
+  background: #fdcb6e;
+  opacity: 1;
+  box-shadow: 0 0 7px rgba(253, 203, 110, 0.6);
+}
 
 .status-dot.status-active {
   background: var(--accent);
@@ -1277,4 +1281,214 @@ body.theme-form {
   color: #ff7675;
   font-weight: 600;
 }
+
+/* Dynamic API Key Input Status Classes */
+.key-status-active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 6px rgba(0, 206, 201, 0.3) !important;
+}
+.key-status-invalid {
+  border-color: #ff7675 !important;
+  box-shadow: 0 0 6px rgba(255, 118, 117, 0.3) !important;
+}
+.key-status-unverified {
+  border-color: #fdcb6e !important;
+  box-shadow: 0 0 6px rgba(253, 203, 110, 0.3) !important;
+}
+
+/* Batch & Schedule Panel Styles */
+.batch-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.batch-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.batch-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+.batch-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.batch-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.lang-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.lang-checkbox-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-color);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lang-checkbox-grid input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.frequency-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.freq-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.freq-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.freq-btn.active {
+  background: rgba(0, 206, 201, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.batch-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.job-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.job-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  word-break: break-all;
+}
+
+.job-card-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.job-card-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-running { background: rgba(9, 132, 227, 0.15); color: #0984e3; }
+.badge-paused { background: rgba(253, 203, 110, 0.15); color: #fdcb6e; }
+.badge-completed { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+.badge-idle { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+
+.job-card-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.job-progress-bar-container {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.job-progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.job-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.job-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.job-action-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.job-action-btn.danger:hover {
+  color: #ff7675;
+  background: rgba(255, 118, 117, 0.05);
+}
+
+.job-empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+}
+
 
