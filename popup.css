@@ -1298,8 +1298,14 @@ body.theme-form {
 
 /* Batch & Schedule Panel Styles */
 .batch-panel {
-  display: flex;
+  display: none; /* Controlled by JS */
+  z-index: 20;
   flex-direction: column;
+}
+
+.batch-panel.active {
+  display: flex;
+  animation: slideIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
 .batch-scroll-container {

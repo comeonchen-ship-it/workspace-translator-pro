@@ -537,6 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Settings views toggles
   btnSettings.addEventListener('click', () => {
     historyPanel.classList.remove('active'); // close history if open
+    batchPanel.classList.remove('active');   // close batch if open
     settingsPanel.classList.add('active');
     // Refresh status badge from storage in case it changed
     chrome.storage.local.get('apiKeyStatus', (items) => {
@@ -1659,6 +1660,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Translation History functionality
   btnHistory.addEventListener('click', () => {
     settingsPanel.classList.remove('active'); // close settings if open
+    batchPanel.classList.remove('active');   // close batch if open
     historyPanel.classList.add('active');
     loadHistory();
     
