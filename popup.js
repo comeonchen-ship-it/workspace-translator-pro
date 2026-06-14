@@ -1887,6 +1887,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnClearHistory = document.getElementById('btn-clear-history');
     if (btnClearHistory) btnClearHistory.textContent = translations.btnClearHistory;
     
+    // Batch & Schedule Panel
+    if (btnBatchSchedule) btnBatchSchedule.setAttribute('title', translations.btnBatchScheduleTitle || 'Batch & Schedule');
+    const batchHeader = document.getElementById('label-batch-header');
+    if (batchHeader) batchHeader.textContent = translations.batchHeader || 'Batch & Schedule';
+    
+    const labelBatchSec1 = document.getElementById('label-batch-sec1');
+    if (labelBatchSec1) labelBatchSec1.textContent = translations.batchSec1 || '1. Select Workspace Files';
+    const labelBatchSec2 = document.getElementById('label-batch-sec2');
+    if (labelBatchSec2) labelBatchSec2.textContent = translations.batchSec2 || '2. Output Destination';
+    const labelBatchSec3 = document.getElementById('label-batch-sec3');
+    if (labelBatchSec3) labelBatchSec3.textContent = translations.batchSec3 || '3. Translation Target Languages';
+    const labelBatchSec4 = document.getElementById('label-batch-sec4');
+    if (labelBatchSec4) labelBatchSec4.textContent = translations.batchSec4 || '4. Schedule Setting';
+    const labelBatchSec5 = document.getElementById('label-batch-sec5');
+    if (labelBatchSec5) labelBatchSec5.textContent = translations.batchSec5 || 'Active Schedules & Jobs';
+    
+    const labelBatchSourceType = document.getElementById('label-batch-source-type');
+    if (labelBatchSourceType) labelBatchSourceType.textContent = translations.batchSourceType || 'Source Type';
+    const optBatchCurrent = document.getElementById('opt-batch-current');
+    if (optBatchCurrent) optBatchCurrent.textContent = translations.optBatchCurrent || 'Current Document/Presentation';
+    const optBatchFolder = document.getElementById('opt-batch-folder');
+    if (optBatchFolder) optBatchFolder.textContent = translations.optBatchFolder || 'Google Drive Folder';
+    const labelBatchFolderId = document.getElementById('label-batch-folder-id');
+    if (labelBatchFolderId) labelBatchFolderId.textContent = translations.batchFolderId || 'Drive Folder ID';
+    const hintBatchFolderId = document.getElementById('hint-batch-folder-id');
+    if (hintBatchFolderId) hintBatchFolderId.textContent = translations.hintBatchFolderId || 'Files in this folder will be processed sequentially';
+    
+    const labelBatchOutputMode = document.getElementById('label-batch-output-mode');
+    if (labelBatchOutputMode) labelBatchOutputMode.textContent = translations.batchOutputMode || 'Save Mode';
+    const optOutputSame = document.getElementById('opt-output-same');
+    if (optOutputSame) optOutputSame.textContent = translations.optOutputSame || 'Same Folder as Original';
+    const optOutputSubfolder = document.getElementById('opt-output-subfolder');
+    if (optOutputSubfolder) optOutputSubfolder.textContent = translations.optOutputSubfolder || 'Create Subfolder (e.g. [Translated])';
+    const optOutputTarget = document.getElementById('opt-output-target');
+    if (optOutputTarget) optOutputTarget.textContent = translations.optOutputTarget || 'Specify Central Folder ID';
+    const labelBatchTargetFolderId = document.getElementById('label-batch-target-folder-id');
+    if (labelBatchTargetFolderId) labelBatchTargetFolderId.textContent = translations.batchTargetFolderId || 'Target Folder ID';
+
+    const labelBatchLangs = document.getElementById('label-batch-langs');
+    if (labelBatchLangs) labelBatchLangs.textContent = translations.batchLangs || 'Select Languages (Multi-select)';
+
+    const labelBatchFreq = document.getElementById('label-batch-freq');
+    if (labelBatchFreq) labelBatchFreq.textContent = translations.batchFreq || 'Repeat Frequency';
+    const btnFreqOnce = document.getElementById('btn-freq-once');
+    if (btnFreqOnce) btnFreqOnce.textContent = translations.freqOnce || 'One-Time';
+    const btnFreqMinute = document.getElementById('btn-freq-minute');
+    if (btnFreqMinute) btnFreqMinute.textContent = translations.freqMinute || 'Minutes';
+    const btnFreqHour = document.getElementById('btn-freq-hour');
+    if (btnFreqHour) btnFreqHour.textContent = translations.freqHour || 'Hours';
+    const btnFreqDaily = document.getElementById('btn-freq-daily');
+    if (btnFreqDaily) btnFreqDaily.textContent = translations.freqDaily || 'Daily';
+    const btnFreqWeekly = document.getElementById('btn-freq-weekly');
+    if (btnFreqWeekly) btnFreqWeekly.textContent = translations.freqWeekly || 'Weekly';
+    const btnFreqMonthly = document.getElementById('btn-freq-monthly');
+    if (btnFreqMonthly) btnFreqMonthly.textContent = translations.freqMonthly || 'Monthly';
+
+    const labelScheduleInterval = document.getElementById('label-schedule-interval');
+    if (labelScheduleInterval) labelScheduleInterval.textContent = translations.scheduleInterval || 'Interval Value';
+    const hintScheduleInterval = document.getElementById('hint-schedule-interval');
+    if (hintScheduleInterval) {
+      hintScheduleInterval.textContent = selectedFrequency === 'minute' ? 
+        (translations.hintScheduleIntervalMinute || 'Run every N minutes') : 
+        (translations.hintScheduleIntervalHour || 'Run every N hours');
+    }
+
+    const labelScheduleTime = document.getElementById('label-schedule-time');
+    if (labelScheduleTime) labelScheduleTime.textContent = translations.scheduleTime || 'Start Time';
+    const labelScheduleTimezone = document.getElementById('label-schedule-timezone');
+    if (labelScheduleTimezone) labelScheduleTimezone.textContent = translations.scheduleTimezone || 'Timezone';
+
+    const labelBatchPrompt = document.getElementById('label-batch-prompt');
+    if (labelBatchPrompt) labelBatchPrompt.textContent = translations.batchPrompt || 'Trigger Prompt (Custom instructions)';
+    const hintBatchPrompt = document.getElementById('hint-batch-prompt');
+    if (hintBatchPrompt) hintBatchPrompt.textContent = translations.hintBatchPrompt || 'e.g. \'Use professional tone. Leave product names untranslated.\'';
+    
+    if (btnCancelBatch) btnCancelBatch.textContent = translations.btnCancel || 'Cancel';
+    if (btnSaveBatch) btnSaveBatch.textContent = translations.btnSaveBatch || 'Add Schedule';
+    
     // Reload Status Badge to apply current language immediately
     chrome.storage.local.get('apiKeyStatus', (items) => {
       updateStatusBadge(items.apiKeyStatus || 'unverified');
