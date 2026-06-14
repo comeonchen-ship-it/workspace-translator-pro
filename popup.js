@@ -393,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (translationEngine !== 'free') {
       const dot = document.getElementById('api-status-dot');
       const isVerified = dot && dot.classList.contains('status-active');
+      const isFailed = dot && dot.classList.contains('status-invalid');
       
       if (!isVerified) {
         // Show dynamic warning banner at the top of scroll container
@@ -405,10 +406,17 @@ document.addEventListener('DOMContentLoaded', () => {
           scrollContainer.insertBefore(errorBanner, scrollContainer.firstChild);
         }
         
-        errorBanner.innerHTML = `
-          <strong>⚠️ API Key Not Verified</strong>
-          <span>請先點擊下方<strong>「Test Connection」</strong>按鈕以驗證您的 API 金鑰。未經驗證的金鑰無法儲存設定。<br>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
-        `;
+        if (isFailed) {
+          errorBanner.innerHTML = `
+            <strong>⚠️ API Key Verification Failed</strong>
+            <span>您的 API 金鑰連線測試失敗。請確認輸入正確的金鑰與模型名稱，並重新測試。<br>Connection test failed for your API key. Please verify the key and model name, then test again.</span>
+          `;
+        } else {
+          errorBanner.innerHTML = `
+            <strong>⚠️ API Key Not Verified</strong>
+            <span>請先點擊下方<strong>「Test Connection」</strong>按鈕以驗證您的 API 金鑰。未經驗證的金鑰無法儲存設定。<br>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
+          `;
+        }
         
         // Highlight inputs and test button
         inputApiKey.classList.add('validation-highlight');
