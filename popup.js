@@ -648,6 +648,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    if (sourceType === 'current' && !currentPresentationId) {
+      alert('No active document detected. Please open a Google Slide, Doc, or Sheet first.');
+      return;
+    }
+    
     const outputMode = batchOutputMode.value;
     const targetFolderId = batchTargetFolderId.value.trim();
     if (outputMode === 'target' && !targetFolderId) {

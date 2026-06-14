@@ -353,7 +353,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 /**
  * Main translation workflow orchestration
  */
-async function runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
+async function runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress, isBatch = false) {
   let copyId = null;
   config.presentationId = presentationId;
   
@@ -424,7 +424,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
       sendProgress('done', 100, `Opening translated spreadsheet!`, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      if (!isBatch) {
+        chrome.tabs.create({ url: editUrl });
+      }
       return;
     }
 
@@ -435,7 +437,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'form', editUrl);
       sendProgress('done', 100, `Opening translated form!`, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      if (!isBatch) {
+        chrome.tabs.create({ url: editUrl });
+      }
       return;
     }
 
@@ -637,7 +641,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await unregisterActiveCopy(presentationId);
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
     sendProgress('done', 100, `Opening translated ${fileTypeName}!`, null, editUrl);
-    chrome.tabs.create({ url: editUrl });
+    if (!isBatch) {
+      chrome.tabs.create({ url: editUrl });
+    }
     
   } catch (err) {
     await logDebug(`Error occurred during translation workflow: ${err.message}`, presentationId);
@@ -2075,7 +2081,7 @@ async function processBatchJob(jobId) {
             logDebug(`[BatchJob ${jobId}] File ${copyId} Progress: ${step} (${pct}%) - ${status}`);
           };
           
-          await runTranslationWorkflow(copyId, translatedName, fileType, targetLang, config, dummyProgress);
+          await runTranslationWorkflow(copyId, translatedName, fileType, targetLang, config, dummyProgress, true);
           
         } catch (err) {
           console.error(`Batch job file translation failed:`, err);
