@@ -6,6 +6,7 @@
   <title>Workspace Translator Pro</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
+  <script src="locales.js" defer></script>
   <script src="popup.js" defer></script>
 </head>
 <body>
@@ -154,9 +155,31 @@
       </div>
 
       <div class="settings-scroll-container">
+        <!-- General Settings -->
+        <div class="setting-group-card">
+          <h4 id="label-general-settings">General Settings</h4>
+          <div class="form-group">
+            <label for="select-ui-lang" id="label-ui-language">UI Language</label>
+            <div class="select-wrapper">
+              <select id="select-ui-lang">
+                <option value="en">English</option>
+                <option value="zh-TW">Traditional Chinese (繁體中文)</option>
+                <option value="zh-CN">Simplified Chinese (简体中文)</option>
+                <option value="ja">Japanese (日本語)</option>
+                <option value="ko">Korean (한국어)</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="vi">Vietnamese (Tiếng Việt)</option>
+                <option value="th">Thai (ไทย)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <!-- Translation Engine settings -->
         <div class="setting-group-card">
-          <h4>Translation Engine</h4>
+          <h4 id="label-translation-engine">Translation Engine</h4>
           
           <div class="form-group">
             <label for="select-engine">Translation Provider</label>

@@ -67,14 +67,21 @@ document.addEventListener('DOMContentLoaded', () => {
     free: ''
   };
 
+  const selectUiLang = document.getElementById('select-ui-lang');
+
   // 1. Check storage for existing settings
   chrome.storage.local.get([
     'translationEngine',
     'apiKey',
     'modelName',
     'customUrl',
-    'apiKeyStatus'
+    'apiKeyStatus',
+    'uiLang'
   ], (items) => {
+    const uiLang = items.uiLang || 'en';
+    if (selectUiLang) selectUiLang.value = uiLang;
+    applyLanguage(uiLang);
+
     selectEngine.value = items.translationEngine || 'gemini';
     inputApiKey.value = items.apiKey || '';
     inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
@@ -364,8 +371,13 @@ document.addEventListener('DOMContentLoaded', () => {
       'apiKey',
       'modelName',
       'customUrl',
-      'apiKeyStatus'
+      'apiKeyStatus',
+      'uiLang'
     ], (items) => {
+      const uiLang = items.uiLang || 'en';
+      if (selectUiLang) selectUiLang.value = uiLang;
+      applyLanguage(uiLang);
+
       selectEngine.value = items.translationEngine || 'gemini';
       inputApiKey.value = items.apiKey || '';
       inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
@@ -388,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiKey = inputApiKey.value.trim();
     const modelName = inputModelName.value.trim();
     const customUrl = inputCustomUrl.value.trim();
+    const uiLang = selectUiLang ? selectUiLang.value : 'en';
 
     if (translationEngine !== 'free') {
       const dot = document.getElementById('api-status-dot');
@@ -405,16 +418,11 @@ document.addEventListener('DOMContentLoaded', () => {
           settingsPanel.insertBefore(errorBanner, scrollContainer);
         }
         
+        const translations = LOCALES[uiLang] || LOCALES['en'];
         if (isFailed) {
-          errorBanner.innerHTML = `
-            <strong>⚠️ API Key Verification Failed</strong>
-            <span>Connection test failed for your API key. Please verify the key and model name, then test again.</span>
-          `;
+          errorBanner.innerHTML = translations.warningBannerFailed;
         } else {
-          errorBanner.innerHTML = `
-            <strong>⚠️ API Key Not Verified</strong>
-            <span>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
-          `;
+          errorBanner.innerHTML = translations.warningBannerNotVerified;
         }
         
         // Highlight inputs and test button
@@ -456,8 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
       apiKey,
       modelName,
       customUrl,
+      uiLang,
       apiKeyStatus: (translationEngine === 'free') ? 'unverified' : 'active'
     }, () => {
+      applyLanguage(uiLang);
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       closeSettings();
     });
@@ -710,12 +720,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Apply body class for dynamic theme variables
       document.body.className = `theme-${newFileType}`;
       
-      // Dynamically adjust step description text
-      const stepCopyEl = document.querySelector('#step-copy span:not(.step-bullet)');
-      if (stepCopyEl) {
-        stepCopyEl.textContent = `Duplicate original ${newFileType}`;
-      }
-      
       if (currentPresentationId !== newPresentationId || currentFileType !== newFileType) {
         currentPresentationId = newPresentationId;
         currentPresentationTitle = newPresentationTitle;
@@ -723,30 +727,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         slideTitleEl.textContent = currentPresentationTitle;
         
-        // Dynamically adjust icon and label
-        const metaLabelEl = document.getElementById('meta-label');
+        // Dynamically adjust icon
         const slideIconEl = document.getElementById('slide-icon');
         
         if (isDoc) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Document";
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(52, 152, 219, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
           }
         } else if (isSheet) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Sheet";
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(46, 204, 113, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>`;
           }
         } else if (isForm) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Form";
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(155, 89, 182, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="8" x2="17" y2="8"></line><line x1="9" y1="13" x2="17" y2="13"></line><line x1="9" y1="18" x2="15" y2="18"></line><circle cx="6" cy="8" r="0.5" fill="currentColor"></circle><circle cx="6" cy="13" r="0.5" fill="currentColor"></circle><circle cx="6" cy="18" r="0.5" fill="currentColor"></circle></svg>`;
           }
         } else {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Presentation";
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(241, 196, 15, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>`;
@@ -767,6 +766,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Restore / Reset UI for this presentation
         resetUIForPresentation(currentPresentationId);
+        
+        // Apply localization
+        applyLanguage((selectUiLang && selectUiLang.value) || 'en');
       }
       
       warningPanel.style.display = 'none';
@@ -1327,4 +1329,132 @@ Translation Failed: ${cleanErr}`;
       loadHistory();
     }
   });
+
+  // ── UI Localization Logic ────────────────────────────────────────────────
+  if (selectUiLang) {
+    selectUiLang.addEventListener('change', (e) => {
+      applyLanguage(e.target.value);
+    });
+  }
+
+  function applyLanguage(lang) {
+    if (typeof LOCALES === 'undefined') return;
+    const translations = LOCALES[lang] || LOCALES['en'];
+    
+    // Header actions titles
+    if (btnHelp) btnHelp.setAttribute('title', translations.btnHelpTitle);
+    if (btnHistory) btnHistory.setAttribute('title', translations.btnHistoryTitle);
+    if (btnSettings) btnSettings.setAttribute('title', translations.btnSettingsTitle);
+    
+    // Warning Panel
+    const warningHeader = document.querySelector('#warning-panel h3');
+    if (warningHeader) warningHeader.textContent = translations.warningHeader;
+    const warningText = document.querySelector('#warning-panel p:nth-of-type(1)');
+    if (warningText) warningText.textContent = translations.warningText;
+    
+    const btnCreateSlides = document.getElementById('btn-create-slides');
+    if (btnCreateSlides) btnCreateSlides.textContent = translations.btnCreateSlides;
+    const btnCreateDocs = document.getElementById('btn-create-docs');
+    if (btnCreateDocs) btnCreateDocs.textContent = translations.btnCreateDocs;
+    const btnCreateSheets = document.getElementById('btn-create-sheets');
+    if (btnCreateSheets) btnCreateSheets.textContent = translations.btnCreateSheets;
+    const btnCreateForms = document.getElementById('btn-create-forms');
+    if (btnCreateForms) btnCreateForms.textContent = translations.btnCreateForms;
+    
+    // Main Panel Active File Label
+    const metaLabel = document.getElementById('meta-label');
+    if (metaLabel) {
+      if (currentFileType === 'presentation') metaLabel.textContent = translations.activePresentation;
+      else if (currentFileType === 'document') metaLabel.textContent = translations.activeDocument;
+      else if (currentFileType === 'spreadsheet') metaLabel.textContent = translations.activeSheet;
+      else if (currentFileType === 'form') metaLabel.textContent = translations.activeForm;
+    }
+    
+    if (slideTitleEl && (slideTitleEl.textContent === 'Loading title...' || slideTitleEl.textContent === '載入標題中...' || slideTitleEl.textContent === '正在加载标题...')) {
+      slideTitleEl.textContent = translations.loadingTitle;
+    }
+    
+    const selectLangLabel = document.querySelector('.control-group label[for="select-lang"]');
+    if (selectLangLabel) selectLangLabel.textContent = translations.selectLangLabel;
+    
+    const btnTranslateSpan = document.querySelector('#btn-translate span');
+    if (btnTranslateSpan) btnTranslateSpan.textContent = translations.btnTranslate;
+    
+    // Progress Section
+    const progressWarningText = document.querySelector('.warning-banner-text');
+    if (progressWarningText) progressWarningText.innerHTML = translations.progressWarningText;
+    
+    // Progress Steps (Dynamic translations)
+    updateStepLanguage(translations);
+    
+    const btnCancelTranslationSpan = document.querySelector('#btn-cancel-translation span');
+    if (btnCancelTranslationSpan) btnCancelTranslationSpan.textContent = translations.btnCancelTranslation;
+    
+    const logConsoleHeaderSpan = document.querySelector('.log-console-header span');
+    if (logConsoleHeaderSpan) logConsoleHeaderSpan.textContent = translations.logConsoleHeader;
+    
+    // Settings panel
+    const settingsHeader = document.querySelector('.settings-panel .settings-header-bar h3');
+    if (settingsHeader) settingsHeader.textContent = translations.settingsHeader;
+    
+    const labelGeneralSettings = document.getElementById('label-general-settings');
+    if (labelGeneralSettings) labelGeneralSettings.textContent = translations.generalSettings;
+    const labelUiLanguage = document.getElementById('label-ui-language');
+    if (labelUiLanguage) labelUiLanguage.textContent = translations.selectUiLangLabel;
+    
+    const labelTranslationEngine = document.getElementById('label-translation-engine');
+    if (labelTranslationEngine) labelTranslationEngine.textContent = translations.engineSettings;
+    const selectEngineLabel = document.querySelector('.settings-panel label[for="select-engine"]');
+    if (selectEngineLabel) selectEngineLabel.textContent = translations.selectEngineLabel;
+    
+    const labelApiKey = document.querySelector('.settings-panel label[for="api-key"]');
+    if (labelApiKey) labelApiKey.textContent = translations.labelApiKey;
+    if (inputApiKey) inputApiKey.setAttribute('placeholder', translations.placeholderApiKey);
+    
+    const labelModelName = document.querySelector('.settings-panel label[for="model-name"]');
+    if (labelModelName) labelModelName.textContent = translations.labelModelName;
+    
+    const modelSunsetTip = document.querySelector('#model-sunset-tip span');
+    if (modelSunsetTip) modelSunsetTip.innerHTML = translations.modelSunsetTip;
+    const quotaTip = document.querySelector('#group-quota-tip span');
+    if (quotaTip) quotaTip.innerHTML = translations.quotaTip;
+    
+    const labelCustomUrl = document.querySelector('.settings-panel label[for="custom-url"]');
+    if (labelCustomUrl) labelCustomUrl.textContent = translations.labelCustomUrl;
+    
+    const btnTestApi = document.getElementById('btn-test-api');
+    if (btnTestApi && !btnTestApi.disabled) {
+      btnTestApi.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ${translations.btnTestConnection}`;
+    }
+    
+    const btnCancelSettings = document.getElementById('btn-cancel-settings');
+    if (btnCancelSettings) btnCancelSettings.textContent = translations.btnCancel;
+    const btnSaveSettings = document.getElementById('btn-save-settings');
+    if (btnSaveSettings) btnSaveSettings.textContent = translations.btnSave;
+    
+    // History Panel
+    const historyHeader = document.querySelector('.history-panel .settings-header-bar h3');
+    if (historyHeader) historyHeader.textContent = translations.historyHeader;
+    const btnClearHistory = document.getElementById('btn-clear-history');
+    if (btnClearHistory) btnClearHistory.textContent = translations.btnClearHistory;
+    
+    // Reload Status Badge to apply current language immediately
+    chrome.storage.local.get('apiKeyStatus', (items) => {
+      updateStatusBadge(items.apiKeyStatus || 'unverified');
+    });
+  }
+
+  function updateStepLanguage(translations) {
+    const stepCopySpan = document.querySelector('#step-copy span:not(.step-bullet)');
+    if (stepCopySpan) {
+      const typeTranslated = translations[currentFileType] || currentFileType;
+      stepCopySpan.textContent = translations.stepCopy.replace('{type}', typeTranslated);
+    }
+    const stepExtractSpan = document.querySelector('#step-extract span:not(.step-bullet)');
+    if (stepExtractSpan) stepExtractSpan.textContent = translations.stepExtract;
+    const stepApiSpan = document.querySelector('#step-api span:not(.step-bullet)');
+    if (stepApiSpan) stepApiSpan.textContent = translations.stepApi;
+    const stepWriteSpan = document.querySelector('#step-write span:not(.step-bullet)');
+    if (stepWriteSpan) stepWriteSpan.textContent = translations.stepWrite;
+  }
 });
