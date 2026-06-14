@@ -347,6 +347,46 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
     })();
     return true;
+  } else if (message.action === 'listDriveFolder') {
+    (async () => {
+      try {
+        const token = await getAuthToken();
+        const folderId = message.folderId || 'root';
+        const url = `https://www.googleapis.com/drive/v3/files?q='${encodeURIComponent(folderId)}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&pageSize=200&orderBy=folder,name`;
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Google Drive API error: ${text}`);
+        }
+        const data = await res.json();
+        sendResponse({ success: true, files: data.files || [] });
+      } catch (e) {
+        sendResponse({ success: false, error: e.message });
+      }
+    })();
+    return true;
+  } else if (message.action === 'getDriveFileMetadata') {
+    (async () => {
+      try {
+        const token = await getAuthToken();
+        const fileId = message.fileId;
+        const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,parents`;
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Google Drive API error: ${text}`);
+        }
+        const data = await res.json();
+        sendResponse({ success: true, metadata: data });
+      } catch (e) {
+        sendResponse({ success: false, error: e.message });
+      }
+    })();
+    return true;
   }
 });
 
@@ -1910,16 +1950,20 @@ function calculateNextTriggerTime(startTimeStr, frequency) {
   const target = new Date();
   target.setHours(hour, minute, 0, 0);
   
-  if (target.getTime() <= now.getTime()) {
-    target.setDate(target.getDate() + 1);
-  }
-  
   if (frequency === 'weekly') {
-    // Add 7 days
-    target.setDate(target.getDate() + 7);
-  } else if (frequency === 'monthly') {
-    // Add 1 month
-    target.setMonth(target.getMonth() + 1);
+    const currentDay = target.getDay(); // 0 is Sunday, 1 is Monday...
+    let daysUntilMonday = (1 - currentDay + 7) % 7;
+    if (daysUntilMonday === 0 && target.getTime() <= now.getTime()) {
+      daysUntilMonday = 7;
+    }
+    target.setDate(target.getDate() + daysUntilMonday);
+  } else {
+    if (target.getTime() <= now.getTime()) {
+      target.setDate(target.getDate() + 1);
+    }
+    if (frequency === 'monthly') {
+      target.setMonth(target.getMonth() + 1);
+    }
   }
   
   return target.getTime();

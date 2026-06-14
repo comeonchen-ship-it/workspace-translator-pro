@@ -66,6 +66,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const batchTriggerPrompt = document.getElementById('batch-trigger-prompt');
   const batchJobList = document.getElementById('batch-job-list');
   
+  // Visual Target Selector and Preset variables
+  let selectedTargetType = 'current'; // 'current' or 'folder' or 'file'
+  let selectedTargetId = '';
+  let selectedTargetName = '';
+  let selectedTargetMimeType = '';
+  let hasManuallySelectedTarget = false;
+
+  const driveExplorerPanel = document.getElementById('drive-explorer-panel');
+  const btnChangeTarget = document.getElementById('btn-change-target');
+  const btnCloseExplorer = document.getElementById('btn-close-explorer');
+  const btnCancelExplorer = document.getElementById('btn-cancel-explorer');
+  const btnSelectExplorer = document.getElementById('btn-select-explorer');
+  const explorerBreadcrumbs = document.getElementById('explorer-breadcrumbs');
+  const explorerList = document.getElementById('explorer-list');
+  const explorerLoading = document.getElementById('explorer-loading');
+  const batchSelectedTargetName = document.getElementById('batch-selected-target-name');
+  const batchTargetIcon = document.getElementById('batch-target-icon');
+  const batchPresetBtns = document.getElementById('batch-preset-btns');
+  
+  // Folder Detected banner elements
+  const folderDetectedBanner = document.getElementById('folder-detected-banner');
+  const detectedFolderName = document.getElementById('detected-folder-name');
+  const btnTranslateDetectedFolder = document.getElementById('btn-translate-detected-folder');
+
+  let selectedDriveItem = null; // Current selected item in the explorer view
+  let explorerPathStack = [{ id: 'root', name: 'My Drive' }]; // Folder navigation stack
+  let selectedPreset = 'now'; // 'now', 'tonight', or 'weekly'
+  
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
   const progressStatus = document.getElementById('progress-status');
@@ -601,6 +629,176 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Target Card and Drive Explorer Logic
+  function updateSelectedTargetUI() {
+    if (!batchSelectedTargetName || !batchTargetIcon) return;
+    
+    batchSelectedTargetName.textContent = selectedTargetName || 'None selected';
+    
+    let icon = '📄';
+    if (selectedTargetType === 'folder') {
+      icon = '📁';
+    } else if (selectedTargetMimeType === 'application/vnd.google-apps.presentation') {
+      icon = '📊';
+    } else if (selectedTargetMimeType === 'application/vnd.google-apps.document') {
+      icon = '📝';
+    } else if (selectedTargetMimeType === 'application/vnd.google-apps.spreadsheet') {
+      icon = '📈';
+    } else if (selectedTargetMimeType === 'application/vnd.google-apps.form') {
+      icon = '📋';
+    }
+    batchTargetIcon.textContent = icon;
+
+    // Set hidden elements
+    if (batchSourceType) batchSourceType.value = selectedTargetType === 'folder' ? 'folder' : 'current';
+    if (batchFolderId) batchFolderId.value = selectedTargetId;
+  }
+
+  // Visual Drive Explorer Functions
+  function loadDriveFolder(folderId) {
+    if (!explorerLoading || !explorerList || !btnSelectExplorer) return;
+    explorerLoading.classList.remove('hidden');
+    explorerList.innerHTML = '';
+    btnSelectExplorer.disabled = true;
+    selectedDriveItem = null;
+
+    chrome.runtime.sendMessage({ action: 'listDriveFolder', folderId }, (response) => {
+      explorerLoading.classList.add('hidden');
+      if (response && response.success) {
+        renderExplorerList(response.files);
+      } else {
+        const errorMsg = response ? response.error : 'Unknown error';
+        explorerList.innerHTML = `<div style="padding:20px; color:#ff7675; font-size:11px; text-align:center;">Failed to load folder: ${errorMsg}</div>`;
+      }
+    });
+  }
+
+  function renderExplorerList(files) {
+    if (!explorerList) return;
+    if (!files || files.length === 0) {
+      explorerList.innerHTML = `<div style="padding:32px; text-align:center; color:var(--text-muted); font-size:11px;">Folder is empty</div>`;
+      return;
+    }
+
+    explorerList.innerHTML = '';
+    files.forEach(file => {
+      const item = document.createElement('div');
+      item.className = 'explorer-item';
+      
+      const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+      
+      let icon = '📄';
+      if (isFolder) icon = '📁';
+      else if (file.mimeType === 'application/vnd.google-apps.presentation') icon = '📊';
+      else if (file.mimeType === 'application/vnd.google-apps.document') icon = '📝';
+      else if (file.mimeType === 'application/vnd.google-apps.spreadsheet') icon = '📈';
+      else if (file.mimeType === 'application/vnd.google-apps.form') icon = '📋';
+
+      item.innerHTML = `
+        <span class="explorer-item-icon">${icon}</span>
+        <span class="explorer-item-name">${escapeHtml(file.name)}</span>
+        <span class="explorer-item-meta">${isFolder ? 'Folder' : ''}</span>
+      `;
+
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.explorer-item').forEach(el => el.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedDriveItem = file;
+        btnSelectExplorer.disabled = false;
+      });
+
+      if (isFolder) {
+        item.addEventListener('dblclick', () => {
+          explorerPathStack.push({ id: file.id, name: file.name });
+          renderBreadcrumbs();
+          loadDriveFolder(file.id);
+        });
+      }
+      
+      explorerList.appendChild(item);
+    });
+  }
+
+  function renderBreadcrumbs() {
+    if (!explorerBreadcrumbs) return;
+    explorerBreadcrumbs.innerHTML = '';
+    explorerPathStack.forEach((crumb, index) => {
+      if (index > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'breadcrumb-separator';
+        sep.textContent = '>';
+        explorerBreadcrumbs.appendChild(sep);
+      }
+
+      const item = document.createElement('span');
+      if (index === explorerPathStack.length - 1) {
+        item.className = 'breadcrumb-current';
+        item.textContent = crumb.name;
+      } else {
+        item.className = 'breadcrumb-item';
+        item.textContent = crumb.name;
+        item.addEventListener('click', () => {
+          explorerPathStack = explorerPathStack.slice(0, index + 1);
+          renderBreadcrumbs();
+          loadDriveFolder(crumb.id);
+        });
+      }
+      explorerBreadcrumbs.appendChild(item);
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+  }
+
+  // Bind change target button
+  if (btnChangeTarget) {
+    btnChangeTarget.addEventListener('click', () => {
+      if (driveExplorerPanel) {
+        driveExplorerPanel.classList.remove('hidden');
+        // Trigger reflow to ensure slide transition works
+        driveExplorerPanel.getBoundingClientRect();
+        driveExplorerPanel.classList.add('active');
+      }
+      explorerPathStack = [{ id: 'root', name: 'My Drive' }];
+      renderBreadcrumbs();
+      loadDriveFolder('root');
+    });
+  }
+
+  const closeExplorer = () => {
+    if (driveExplorerPanel) {
+      driveExplorerPanel.classList.remove('active');
+      setTimeout(() => {
+        driveExplorerPanel.classList.add('hidden');
+      }, 300);
+    }
+  };
+
+  if (btnCloseExplorer) btnCloseExplorer.addEventListener('click', closeExplorer);
+  if (btnCancelExplorer) btnCancelExplorer.addEventListener('click', closeExplorer);
+
+  if (btnSelectExplorer) {
+    btnSelectExplorer.addEventListener('click', () => {
+      if (selectedDriveItem) {
+        selectedTargetType = selectedDriveItem.mimeType === 'application/vnd.google-apps.folder' ? 'folder' : 'file';
+        selectedTargetId = selectedDriveItem.id;
+        selectedTargetName = selectedDriveItem.name;
+        selectedTargetMimeType = selectedDriveItem.mimeType;
+        hasManuallySelectedTarget = true;
+
+        updateSelectedTargetUI();
+        closeExplorer();
+      }
+    });
+  }
+
+  // Frequency/Intervals logic (Advanced Settings)
   let selectedFrequency = 'once';
   const freqButtons = batchFrequencyBtns.querySelectorAll('.freq-btn');
   freqButtons.forEach(btn => {
@@ -608,6 +806,11 @@ document.addEventListener('DOMContentLoaded', () => {
       freqButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedFrequency = btn.getAttribute('data-freq');
+      
+      // Deactivate presets since custom options are picked
+      const presetButtons = batchPresetBtns.querySelectorAll('.preset-btn');
+      presetButtons.forEach(b => b.classList.remove('active'));
+      selectedPreset = 'custom';
       
       if (selectedFrequency === 'minute' || selectedFrequency === 'hour') {
         groupScheduleInterval.classList.remove('hidden');
@@ -624,6 +827,54 @@ document.addEventListener('DOMContentLoaded', () => {
         groupScheduleTime.classList.remove('hidden');
       }
     });
+  });
+
+  // Preset buttons click handlers
+  if (batchPresetBtns) {
+    const presetButtons = batchPresetBtns.querySelectorAll('.preset-btn');
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedPreset = btn.getAttribute('data-preset');
+        
+        if (selectedPreset === 'now') {
+          selectedFrequency = 'once';
+          freqButtons.forEach(b => {
+            if (b.getAttribute('data-freq') === 'once') b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          groupScheduleInterval.classList.add('hidden');
+          groupScheduleTime.classList.add('hidden');
+        } else if (selectedPreset === 'tonight') {
+          selectedFrequency = 'daily';
+          freqButtons.forEach(b => {
+            if (b.getAttribute('data-freq') === 'daily') b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          if (scheduleTime) scheduleTime.value = '23:00';
+          groupScheduleInterval.classList.add('hidden');
+          groupScheduleTime.classList.remove('hidden');
+        } else if (selectedPreset === 'weekly') {
+          selectedFrequency = 'weekly';
+          freqButtons.forEach(b => {
+            if (b.getAttribute('data-freq') === 'weekly') b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          if (scheduleTime) scheduleTime.value = '09:00';
+          groupScheduleInterval.classList.add('hidden');
+          groupScheduleTime.classList.remove('hidden');
+        }
+      });
+    });
+  }
+
+  batchOutputMode.addEventListener('change', () => {
+    if (batchOutputMode.value === 'target') {
+      groupTargetFolderId.classList.remove('hidden');
+    } else {
+      groupTargetFolderId.classList.add('hidden');
+    }
   });
 
   btnBatchSchedule.addEventListener('click', () => {
@@ -643,13 +894,8 @@ document.addEventListener('DOMContentLoaded', () => {
   btnSaveBatch.addEventListener('click', () => {
     const sourceType = batchSourceType.value;
     const folderId = batchFolderId.value.trim();
-    if (sourceType === 'folder' && !folderId) {
-      alert('Please enter a Folder ID.');
-      return;
-    }
-    
-    if (sourceType === 'current' && !currentPresentationId) {
-      alert('No active document detected. Please open a Google Slide, Doc, or Sheet first.');
+    if (!folderId) {
+      alert('Please select a file or folder.');
       return;
     }
     
@@ -676,9 +922,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const job = {
       id: 'job_' + Date.now(),
       sourceType,
-      folderId: sourceType === 'folder' ? folderId : (currentPresentationId || 'active'),
-      folderTitle: sourceType === 'folder' ? 'Drive Folder' : (currentPresentationTitle || 'Active Document'),
-      fileType: currentFileType || 'presentation',
+      folderId: folderId,
+      folderTitle: selectedTargetName || (sourceType === 'folder' ? 'Drive Folder' : 'Active Document'),
+      fileType: selectedTargetType === 'folder' ? 'folder' : (currentFileType || 'presentation'),
       outputMode,
       targetFolderId: outputMode === 'target' ? targetFolderId : '',
       targetLangs: selectedLangs,
@@ -1193,6 +1439,20 @@ document.addEventListener('DOMContentLoaded', () => {
         slideTitleEl.textContent = currentPresentationTitle;
       }
       
+      if (folderDetectedBanner) folderDetectedBanner.classList.add('hidden');
+      
+      // Auto-select active file if target has not been manually changed
+      if (!hasManuallySelectedTarget) {
+        selectedTargetType = 'current';
+        selectedTargetId = currentPresentationId;
+        selectedTargetName = currentPresentationTitle;
+        selectedTargetMimeType = (currentFileType === 'document') ? 'application/vnd.google-apps.document' :
+                                 (currentFileType === 'spreadsheet') ? 'application/vnd.google-apps.spreadsheet' :
+                                 (currentFileType === 'form') ? 'application/vnd.google-apps.form' :
+                                 'application/vnd.google-apps.presentation';
+        updateSelectedTargetUI();
+      }
+
       warningPanel.style.display = 'none';
       mainPanel.style.display = 'flex';
     } else {
@@ -1202,6 +1462,45 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.className = ''; // Reset theme
       warningPanel.style.display = 'flex';
       mainPanel.style.display = 'none';
+
+      // Check if it's a folder tab:
+      const driveFolderMatch = url.match(/drive\.google\.com\/(?:drive\/(?:u\/\d+\/)?folders\/)([a-zA-Z0-9_-]+)/);
+      if (driveFolderMatch) {
+        const folderId = driveFolderMatch[1];
+        const tabTitle = tab.title || '';
+        const folderName = tabTitle.replace(/\s*-\s*Google\s+Drive/i, "").trim() || 'Drive Folder';
+        
+        if (folderDetectedBanner) folderDetectedBanner.classList.remove('hidden');
+        if (detectedFolderName) detectedFolderName.textContent = folderName;
+        
+        // Setup direct translation click handler for this banner
+        if (btnTranslateDetectedFolder) {
+          btnTranslateDetectedFolder.onclick = () => {
+            selectedTargetType = 'folder';
+            selectedTargetId = folderId;
+            selectedTargetName = folderName;
+            selectedTargetMimeType = 'application/vnd.google-apps.folder';
+            hasManuallySelectedTarget = true;
+            
+            updateSelectedTargetUI();
+            
+            // Open batch panel
+            if (btnBatchSchedule) btnBatchSchedule.click();
+          };
+        }
+        
+        // Auto-select folder if target has not been manually customized
+        if (!hasManuallySelectedTarget) {
+          selectedTargetType = 'folder';
+          selectedTargetId = folderId;
+          selectedTargetName = folderName;
+          selectedTargetMimeType = 'application/vnd.google-apps.folder';
+          updateSelectedTargetUI();
+        }
+      } else {
+        if (folderDetectedBanner) folderDetectedBanner.classList.add('hidden');
+      }
+
       if (logCheckInterval) {
         clearInterval(logCheckInterval);
         logCheckInterval = null;
@@ -1891,7 +2190,198 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnBatchSchedule) btnBatchSchedule.setAttribute('title', translations.btnBatchScheduleTitle || 'Batch & Schedule');
     const batchHeader = document.getElementById('label-batch-header');
     if (batchHeader) batchHeader.textContent = translations.batchHeader || 'Batch & Schedule';
+
+    const DRIVE_LOCALES = {
+      'en': {
+        selectedSource: 'Selected Source',
+        schedulePreset: 'Schedule Preset',
+        presetNow: '🚀 Now',
+        presetTonight: '🌙 Tonight (11:00 PM)',
+        presetWeekly: '📅 Weekly (Mon 9:00 AM)',
+        advancedSettings: '⚙️ Advanced Settings',
+        explorerTitle: 'Google Drive Explorer',
+        loadingFiles: 'Loading files...',
+        btnSelect: 'Select',
+        btnChoose: '📁 Choose...',
+        activeDocument: 'Active Document'
+      },
+      'zh-TW': {
+        selectedSource: '已選擇來源',
+        schedulePreset: '排程預設',
+        presetNow: '🚀 立即執行',
+        presetTonight: '🌙 今晚 (11:00 PM)',
+        presetWeekly: '📅 每週 (週一 9:00 AM)',
+        advancedSettings: '⚙️ 進階設定',
+        explorerTitle: 'Google 雲端硬碟瀏覽器',
+        loadingFiles: '載入檔案中...',
+        btnSelect: '選擇',
+        btnChoose: '📁 選擇...',
+        activeDocument: '目前文件'
+      },
+      'zh-CN': {
+        selectedSource: '已选择来源',
+        schedulePreset: '日程预设',
+        presetNow: '🚀 立即执行',
+        presetTonight: '🌙 今晚 (11:00 PM)',
+        presetWeekly: '📅 每周 (周一 9:00 AM)',
+        advancedSettings: '⚙️ 高级设置',
+        explorerTitle: 'Google 云端硬盘浏览器',
+        loadingFiles: '正在加载文件...',
+        btnSelect: '选择',
+        btnChoose: '📁 选择...',
+        activeDocument: '当前文档'
+      },
+      'ja': {
+        selectedSource: '選択されたソース',
+        schedulePreset: 'スケジュールプリセット',
+        presetNow: '🚀 今すぐ',
+        presetTonight: '🌙 今夜 (23:00)',
+        presetWeekly: '📅 毎週 (月曜 9:00 AM)',
+        advancedSettings: '⚙️ 詳細設定',
+        explorerTitle: 'Google ドライブエクスプローラー',
+        loadingFiles: 'ファイルを読み込み中...',
+        btnSelect: '選択',
+        btnChoose: '📁 選択...',
+        activeDocument: '現在ドキュメント'
+      },
+      'ko': {
+        selectedSource: '선택된 소스',
+        schedulePreset: '일정 프리셋',
+        presetNow: '🚀 지금 실행',
+        presetTonight: '🌙 오늘 밤 (오후 11:00)',
+        presetWeekly: '📅 매주 (월요일 오전 9:00)',
+        advancedSettings: '⚙️ 고급 설정',
+        explorerTitle: 'Google 드라이브 탐색기',
+        loadingFiles: '파일 로ด 중...',
+        btnSelect: '선택',
+        btnChoose: '📁 선택...',
+        activeDocument: '현재 문서'
+      },
+      'es': {
+        selectedSource: 'Origen Seleccionado',
+        schedulePreset: 'Preselección de Horario',
+        presetNow: '🚀 Ahora',
+        presetTonight: '🌙 Esta noche (11:00 PM)',
+        presetWeekly: '📅 Semanal (Lun 9:00 AM)',
+        advancedSettings: '⚙️ Configuración Avanzada',
+        explorerTitle: 'Explorador de Google Drive',
+        loadingFiles: 'Cargando archivos...',
+        btnSelect: 'Seleccionar',
+        btnChoose: '📁 Elegir...',
+        activeDocument: 'Documento Activo'
+      },
+      'fr': {
+        selectedSource: 'Source Sélectionnée',
+        schedulePreset: 'Planification Prédéfinie',
+        presetNow: '🚀 Maintenant',
+        presetTonight: '🌙 Ce soir (23:00)',
+        presetWeekly: '📅 Hebdomadaire (Lun 9h00)',
+        advancedSettings: '⚙️ Paramètres Avancés',
+        explorerTitle: 'Explorateur Google Drive',
+        loadingFiles: 'Chargement des fichiers...',
+        btnSelect: 'Sélectionner',
+        btnChoose: '📁 Choisir...',
+        activeDocument: 'Document Actif'
+      },
+      'de': {
+        selectedSource: 'Ausgewählte Quelle',
+        schedulePreset: 'Zeitplan-Voreinstellung',
+        presetNow: '🚀 Jetzt',
+        presetTonight: '🌙 Heute Nacht (23:00)',
+        presetWeekly: '📅 Wöchentlich (Mo 9:00)',
+        advancedSettings: '⚙️ Erweiterte Einstellungen',
+        explorerTitle: 'Google Drive Explorer',
+        loadingFiles: 'Dateien werden geladen...',
+        btnSelect: 'Auswählen',
+        btnChoose: '📁 Auswählen...',
+        activeDocument: 'Aktives Dokument'
+      },
+      'vi': {
+        selectedSource: 'Nguồn Đã Chọn',
+        schedulePreset: 'Lịch Trình Có Sẵn',
+        presetNow: '🚀 Ngay bây giờ',
+        presetTonight: '🌙 Tối nay (11:00 CH)',
+        presetWeekly: '📅 Hàng tuần (T2 9:00 SA)',
+        advancedSettings: '⚙️ Cài đặt Nâng cao',
+        explorerTitle: 'Trình duyệt Google Drive',
+        loadingFiles: 'Đang tải tệp...',
+        btnSelect: 'Chọn',
+        btnChoose: '📁 Chọn...',
+        activeDocument: 'Tài liệu Hiện tại'
+      },
+      'th': {
+        selectedSource: 'แหล่งข้อมูลที่เลือก',
+        schedulePreset: 'กำหนดเวลาล่วงหน้า',
+        presetNow: '🚀 ตอนนี้',
+        presetTonight: '🌙 คืนนี้ (23:00 น.)',
+        presetWeekly: '📅 ทุกสัปดาห์ (จันทร์ 9:00 น.)',
+        advancedSettings: '⚙️ ตั้งค่าขั้นสูง',
+        explorerTitle: 'เครื่องมือค้นหา Google Drive',
+        loadingFiles: 'กำลังโหลดไฟล์...',
+        btnSelect: 'เลือก',
+        btnChoose: '📁 เลือก...',
+        activeDocument: 'เอกสารปัจจุบัน'
+      }
+    };
+
+    const driveTrans = DRIVE_LOCALES[lang] || DRIVE_LOCALES['en'];
     
+    const labelSelectedSource = document.getElementById('label-selected-source');
+    if (labelSelectedSource) labelSelectedSource.textContent = driveTrans.selectedSource;
+    
+    const labelBatchSchedulePreset = document.getElementById('label-batch-schedule-preset');
+    if (labelBatchSchedulePreset) labelBatchSchedulePreset.textContent = driveTrans.schedulePreset;
+    
+    const btnPresetNow = document.getElementById('btn-preset-now');
+    if (btnPresetNow) btnPresetNow.textContent = driveTrans.presetNow;
+    const btnPresetTonight = document.getElementById('btn-preset-tonight');
+    if (btnPresetTonight) btnPresetTonight.textContent = driveTrans.presetTonight;
+    const btnPresetWeekly = document.getElementById('btn-preset-weekly');
+    if (btnPresetWeekly) btnPresetWeekly.textContent = driveTrans.presetWeekly;
+    
+    const labelAdvancedSettings = document.getElementById('label-advanced-settings');
+    if (labelAdvancedSettings) labelAdvancedSettings.textContent = driveTrans.advancedSettings;
+    
+    const labelExplorerTitle = document.getElementById('label-explorer-title');
+    if (labelExplorerTitle) labelExplorerTitle.textContent = driveTrans.explorerTitle;
+    
+    const labelLoadingFiles = document.getElementById('label-loading-files');
+    if (labelLoadingFiles) labelLoadingFiles.textContent = driveTrans.loadingFiles;
+    
+    const btnCancelExplorerEl = document.getElementById('btn-cancel-explorer');
+    if (btnCancelExplorerEl) btnCancelExplorerEl.textContent = translations.btnCancel || 'Cancel';
+    const btnSelectExplorerEl = document.getElementById('btn-select-explorer');
+    if (btnSelectExplorerEl) btnSelectExplorerEl.textContent = driveTrans.btnSelect;
+    
+    const btnChangeTargetEl = document.getElementById('btn-change-target');
+    if (btnChangeTargetEl) btnChangeTargetEl.textContent = driveTrans.btnChoose;
+
+    const labelFolderDetected = document.getElementById('label-folder-detected');
+    if (labelFolderDetected) {
+      labelFolderDetected.textContent = lang === 'zh-TW' ? '偵測到 Google 雲端硬碟資料夾' :
+                                       lang === 'zh-CN' ? '检测到 Google 云端硬盘文件夹' :
+                                       lang === 'ja' ? 'Google ドライブのフォルダが検出されました' :
+                                       lang === 'ko' ? 'Google 드라이브 폴더 감지됨' :
+                                       'Google Drive Folder Detected';
+    }
+    const btnTranslateDetectedFolderEl = document.getElementById('btn-translate-detected-folder');
+    if (btnTranslateDetectedFolderEl) {
+      btnTranslateDetectedFolderEl.textContent = lang === 'zh-TW' ? '📁 翻譯資料夾' :
+                                                 lang === 'zh-CN' ? '📁 翻译文件夹' :
+                                                 lang === 'ja' ? '📁 フォルダを翻訳' :
+                                                 lang === 'ko' ? '📁 폴더 번역' :
+                                                 '📁 Translate Folder';
+    }
+
+    // Update selected target text if it matches current document/presentation default text
+    if (!hasManuallySelectedTarget) {
+      selectedTargetName = (currentFileType === 'document') ? (driveTrans.activeDocument || translations.activeDocument) :
+                           (currentFileType === 'spreadsheet') ? translations.activeSheet :
+                           (currentFileType === 'form') ? translations.activeForm :
+                           translations.activePresentation;
+      if (batchSelectedTargetName) batchSelectedTargetName.textContent = selectedTargetName;
+    }
+
     const labelBatchSec1 = document.getElementById('label-batch-sec1');
     if (labelBatchSec1) labelBatchSec1.textContent = translations.batchSec1 || '1. Select Workspace Files';
     const labelBatchSec2 = document.getElementById('label-batch-sec2');

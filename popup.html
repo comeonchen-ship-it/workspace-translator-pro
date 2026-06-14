@@ -55,6 +55,11 @@
         <a href="https://sheets.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-sheets">New Sheets</a>
         <a href="https://forms.new" target="_blank" class="btn btn-secondary btn-sm" id="btn-create-forms">New Form</a>
       </div>
+      <div id="folder-detected-banner" class="hidden" style="margin-top: 12px; padding: 10px; background: rgba(9, 132, 227, 0.1); border: 1px solid rgba(9, 132, 227, 0.2); border-radius: 8px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; box-sizing: border-box;">
+        <span style="font-size: 11px; font-weight: 600; color: #fff;" id="label-folder-detected">Google Drive Folder Detected</span>
+        <span style="font-size: 11.5px; color: var(--text-muted); text-align: center; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;" id="detected-folder-name">Folder Name</span>
+        <button class="btn btn-primary btn-sm" id="btn-translate-detected-folder" style="width:100%; font-size:11px; padding: 6px 12px;">📁 Translate Folder</button>
+      </div>
     </div>
 
     <!-- Main Active Workspace Panel -->
@@ -275,40 +280,35 @@
         <!-- Section 1: File Selection -->
         <div class="settings-section">
           <h4 style="margin-top:0;" id="label-batch-sec1">1. Select Workspace Files</h4>
-          <div class="form-group">
-            <label for="batch-source-type" id="label-batch-source-type">Source Type</label>
-            <select id="batch-source-type">
-              <option value="current" id="opt-batch-current">Current Document/Presentation</option>
-              <option value="folder" id="opt-batch-folder">Google Drive Folder</option>
-            </select>
+          <div class="selected-target-card" id="batch-target-card">
+            <div class="target-icon" id="batch-target-icon">📄</div>
+            <div class="target-details">
+              <span class="target-title-label" id="label-selected-source">Selected Source</span>
+              <span class="target-name" id="batch-selected-target-name">Active Document</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-change-target">📁 Choose...</button>
           </div>
-          <div class="form-group hidden" id="group-folder-id">
-            <label for="batch-folder-id" id="label-batch-folder-id">Drive Folder ID</label>
-            <input type="text" id="batch-folder-id" placeholder="Enter Drive Folder ID...">
-            <span class="field-hint" id="hint-batch-folder-id">Files in this folder will be processed sequentially</span>
-          </div>
+          <!-- Hidden inputs kept for backward-compatibility with JS selectors -->
+          <select id="batch-source-type" style="display:none;">
+            <option value="current">Current Document/Presentation</option>
+            <option value="folder">Google Drive Folder</option>
+          </select>
+          <input type="hidden" id="batch-folder-id">
         </div>
 
-        <!-- Section 2: Destination -->
+        <!-- Section 2: Presets & Simple Scheduling -->
         <div class="settings-section">
-          <h4 id="label-batch-sec2">2. Output Destination</h4>
-          <div class="form-group">
-            <label for="batch-output-mode" id="label-batch-output-mode">Save Mode</label>
-            <select id="batch-output-mode">
-              <option value="same" id="opt-output-same">Same Folder as Original</option>
-              <option value="subfolder" id="opt-output-subfolder">Create Subfolder (e.g. [Translated])</option>
-              <option value="target" id="opt-output-target">Specify Central Folder ID</option>
-            </select>
-          </div>
-          <div class="form-group hidden" id="group-target-folder-id">
-            <label for="batch-target-folder-id" id="label-batch-target-folder-id">Target Folder ID</label>
-            <input type="text" id="batch-target-folder-id" placeholder="Enter central Folder ID...">
+          <h4 id="label-batch-schedule-preset">Schedule Preset</h4>
+          <div class="preset-btn-group" id="batch-preset-btns">
+            <button type="button" class="preset-btn active" data-preset="now" id="btn-preset-now">🚀 Now</button>
+            <button type="button" class="preset-btn" data-preset="tonight" id="btn-preset-tonight">🌙 Tonight (11:00 PM)</button>
+            <button type="button" class="preset-btn" data-preset="weekly" id="btn-preset-weekly">📅 Weekly (Mon 9:00 AM)</button>
           </div>
         </div>
 
         <!-- Section 3: Translation Target Languages -->
         <div class="settings-section">
-          <h4 id="label-batch-sec3">3. Translation Target Languages</h4>
+          <h4 id="label-batch-sec3">2. Translation Target Languages</h4>
           <div class="form-group">
             <label id="label-batch-langs">Select Languages (Multi-select)</label>
             <div class="lang-checkbox-grid" id="batch-lang-checkboxes">
@@ -326,46 +326,69 @@
           </div>
         </div>
 
-        <!-- Section 4: Scheduler Settings -->
-        <div class="settings-section">
-          <h4 id="label-batch-sec4">4. Schedule Setting</h4>
-          <div class="form-group">
-            <label id="label-batch-freq">Repeat Frequency</label>
-            <div class="frequency-btn-group" id="batch-frequency-btns">
-              <button type="button" class="freq-btn active" data-freq="once" id="btn-freq-once">One-Time</button>
-              <button type="button" class="freq-btn" data-freq="minute" id="btn-freq-minute">Minutes</button>
-              <button type="button" class="freq-btn" data-freq="hour" id="btn-freq-hour">Hours</button>
-              <button type="button" class="freq-btn" data-freq="daily" id="btn-freq-daily">Daily</button>
-              <button type="button" class="freq-btn" data-freq="weekly" id="btn-freq-weekly">Weekly</button>
-              <button type="button" class="freq-btn" data-freq="monthly" id="btn-freq-monthly">Monthly</button>
+        <!-- Section 4: Advanced Collapsible Panel -->
+        <details class="advanced-details" id="batch-advanced-details">
+          <summary id="label-advanced-settings">⚙️ Advanced Settings</summary>
+          <div class="advanced-content">
+            <!-- Output Destination -->
+            <div class="settings-section" style="border:none; padding:0; margin-bottom:12px;">
+              <h5 id="label-batch-sec2" style="margin: 0 0 8px 0; font-size:12px;">Output Destination</h5>
+              <div class="form-group">
+                <label for="batch-output-mode" id="label-batch-output-mode">Save Mode</label>
+                <select id="batch-output-mode">
+                  <option value="same" id="opt-output-same">Same Folder as Original</option>
+                  <option value="subfolder" id="opt-output-subfolder">Create Subfolder (e.g. [Translated])</option>
+                  <option value="target" id="opt-output-target">Specify Central Folder ID</option>
+                </select>
+              </div>
+              <div class="form-group hidden" id="group-target-folder-id">
+                <label for="batch-target-folder-id" id="label-batch-target-folder-id">Target Folder ID</label>
+                <input type="text" id="batch-target-folder-id" placeholder="Enter central Folder ID...">
+              </div>
+            </div>
+
+            <!-- Detailed Scheduler Setting -->
+            <div class="settings-section" style="border:none; padding:0; margin-bottom:0;">
+              <h5 id="label-batch-custom-schedule" style="margin: 0 0 8px 0; font-size:12px;">Custom Schedule Settings</h5>
+              <div class="form-group">
+                <label id="label-batch-freq">Repeat Frequency</label>
+                <div class="frequency-btn-group" id="batch-frequency-btns">
+                  <button type="button" class="freq-btn active" data-freq="once" id="btn-freq-once">One-Time</button>
+                  <button type="button" class="freq-btn" data-freq="minute" id="btn-freq-minute">Minutes</button>
+                  <button type="button" class="freq-btn" data-freq="hour" id="btn-freq-hour">Hours</button>
+                  <button type="button" class="freq-btn" data-freq="daily" id="btn-freq-daily">Daily</button>
+                  <button type="button" class="freq-btn" data-freq="weekly" id="btn-freq-weekly">Weekly</button>
+                  <button type="button" class="freq-btn" data-freq="monthly" id="btn-freq-monthly">Monthly</button>
+                </div>
+              </div>
+              <div class="form-group hidden" id="group-schedule-interval">
+                <label for="schedule-interval-val" id="label-schedule-interval">Interval Value</label>
+                <input type="number" id="schedule-interval-val" value="15" min="1">
+                <span class="field-hint" id="hint-schedule-interval">Run every N minutes</span>
+              </div>
+              <div class="form-row hidden" id="group-schedule-time">
+                <div class="form-group" style="flex:1;">
+                  <label for="schedule-time" id="label-schedule-time">Start Time</label>
+                  <input type="time" id="schedule-time" value="09:00">
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label for="schedule-timezone" id="label-schedule-timezone">Timezone</label>
+                  <select id="schedule-timezone">
+                    <option value="GMT+08:00">(GMT+08:00) Taipei</option>
+                    <option value="GMT+00:00">(GMT+00:00) UTC</option>
+                    <option value="GMT-05:00">(GMT-05:00) EST</option>
+                    <option value="GMT-08:00">(GMT-08:00) PST</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:12px;">
+                <label for="batch-trigger-prompt" id="label-batch-prompt">Trigger Prompt (Custom instructions)</label>
+                <textarea id="batch-trigger-prompt" rows="3" placeholder="Input prompt that the agent will receive at scheduled time..."></textarea>
+                <span class="field-hint" id="hint-batch-prompt">e.g. 'Use professional tone. Leave product names untranslated.'</span>
+              </div>
             </div>
           </div>
-          <div class="form-group hidden" id="group-schedule-interval">
-            <label for="schedule-interval-val" id="label-schedule-interval">Interval Value</label>
-            <input type="number" id="schedule-interval-val" value="15" min="1">
-            <span class="field-hint" id="hint-schedule-interval">Run every N minutes</span>
-          </div>
-          <div class="form-row hidden" id="group-schedule-time">
-            <div class="form-group" style="flex:1;">
-              <label for="schedule-time" id="label-schedule-time">Start Time</label>
-              <input type="time" id="schedule-time" value="09:00">
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label for="schedule-timezone" id="label-schedule-timezone">Timezone</label>
-              <select id="schedule-timezone">
-                <option value="GMT+08:00">(GMT+08:00) Taipei</option>
-                <option value="GMT+00:00">(GMT+00:00) UTC</option>
-                <option value="GMT-05:00">(GMT-05:00) EST</option>
-                <option value="GMT-08:00">(GMT-08:00) PST</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="batch-trigger-prompt" id="label-batch-prompt">Trigger Prompt (Custom instructions)</label>
-            <textarea id="batch-trigger-prompt" rows="3" placeholder="Input prompt that the agent will receive at scheduled time..."></textarea>
-            <span class="field-hint" id="hint-batch-prompt">e.g. 'Use professional tone. Leave product names untranslated.'</span>
-          </div>
-        </div>
+        </details>
 
         <!-- Section 5: Job Queue List -->
         <div class="settings-section">
@@ -378,6 +401,30 @@
       <div class="settings-actions">
         <button class="btn btn-secondary" id="btn-cancel-batch">Cancel</button>
         <button class="btn btn-primary" id="btn-save-batch">Add Schedule</button>
+      </div>
+    </div>
+
+    <!-- Google Drive File Explorer Panel (Slide-in / Overlay) -->
+    <div class="drive-explorer-panel hidden" id="drive-explorer-panel">
+      <div class="explorer-header">
+        <h3 id="label-explorer-title">Google Drive Explorer</h3>
+        <button class="close-btn" id="btn-close-explorer">&times;</button>
+      </div>
+      <div class="explorer-breadcrumbs" id="explorer-breadcrumbs">
+        <!-- Breadcrumbs are populated dynamically -->
+      </div>
+      <div class="explorer-body">
+        <div class="explorer-loading hidden" id="explorer-loading">
+          <div class="spinner"></div>
+          <span id="label-loading-files">Loading files...</span>
+        </div>
+        <div class="explorer-list" id="explorer-list">
+          <!-- Dynamically populated files/folders -->
+        </div>
+      </div>
+      <div class="explorer-footer">
+        <button class="btn btn-secondary" id="btn-cancel-explorer">Cancel</button>
+        <button class="btn btn-primary" id="btn-select-explorer" disabled>Select</button>
       </div>
     </div>
 
