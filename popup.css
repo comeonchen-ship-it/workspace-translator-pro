@@ -1244,3 +1244,37 @@ body.theme-form {
 }
 
 .modal-btns .btn { font-size: 11.5px; padding: 7px 10px; }
+
+/* API Key Validation Guidance Highlights */
+.validation-highlight {
+  border-color: #ff7675 !important;
+  box-shadow: 0 0 10px rgba(255, 118, 117, 0.5) !important;
+  animation: pulse-validation-border 1.5s infinite alternate !important;
+}
+
+@keyframes pulse-validation-border {
+  from { box-shadow: 0 0 3px rgba(255, 118, 117, 0.3); }
+  to { box-shadow: 0 0 10px rgba(255, 118, 117, 0.7); }
+}
+
+.settings-error-banner {
+  background: rgba(255, 118, 117, 0.1);
+  border: 1px solid rgba(255, 118, 117, 0.25);
+  border-left: 4px solid #ff7675;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #ff7675;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.settings-error-banner strong {
+  color: #ff7675;
+  font-weight: 600;
+}
+

@@ -1,3 +1,17 @@
+# Security / Keys
 key.pem
+*.pem
+*.key
+
+# Archive files
 workspace-translate-pro-store.zip
+
+# Logs and temporary files
+response_gemini_2_5.json
+check_zip.py
+repack.py
+repack_extension.py
+
+# OS metadata
 .DS_Store
+Thumbs.db

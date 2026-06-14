@@ -351,6 +351,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const closeSettings = () => {
     settingsPanel.classList.remove('active');
+    
+    // Clean up highlights and error banners
+    inputApiKey.classList.remove('validation-highlight');
+    const btnTestApi = document.getElementById('btn-test-api');
+    if (btnTestApi) btnTestApi.classList.remove('validation-highlight');
+    const errorBanner = document.getElementById('settings-error-banner');
+    if (errorBanner) errorBanner.remove();
+    
+    // Restore settings from storage
+    chrome.storage.local.get([
+      'translationEngine',
+      'apiKey',
+      'modelName',
+      'customUrl',
+      'apiKeyStatus'
+    ], (items) => {
+      selectEngine.value = items.translationEngine || 'gemini';
+      inputApiKey.value = items.apiKey || '';
+      inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
+      inputCustomUrl.value = items.customUrl || '';
+      
+      toggleEngineFields(selectEngine.value);
+      updateStatusBadge(items.apiKeyStatus || 'unverified');
+      
+      setTimeout(() => {
+        validateApiKey();
+      }, 100);
+    });
   };
 
   btnCloseSettings.addEventListener('click', closeSettings);
@@ -361,6 +389,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiKey = inputApiKey.value.trim();
     const modelName = inputModelName.value.trim();
     const customUrl = inputCustomUrl.value.trim();
+
+    if (translationEngine !== 'free') {
+      const dot = document.getElementById('api-status-dot');
+      const isVerified = dot && dot.classList.contains('status-active');
+      
+      if (!isVerified) {
+        // Show dynamic warning banner at the top of scroll container
+        const scrollContainer = document.querySelector('.settings-scroll-container');
+        let errorBanner = document.getElementById('settings-error-banner');
+        if (!errorBanner) {
+          errorBanner = document.createElement('div');
+          errorBanner.id = 'settings-error-banner';
+          errorBanner.className = 'settings-error-banner';
+          scrollContainer.insertBefore(errorBanner, scrollContainer.firstChild);
+        }
+        
+        errorBanner.innerHTML = `
+          <strong>⚠️ API Key Not Verified</strong>
+          <span>請先點擊下方<strong>「Test Connection」</strong>按鈕以驗證您的 API 金鑰。未經驗證的金鑰無法儲存設定。<br>Please click the <strong>"Test Connection"</strong> button below to verify your API key before saving.</span>
+        `;
+        
+        // Highlight inputs and test button
+        inputApiKey.classList.add('validation-highlight');
+        const btnTestApi = document.getElementById('btn-test-api');
+        if (btnTestApi) btnTestApi.classList.add('validation-highlight');
+        
+        // Scroll to group-api-key or group-test-api
+        const groupApiKey = document.getElementById('group-api-key');
+        if (groupApiKey) {
+          groupApiKey.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // Focus input field
+        inputApiKey.focus();
+        
+        // Clear warnings when they start typing or click test
+        const clearWarnings = () => {
+          inputApiKey.classList.remove('validation-highlight');
+          if (btnTestApi) btnTestApi.classList.remove('validation-highlight');
+          const banner = document.getElementById('settings-error-banner');
+          if (banner) banner.remove();
+        };
+        
+        inputApiKey.removeEventListener('input', clearWarnings);
+        inputApiKey.addEventListener('input', clearWarnings);
+        
+        if (btnTestApi) {
+          btnTestApi.removeEventListener('click', clearWarnings);
+          btnTestApi.addEventListener('click', clearWarnings);
+        }
+        
+        return; // BLOCK SAVING
+      }
+    }
 
     chrome.storage.local.set({
       translationEngine,
