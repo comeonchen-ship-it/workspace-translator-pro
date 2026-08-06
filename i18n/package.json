@@ -1,0 +1,5 @@
+{
+  "//": "Scopes ESM semantics to i18n/ only, so the Node dev scripts (validate.mjs, build-qa-locale.mjs) can import languages.js. The project root deliberately has no package.json and needs no npm install. Chrome ignores this file.",
+  "type": "module",
+  "private": true
+}
