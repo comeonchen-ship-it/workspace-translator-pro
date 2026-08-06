@@ -1,6 +1,10 @@
 :root {
   --bg-primary: #0a0b10;
-  --bg-surface: rgba(255, 255, 255, 0.03);
+  /* Dark frosted glass (was rgba(255,255,255,0.03), which was so transparent the
+     decorative --glass-bg blobs bled through as a blue/purple wash over the content).
+     0.66 alpha keeps a translucent frosted look with the backdrop blur, but mutes the
+     blobs to a subtle edge glow so text stays crisp. Only .panel consumes this var. */
+  --bg-surface: rgba(14, 15, 23, 0.66);
   --bg-card: rgba(255, 255, 255, 0.05);
   --border-color: rgba(255, 255, 255, 0.08);
   
@@ -14,7 +18,25 @@
   --text-warning: #ffeaa7;
   
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* i18n typography. Both are driven from i18n/languages.js at runtime — never add
+     a per-language CSS rule like [lang="ja"], add a registry entry instead.
+     'Outfit' is Latin-only, so each stack falls through to a script-appropriate face. */
+  --i18n-line-height: 1.4;
+  --font-latin:  'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-cjk-tc: 'Outfit', -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-cjk-sc: 'Outfit', -apple-system, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-jp:     'Outfit', -apple-system, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-kr:     'Outfit', -apple-system, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-thai:   'Outfit', -apple-system, "Noto Sans Thai", "Thonburi", "Leelawadee UI", sans-serif;
 }
+
+/* i18n.js stamps data-font-stack on <html> from the language registry. */
+html[data-font-stack="cjk-tc"] body { font-family: var(--font-cjk-tc); }
+html[data-font-stack="cjk-sc"] body { font-family: var(--font-cjk-sc); }
+html[data-font-stack="jp"]     body { font-family: var(--font-jp); }
+html[data-font-stack="kr"]     body { font-family: var(--font-kr); }
+html[data-font-stack="thai"]   body { font-family: var(--font-thai); }
 
 * {
   box-sizing: border-box;
@@ -22,12 +44,20 @@
   padding: 0;
 }
 
+/* The Side Panel is user-resizable, so fill whatever viewport Chrome gives us
+   rather than assuming the 380x520 of a popup window. */
+html {
+  height: 100%;
+}
+
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-latin);
+  line-height: var(--i18n-line-height);
   background-color: var(--bg-primary);
   color: var(--text-main);
-  width: 380px;
-  height: 520px;
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
   overflow: hidden;
   position: relative;
 }
@@ -36,13 +66,12 @@ body {
 .glass-bg {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   bottom: 0;
   z-index: -1;
   background: 
-    radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 90% 80%, rgba(9, 132, 227, 0.12) 0%, transparent 50%);
+    radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(9, 132, 227, 0.10) 0%, transparent 50%);
   filter: blur(40px);
 }
 
@@ -129,19 +158,49 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg-surface);
+  /* Premium frosted glass, in three layers (bottom to top):
+     1. a faint brand sheen hugging the TOP RIM only — brings the purple back as an
+        edge accent (depth/life) without washing over the content the way the old
+        --glass-bg blobs did;
+     2. a subtle top-lighter → dark gradient body, so the glass reads as a curved
+        surface rather than a flat fill. */
+  background:
+    radial-gradient(130% 55% at 50% -12%, rgba(108, 92, 231, 0.12) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(30, 32, 46, 0.72) 0%, var(--bg-surface) 55%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 16px;
+  /* elevation shadow lifts the card off the app background; the inset line is a
+     crisp rim-light along the top edge, like light catching the glass. */
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   padding: 16px;
   overflow: hidden;
   position: absolute;
   top: 60px;
-  left: 20px;
-  right: 20px;
-  bottom: 20px;
+  inset-inline: 20px;
+  /* Hug the content instead of stretching to the bottom, so the footer buttons
+     sit directly under the content rather than across an empty gap. Grows only
+     up to the available height, after which the inner container scrolls.
+     80px = 60px top offset + 20px bottom breathing room. */
+  max-height: calc(100% - 80px);
   transition: var(--transition);
+}
+
+/* When an overlay (Settings or History) is open, hide the base panel behind it.
+   The panels are near-transparent and hug their content, so a short overlay like
+   History would otherwise let the base panel's buttons bleed through and poke out
+   below it. Hiding the base leaves the overlay cleanly over the dark app background,
+   exactly as the Settings panel already looks. `!important` beats the inline
+   display:flex that JS sets on the base panels; when the overlay closes the rule
+   stops matching and the inline display is restored. */
+.app-container:has(.settings-panel.active) .warning-panel,
+.app-container:has(.settings-panel.active) .active-panel,
+.app-container:has(.history-panel.active) .warning-panel,
+.app-container:has(.history-panel.active) .active-panel {
+  display: none !important;
 }
 
 /* Visibility management */
@@ -179,7 +238,7 @@ body {
   gap: 16px;
   z-index: 5;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }
 
 .active-panel::-webkit-scrollbar {
@@ -195,8 +254,9 @@ body {
 
 /* Slide Info Card */
 .slide-info-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -260,13 +320,13 @@ body {
 .select-wrapper::after {
   content: '';
   position: absolute;
-  right: 12px;
+  inset-inline-end: 12px;
   top: 50%;
   transform: translateY(-20%);
   width: 0;
   height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
+  border-inline-start: 5px solid transparent;
+  border-inline-end: 5px solid transparent;
   border-top: 5px solid var(--text-muted);
   pointer-events: none;
 }
@@ -305,6 +365,11 @@ select option {
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 600;
+  /* Fixed line-height instead of the default `normal`, which is resolved from the
+     active font's own metrics — the CJK fallback macOS picks (PingFang) has unusually
+     tall metrics and gave the label an off-centre line box. A fixed value keeps the
+     text box deterministic across fonts so flex align-items:center lines the icon up. */
+  line-height: 1.2;
   padding: 10px 18px;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -432,20 +497,22 @@ select option {
 
 .progress-warning-banner {
   display: flex;
-  align-items: flex-start;
+  /* center, not flex-start: the ⚠️ emoji renders taller than the text line, so
+     flex-start left the shorter text stuck to the top of the banner (looked
+     un-centred). center aligns icon and text on the same middle line. */
+  align-items: center;
   gap: 8px;
   background: rgba(254, 202, 87, 0.08);
   border: 1px solid rgba(254, 202, 87, 0.15);
   border-radius: 8px;
   padding: 8px 10px;
   margin-bottom: 12px;
-  text-align: left;
+  text-align: start;
 }
 
 .warning-banner-icon {
   font-size: 12px;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .warning-banner-text {
@@ -545,9 +612,11 @@ select option {
 }
 
 .settings-scroll-container {
-  flex: 1;
+  /* basis:auto so it sizes to content while the panel hugs, and shrinks to
+     scroll once the panel hits max-height (keeping the footer buttons visible) */
+  flex: 1 1 auto;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-inline-end: 4px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -567,8 +636,10 @@ select option {
 }
 
 .setting-group-card {
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid var(--border-color);
+  /* Raised glass tile: top-lighter gradient + a 1px top rim-light. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.012) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 12px;
 }
@@ -656,12 +727,12 @@ input[type="password"]:focus {
 }
 
 .password-container input {
-  padding-right: 36px !important;
+  padding-inline-end: 36px !important;
 }
 
 .eye-toggle-btn {
   position: absolute;
-  right: 8px;
+  inset-inline-end: 8px;
   top: 17px;
   transform: translateY(-50%);
   background: transparent;
@@ -723,7 +794,7 @@ input[type="password"]:focus {
   gap: 7px;
   background: rgba(0, 206, 201, 0.07);
   border: 1px solid rgba(0, 206, 201, 0.22);
-  border-left: 3px solid var(--accent);
+  border-inline-start: 3px solid var(--accent);
   border-radius: 7px;
   padding: 8px 10px;
   font-size: 10.5px;
@@ -738,7 +809,7 @@ input[type="password"]:focus {
   gap: 7px;
   background: rgba(241, 196, 15, 0.07);
   border: 1px solid rgba(241, 196, 15, 0.25);
-  border-left: 3px solid #f1c40f;
+  border-inline-start: 3px solid #f1c40f;
   border-radius: 7px;
   padding: 8px 10px;
   font-size: 10.5px;
@@ -761,7 +832,6 @@ input[type="password"]:focus {
 .model-sunset-tip.hidden {
   display: none;
 }
-
 
 .settings-quota-tip svg {
   color: var(--accent);
@@ -839,7 +909,7 @@ input[type="password"]:focus {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  text-align: left;
+  text-align: start;
 }
 
 .log-console-header {
@@ -871,7 +941,9 @@ input[type="password"]:focus {
   font-family: monospace;
   font-size: 9.5px;
   color: #a29bfe;
-  max-height: 80px;
+  /* Grow with the panel instead of clipping at a fixed 80px, but stay bounded
+     so the log never crowds out the controls above it. */
+  max-height: clamp(80px, 22vh, 240px);
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
@@ -936,9 +1008,9 @@ body.theme-form {
 }
 
 .history-scroll-container {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-inline-end: 4px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -958,8 +1030,9 @@ body.theme-form {
 }
 
 .history-item-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   padding: 10px;
   display: flex;
@@ -1006,7 +1079,7 @@ body.theme-form {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
 }
 
 .history-item-title:hover {
@@ -1018,7 +1091,7 @@ body.theme-form {
   font-size: 8.5px;
   color: var(--text-muted);
   margin-top: 2px;
-  text-align: left;
+  text-align: start;
 }
 
 .history-item-actions {
@@ -1135,6 +1208,15 @@ body.theme-form {
 }
 
 .btn-test-connection:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Interface-language card: flags that this control bypasses Save/Cancel. */
+.ui-lang-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.8;
+  margin-top: 6px;
+  line-height: 1.4;
+}
 
 .btn-icon-spin { animation: spin-icon 0.9s linear infinite; }
 

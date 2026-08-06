@@ -1,4 +1,16 @@
-document.addEventListener('DOMContentLoaded', () => {
+import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang } from './i18n/languages.js';
+import {
+  loadLocale, t, tStatus, applyI18n, formatDateTime,
+  getStoredUiLang, setStoredUiLang,
+} from './i18n/i18n.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // i18n must be ready before anything renders, otherwise the user sees a flash of
+  // English. Everything below this point may call t().
+  const uiLang = resolveUiLang(await getStoredUiLang());
+  await loadLocale(uiLang);
+  applyI18n();
+
   // Populate version badge from manifest
   const appVersionEl = document.getElementById('app-version');
   if (appVersionEl) {
@@ -67,6 +79,76 @@ document.addEventListener('DOMContentLoaded', () => {
     free: ''
   };
 
+  // ── Language pickers ──────────────────────────────────────────────────────
+  // Both lists come from i18n/languages.js. Adding a language must never require
+  // touching this file — see docs/06 §10.9.
+  const selectUiLang = document.getElementById('select-ui-lang');
+
+  function populateLanguagePickers() {
+    selectLang.innerHTML = '';
+    for (const lang of TARGET_LANGUAGES) {
+      const opt = document.createElement('option');
+      opt.value = lang.code;
+      opt.textContent = targetLabel(lang);
+      selectLang.appendChild(opt);
+    }
+    if (selectUiLang) {
+      selectUiLang.innerHTML = '';
+      for (const lang of UI_LANGUAGES) {
+        const opt = document.createElement('option');
+        opt.value = lang.code;
+        // Endonym only, deliberately never localised, so a user who picked a
+        // script they can't read can still find their way back.
+        opt.textContent = uiLabel(lang);
+        selectUiLang.appendChild(opt);
+      }
+      selectUiLang.value = uiLang;
+    }
+  }
+  populateLanguagePickers();
+
+  /**
+   * Re-render every string that JS writes at runtime. applyI18n() only covers
+   * elements carrying data-i18n, so anything set via textContent must be redone
+   * here or the UI ends up half in the old language.
+   */
+  function refreshDynamicTexts() {
+    applyI18n();
+    refreshFileTypeTexts();
+    chrome.storage.local.get('apiKeyStatus', (items) => {
+      updateStatusBadge(items.apiKeyStatus || 'unverified');
+    });
+    validateApiKey();
+    loadHistory();
+  }
+
+  /**
+   * The two strings that depend on the detected file type. Kept separate because
+   * `steps.copy` carries a {fileType} param that applyI18n() cannot fill, and
+   * because applyI18n() would otherwise reset the meta label to "Active Presentation".
+   * Must run AFTER applyI18n().
+   */
+  function refreshFileTypeTexts() {
+    const type = currentFileType || 'presentation';
+    const metaLabelEl = document.getElementById('meta-label');
+    if (metaLabelEl && currentPresentationId) {
+      metaLabelEl.textContent = t(`main.metaLabel.${type}`);
+    }
+    const stepCopyEl = document.querySelector('#step-copy span:not(.step-bullet)');
+    if (stepCopyEl) {
+      stepCopyEl.textContent = t('steps.copy', { fileType: t(`fileType.${type}`) });
+    }
+  }
+
+  if (selectUiLang) {
+    selectUiLang.addEventListener('change', async (e) => {
+      const code = e.target.value;
+      await setStoredUiLang(code);
+      await loadLocale(code);
+      refreshDynamicTexts();
+    });
+  }
+
   // 1. Check storage for existing settings
   chrome.storage.local.get([
     'translationEngine',
@@ -131,10 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
       inputApiKey.setAttribute('type', type);
       if (type === 'text') {
         btnToggleApiKey.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
-        btnToggleApiKey.setAttribute('title', 'Hide API Key');
+        btnToggleApiKey.setAttribute('title', t('settings.apiKey.hide'));
       } else {
         btnToggleApiKey.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-        btnToggleApiKey.setAttribute('title', 'Show API Key');
+        btnToggleApiKey.setAttribute('title', t('settings.apiKey.show'));
       }
     });
   }
@@ -147,15 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
     dot.className = 'status-dot';
     if (status === 'active') {
       dot.classList.add('status-active');
-      text.textContent = '生效 · Active';
+      text.textContent = t('settings.status.active');
       text.style.color = 'var(--accent)';
     } else if (status === 'invalid') {
       dot.classList.add('status-invalid');
-      text.textContent = '失效 · Invalid';
+      text.textContent = t('settings.status.invalid');
       text.style.color = '#ff7675';
     } else {
       dot.classList.add('status-unverified');
-      text.textContent = '未验证 · Unverified';
+      text.textContent = t('settings.status.unverified');
       text.style.color = 'var(--text-muted)';
     }
   }
@@ -201,14 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ model: modelName, messages: [{ role: 'user', content: 'Reply ok.' }], max_tokens: 5 }) }
         );
       } else {
-        return { success: null, message: '⚠ Unsupported engine.', suggestion: '' };
+        return { success: null, message: t('settings.test.unsupportedEngine'), suggestion: '' };
       }
       clearTimeout(timer);
 
       // 429 = quota hit but key is valid ─ treat as success
       if (resp.ok || resp.status === 429) {
-        const suffix = resp.status === 429 ? ' (Rate limit reached, but credentials are valid.)' : '';
-        return { success: true, message: `✅ Connection successful! API key and model are working.${suffix}`, suggestion: '' };
+        const suffix = resp.status === 429 ? t('settings.test.successRateLimited') : '';
+        return { success: true, message: t('settings.test.success', { suffix }), suggestion: '' };
       }
 
       let body = {};
@@ -218,34 +300,32 @@ document.addEventListener('DOMContentLoaded', () => {
         gemini: 'https://ai.google.dev/gemini-api/docs/models',
         openai: 'https://platform.openai.com/docs/models',
         claude: 'https://docs.anthropic.com/claude/docs/models-overview',
-        custom: 'your provider’s documentation'
-      };
-      const keyHints = {
-        gemini: 'Get/check your key at aistudio.google.com → "Get API key". Keys start with AIzaSy...',
-        openai: 'Get/check your key at platform.openai.com/api-keys. Keys start with sk-...',
-        claude: 'Get/check your key at console.anthropic.com/api-keys. Keys start with sk-ant-...',
-        custom: 'Verify the API key format required by your custom LLM provider.'
+        custom: t('settings.test.suggest.providerDocs')
       };
 
       if (resp.status === 401 || resp.status === 403) {
-        return { success: false, message: `❌ Invalid API key: ${errMsg}`, suggestion: keyHints[engine] || '' };
+        return { success: false, message: t('settings.test.invalidKey', { error: errMsg }), suggestion: t(`settings.test.keyHint.${engine}`) };
       } else if (resp.status === 404) {
-        return { success: false, message: `❌ Model not found: "${modelName}"`, suggestion: `Verify model name at ${modelLinks[engine] || 'your provider docs'}.` };
+        return {
+          success: false,
+          message: t('settings.test.modelNotFound', { model: modelName }),
+          suggestion: t('settings.test.suggest.modelDocs', { url: modelLinks[engine] || t('settings.test.suggest.providerDocs') })
+        };
       } else if (resp.status === 400) {
-        return { success: false, message: `❌ Bad request: ${errMsg}`, suggestion: 'Double-check the API key and model name are correctly entered.' };
+        return { success: false, message: t('settings.test.badRequest', { error: errMsg }), suggestion: t('settings.test.suggest.badRequest') };
       } else if (resp.status === 402) {
-        return { success: true, message: '✅ API key is valid (billing issue detected, but key itself works).', suggestion: 'Add credits to your account to use this API.' };
+        return { success: true, message: t('settings.test.billingIssue'), suggestion: t('settings.test.suggest.billing') };
       } else if (resp.status >= 500) {
-        return { success: null, message: `⚠ Server error (${resp.status}): ${errMsg}. The service may be temporarily unavailable. Try again later.`, suggestion: '' };
+        return { success: null, message: t('settings.test.serverError', { status: resp.status, error: errMsg }), suggestion: '' };
       }
-      return { success: false, message: `❌ Error (${resp.status}): ${errMsg}`, suggestion: '' };
+      return { success: false, message: t('settings.test.genericError', { status: resp.status, error: errMsg }), suggestion: '' };
 
     } catch (err) {
       clearTimeout(timer);
       if (err.name === 'AbortError') {
-        return { success: null, message: '⚠ Request timed out (15s). Check your internet connection.', suggestion: '' };
+        return { success: null, message: t('settings.test.timeout'), suggestion: '' };
       }
-      return { success: null, message: `⚠ Network error: ${err.message}`, suggestion: 'Check your internet connection or the custom endpoint URL.' };
+      return { success: null, message: t('settings.test.networkError', { error: err.message }), suggestion: t('settings.test.suggest.network') };
     }
   }
 
@@ -255,15 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('modal-title');
     const msg = document.getElementById('modal-msg');
     if (!modal) return;
-    if (reason === 'missing' || reason === 'unverified') {
-      title.textContent = reason === 'missing' ? 'API Key Required' : 'API Key Not Verified';
-      msg.textContent = reason === 'missing'
-        ? 'An API key is required for the selected translation provider. Please go to Settings, enter your API key, and click "Test Connection" to verify.'
-        : 'Your API key has not been tested yet. Please go to Settings and click "Test Connection" to verify your credentials before translating.';
-    } else {
-      title.textContent = 'API Key Invalid';
-      msg.textContent = 'Your API key is marked as invalid or the model name is incorrect. Please go to Settings, fix the issue, and run "Test Connection" again.';
-    }
+    const variant = reason === 'missing' ? 'apiKeyRequired'
+      : reason === 'unverified' ? 'apiKeyUnverified'
+      : 'apiKeyInvalid';
+    title.textContent = t(`modal.${variant}.title`);
+    msg.textContent = t(`modal.${variant}.msg`);
     modal.classList.remove('hidden');
   }
 
@@ -278,39 +354,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (engine === 'gemini') {
-      if (key.startsWith('AIzaSy') && key.length >= 35) {
-        apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ Gemini API Key format matches specifications';
-      } else {
-        apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: Gemini keys typically start with AIzaSy';
-      }
-    } else if (engine === 'openai') {
-      if ((key.startsWith('sk-') || key.startsWith('sk-proj-')) && key.length >= 20) {
-        apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ OpenAI API Key format matches specifications';
-      } else {
-        apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: OpenAI keys typically start with sk-';
-      }
-    } else if (engine === 'claude') {
-      if (key.startsWith('sk-ant-') && key.length >= 25) {
-        apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ Claude API Key format matches specifications';
-      } else {
-        apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ Format mismatch: Claude keys typically start with sk-ant-';
-      }
-    } else {
-      if (key.length >= 10) {
-        apiKeyIndicator.className = 'val-indicator valid';
-        apiKeyIndicator.textContent = '✓ API Key looks valid';
-      } else {
-        apiKeyIndicator.className = 'val-indicator invalid';
-        apiKeyIndicator.textContent = '⚠ API Key is extremely short';
-      }
-    }
+    // Per-engine key shape checks; anything else falls back to a length sanity check.
+    const CHECKS = {
+      gemini: (k) => k.startsWith('AIzaSy') && k.length >= 35,
+      openai: (k) => (k.startsWith('sk-') || k.startsWith('sk-proj-')) && k.length >= 20,
+      claude: (k) => k.startsWith('sk-ant-') && k.length >= 25,
+    };
+    const group = CHECKS[engine] ? engine : 'generic';
+    const ok = (CHECKS[engine] || ((k) => k.length >= 10))(key);
+
+    apiKeyIndicator.className = `val-indicator ${ok ? 'valid' : 'invalid'}`;
+    apiKeyIndicator.textContent = t(`settings.keyFormat.${group}.${ok ? 'ok' : 'bad'}`);
   }
 
   inputApiKey.addEventListener('input', () => { validateApiKey(); resetApiStatus(); });
@@ -390,22 +444,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const customUrl = inputCustomUrl.value.trim();
       if (!apiKey) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter your API key first.';
+        testResultMsg.textContent = t('settings.test.needKey');
         return;
       }
       if (!modelName) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter a model name first.';
+        testResultMsg.textContent = t('settings.test.needModel');
         return;
       }
       if (engine === 'custom' && !customUrl) {
         testResultMsg.className = 'test-result-msg result-invalid';
-        testResultMsg.textContent = '\u26a0\ufe0f Please enter a Base Endpoint URL first.';
+        testResultMsg.textContent = t('settings.test.needUrl');
         return;
       }
-      // Show loading state
+      // Show loading state. Swap only the label text and spin the existing icon, so
+      // the button keeps its data-i18n span and survives a mid-test language switch.
+      const testLabel = document.getElementById('btn-test-api-label');
+      const testIcon = document.getElementById('btn-test-api-icon');
       btnTestApi.disabled = true;
-      btnTestApi.innerHTML = '<svg class="btn-icon-spin" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg> Testing...';
+      if (testLabel) testLabel.textContent = t('settings.testConnection.busy');
+      if (testIcon) testIcon.classList.add('btn-icon-spin');
       testResultMsg.className = 'test-result-msg';
       testResultMsg.textContent = '';
 
@@ -413,7 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Restore button
       btnTestApi.disabled = false;
-      btnTestApi.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Test Connection';
+      if (testLabel) testLabel.textContent = t('settings.testConnection');
+      if (testIcon) testIcon.classList.remove('btn-icon-spin');
 
       // Determine new status
       let newStatus;
@@ -625,7 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Dynamically adjust step description text
       const stepCopyEl = document.querySelector('#step-copy span:not(.step-bullet)');
       if (stepCopyEl) {
-        stepCopyEl.textContent = `Duplicate original ${newFileType}`;
+        stepCopyEl.textContent = t('steps.copy', { fileType: t(`fileType.${newFileType}`) });
       }
       
       if (currentPresentationId !== newPresentationId || currentFileType !== newFileType) {
@@ -640,25 +699,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const slideIconEl = document.getElementById('slide-icon');
         
         if (isDoc) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Document";
+          if (metaLabelEl) metaLabelEl.textContent = t('main.metaLabel.document');
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(52, 152, 219, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
           }
         } else if (isSheet) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Sheet";
+          if (metaLabelEl) metaLabelEl.textContent = t('main.metaLabel.spreadsheet');
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(46, 204, 113, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>`;
           }
         } else if (isForm) {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Form";
+          if (metaLabelEl) metaLabelEl.textContent = t('main.metaLabel.form');
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(155, 89, 182, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="8" x2="17" y2="8"></line><line x1="9" y1="13" x2="17" y2="13"></line><line x1="9" y1="18" x2="15" y2="18"></line><circle cx="6" cy="8" r="0.5" fill="currentColor"></circle><circle cx="6" cy="13" r="0.5" fill="currentColor"></circle><circle cx="6" cy="18" r="0.5" fill="currentColor"></circle></svg>`;
           }
         } else {
-          if (metaLabelEl) metaLabelEl.textContent = "Active Presentation";
+          if (metaLabelEl) metaLabelEl.textContent = t('main.metaLabel.presentation');
           if (slideIconEl) {
             slideIconEl.style.background = "rgba(241, 196, 15, 0.1)";
             slideIconEl.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>`;
@@ -751,16 +810,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const isHidden = logConsoleContent.classList.contains('hidden');
     if (isHidden) {
       logConsoleContent.classList.remove('hidden');
-      btnToggleLogs.textContent = 'Hide';
+      btnToggleLogs.textContent = t('logs.hide');
     } else {
       logConsoleContent.classList.add('hidden');
-      btnToggleLogs.textContent = 'Show';
+      btnToggleLogs.textContent = t('logs.show');
     }
   });
 
   function updateLogDisplay(logs) {
     if (!logs || logs.length === 0) {
-      logConsoleContent.textContent = 'Waiting for logs...';
+      logConsoleContent.textContent = t('logs.waiting');
       return;
     }
     logConsoleContent.textContent = logs.join('\n');
@@ -790,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     resetProgress();
     
-    logConsoleContent.textContent = 'Waiting for logs...';
+    logConsoleContent.textContent = t('logs.waiting');
     
     // Start periodic log polling for this specific presentation
     lastProgressTime = Date.now();
@@ -803,7 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // If no progress update for 12 seconds, display warning
       if (Date.now() - lastProgressTime > 12000 && btnTranslate.disabled) {
-        progressStatus.textContent = 'Taking longer than expected. Check connection/logs...';
+        progressStatus.textContent = t('progress.slow');
         progressStatus.style.color = 'var(--text-warning)';
       }
     }, 1500);
@@ -843,7 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const key = `debugLogs_${currentPresentationId}`;
       chrome.storage.local.set({ [key]: [] }, () => {
-        logConsoleContent.textContent = 'Initiating connection...';
+        logConsoleContent.textContent = t('logs.initiating');
         lastProgressTime = Date.now();
         
         // Send start translation message to service worker
@@ -865,10 +924,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           } catch (err) {
             console.error('Failed to post startTranslation message:', err);
-            alert('Communication with background worker failed. Please try again.');
+            alert(t('alert.commFailed'));
           }
         } else {
-          alert('Not connected to background service. Attempting to reconnect...');
+          alert(t('alert.notConnected'));
           connectToBackground();
         }
       });
@@ -879,7 +938,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancelTranslation.addEventListener('click', () => {
       if (!currentPresentationId) return;
       btnCancelTranslation.disabled = true;
-      btnCancelTranslation.textContent = 'Stopping...';
+      // Label only — setting textContent on the button would drop the icon.
+      const cancelLabel = document.getElementById('btn-cancel-label');
+      if (cancelLabel) cancelLabel.textContent = t('main.btnStopping');
       if (port) {
         try {
           port.postMessage({
@@ -894,15 +955,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetProgress() {
-    progressStatus.textContent = 'Connecting...';
+    progressStatus.textContent = t('progress.connecting');
     progressStatus.style.color = 'var(--text-muted)';
     progressPct.textContent = '0%';
     progressBarFill.style.width = '0%';
     
     if (btnCancelTranslation) {
       btnCancelTranslation.disabled = false;
-      btnCancelTranslation.style.display = 'block';
-      btnCancelTranslation.innerHTML = '<span>Stop Translation</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>';
+      // Must be 'flex', not 'block'. The .btn class centres its icon + label with
+      // flexbox; forcing display:block here dropped that centring AND turned the
+      // label <span> back into an inline box (transform no-ops on inline), which is
+      // why the Stop button's icon looked misaligned only during a live run.
+      btnCancelTranslation.style.display = 'flex';
+      // Restore the LABEL only. Rebuilding innerHTML here used to wipe the
+      // data-i18n span, which is why this button stayed English after a switch.
+      const cancelLabel = document.getElementById('btn-cancel-label');
+      if (cancelLabel) cancelLabel.textContent = t('main.btnStop');
     }
 
     stepCopy.className = 'pending';
@@ -911,103 +979,57 @@ document.addEventListener('DOMContentLoaded', () => {
     stepWrite.className = 'pending';
   }
 
-  // Helper to translate raw developer API error stacks into actionable human-friendly bilingual messages
+  // Maps a raw API error onto an actionable, localised message.
+  // Matching stays on the English/technical markers the APIs actually return, so the
+  // user's interface language never affects which branch is taken.
   function translateErrorToHuman(errorStr, engine) {
-    if (!errorStr) return "發生未知錯誤，請重試。\nAn unknown error occurred. Please try again.";
-    
+    if (!errorStr) return t('error.unknown');
+
     const err = errorStr.toString();
-    const upperEngine = engine.toUpperCase();
-    
+
     // 429 Rate Limit / Quota Exceeded
     if (err.includes("429") || err.includes("RESOURCE_EXHAUSTED") || err.includes("quota")) {
-      if (engine === 'gemini') {
-        return `[繁體中文]
-Gemini API 每日免費額度已達上限 (429)。
-建議您至設定 (⚙️) 將引擎切換為免金鑰的 'Free Google Translate' 繼續翻譯，或至 Google AI Studio 綁定信用卡提升配額。
-
-───────────────────────────────────
-[English]
-Gemini API daily free quota limit reached (429).
-We suggest going to Settings (⚙️) and switching the provider to keyless 'Free Google Translate' to continue, or upgrade your key on Google AI Studio.`;
-      }
-      return `[繁體中文]
-${upperEngine} API 呼叫頻率已達上限 (429)。
-請稍候重試，或至設定切換為 'Free Google Translate' 繼續翻譯。
-
-───────────────────────────────────
-[English]
-${upperEngine} API rate limit reached (429).
-Please wait and try again, or go to settings and switch to 'Free Google Translate' to continue.`;
+      return engine === 'gemini'
+        ? t('error.429.gemini')
+        : t('error.429.generic', { engine: engine.toUpperCase() });
     }
-    
+
     // 403 Forbidden / Invalid API Key / API Not Enabled
     if (err.includes("403") || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
-      return `[繁體中文]
-API 金鑰無效或未啟用 (403)。
-請點擊設定 (⚙️) 檢查金鑰是否填寫正確，並確認已在 Google Cloud 控制台啟用對應的 API 服務。
-
-───────────────────────────────────
-[English]
-API Key invalid or not activated (403).
-Please click Settings (⚙️) to check your key format, and ensure the corresponding APIs are enabled on your Google Cloud Console.`;
+      return t('error.403');
     }
-    
+
     // 400 Bad Request
     if (err.includes("400") || err.includes("INVALID_ARGUMENT") || err.includes("Invalid value")) {
-      return `[繁體中文]
-檔案結構或屬性要求無效 (400)。
-這可能是由於文件包含特殊不相容樣式所致。建議切換為 'Free Google Translate' 引擎繞過格式限制。
-
-───────────────────────────────────
-[English]
-Invalid file structure or API parameter error (400).
-This usually happens due to incompatible custom document styles. Try switching to 'Free Google Translate' to bypass formatting limits.`;
+      return t('error.400');
     }
-    
+
+    // Our own guard in translate.js: the model returned a different array length.
+    if (err.includes("Translation mismatch")) {
+      return t('error.mismatch');
+    }
+
+    // Our own guard in translate.js: the model did not return a JSON array.
+    if (err.includes("invalid response format")) {
+      return t('error.invalidFormat');
+    }
+
     // Network Timeout
     if (err.includes("timed out") || err.includes("Timeout") || err.includes("Abort")) {
-      return `[繁體中文]
-API 請求連線逾時。
-請檢查您的網際網路連線，或於稍後網路通暢時再次嘗試。
-
-───────────────────────────────────
-[English]
-API request timed out.
-Please check your internet connection, or try again later when the network is stable.`;
+      return t('error.timeout');
     }
-    
+
     // Browser or Extension Restart Interruption
     if (err.includes("interrupted") || err.includes("restart")) {
-      return `[繁體中文]
-翻譯已被瀏覽器或擴充功能重啟中斷。
-請點擊頂部的「開始翻譯」按鈕以重新發起翻譯。
-
-───────────────────────────────────
-[English]
-Translation was interrupted by browser or extension restart.
-Please click the "Start Translation" button at the top to retry.`;
+      return t('error.interrupted');
     }
 
     // User Stop / Cancellation
     if (err.includes("stopped by user") || err.includes("Stop")) {
-      return `[繁體中文]
-翻譯已由使用者停止。
-如果您需要再次翻譯，請重新點擊「開始翻譯」按鈕。
-
-───────────────────────────────────
-[English]
-Translation stopped by user.
-If you need to translate again, please click the "Start Translation" button.`;
+      return t('error.stopped');
     }
-    
-    // Default fallback but clean
-    const cleanErr = errorStr.replace(/^Error:\s*/i, '');
-    return `[繁體中文]
-翻譯失敗: ${cleanErr}
 
-───────────────────────────────────
-[English]
-Translation Failed: ${cleanErr}`;
+    return t('error.generic', { error: errorStr.replace(/^Error:\s*/i, '') });
   }
 
   // Progress message handler
@@ -1042,7 +1064,7 @@ Translation Failed: ${cleanErr}`;
       }
       
       logConsoleContent.classList.remove('hidden');
-      btnToggleLogs.textContent = 'Hide';
+      btnToggleLogs.textContent = t('logs.hide');
       
       if (step === 'copy') {
         stepCopy.className = 'active';
@@ -1068,7 +1090,9 @@ Translation Failed: ${cleanErr}`;
     btnHelp.disabled = true;
 
     progressStatus.style.color = 'var(--text-muted)';
-    progressStatus.textContent = status;
+    // status is {key, params} from the service worker; plain strings still work
+    // so a taskState_ persisted by an older build keeps rendering.
+    progressStatus.textContent = tStatus(status);
     progressPct.textContent = `${pct}%`;
     progressBarFill.style.width = `${pct}%`;
 
@@ -1097,7 +1121,7 @@ Translation Failed: ${cleanErr}`;
         btnCancelTranslation.style.display = 'none';
       }
       
-      progressStatus.textContent = 'Translation Complete!';
+      progressStatus.textContent = t('progress.complete');
       progressStatus.style.color = 'var(--accent)';
       
       // final fetch of logs to show complete history for this presentation
@@ -1141,7 +1165,7 @@ Translation Failed: ${cleanErr}`;
   btnCloseHistory.addEventListener('click', closeHistory);
 
   btnClearHistory.addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear all translation history?')) {
+    if (confirm(t('history.confirmClear'))) {
       chrome.storage.local.set({ completedTranslations: [] }, () => {
         loadHistory();
       });
@@ -1157,7 +1181,7 @@ Translation Failed: ${cleanErr}`;
 
   function renderHistoryList(list) {
     if (list.length === 0) {
-      historyScrollContainer.innerHTML = '<div class="history-empty-state">No completed translations yet.</div>';
+      historyScrollContainer.innerHTML = `<div class="history-empty-state">${escapeHtml(t('history.empty'))}</div>`;
       return;
     }
 
@@ -1180,7 +1204,8 @@ Translation Failed: ${cleanErr}`;
         iconSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="8" x2="17" y2="8"></line><line x1="9" y1="13" x2="17" y2="13"></line><line x1="9" y1="18" x2="15" y2="18"></line><circle cx="6" cy="8" r="0.5" fill="currentColor"></circle><circle cx="6" cy="13" r="0.5" fill="currentColor"></circle><circle cx="6" cy="18" r="0.5" fill="currentColor"></circle></svg>`;
       }
 
-      const dateStr = new Date(item.timestamp).toLocaleString();
+      // Formatted in the active UI locale, not the browser's.
+      const dateStr = formatDateTime(item.timestamp);
 
       card.innerHTML = `
         <div class="history-item-info">
@@ -1188,12 +1213,12 @@ Translation Failed: ${cleanErr}`;
             ${iconSvg}
           </div>
           <div class="history-item-meta">
-            <div class="history-item-title" title="Open translation">${escapeHtml(item.originalTitle)}</div>
+            <div class="history-item-title" title="${escapeHtml(t('history.openTooltip'))}">${escapeHtml(item.originalTitle)}</div>
             <div class="history-item-date">${dateStr}</div>
           </div>
         </div>
         <div class="history-item-actions">
-          <button class="history-del-btn" title="Remove from history">
+          <button class="history-del-btn" title="${escapeHtml(t('history.deleteTooltip'))}">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
         </div>
