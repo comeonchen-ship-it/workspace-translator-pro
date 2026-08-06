@@ -1,7 +1,29 @@
-import { translateTexts, logDebug } from './translate.js';
+import { translateTexts, logDebug, fetchWithRetryAndTimeout } from './translate.js';
+import { getLanguage } from './i18n/languages.js';
 
 // Bundled OAuth 2.0 Client ID — users do not need to configure their own
 const BUNDLED_CLIENT_ID = '770405736518-j64169msnu3npqh1p09k4rko4022c80f.apps.googleusercontent.com';
+
+/**
+ * Wrapper for every Google API (Drive/Slides/Docs/Sheets/Forms) call.
+ *
+ * Google's REST APIs return transient 500/503 ("Internal Error") and can time
+ * out; without retries a single blip fails the whole translation and the user
+ * has to start over (see docs/05 H1). This reuses translate.js's proven
+ * retry+timeout+backoff helper. useLock=false and cooldownMs=0 keep Google calls
+ * OFF the LLM rate-limit lock (that lock exists to pace the translation model,
+ * not Google). Drop-in for fetch(): same args in, same Response out — callers
+ * still check response.ok themselves.
+ *
+ * NOTE: retrying a 5xx on the non-idempotent Drive "copy" can, very rarely,
+ * leave an orphan duplicate if the server actually completed before erroring.
+ * That is far preferable to failing the entire job, and easy for the user to
+ * delete. Every other Google call here (get / batchUpdate replaceAllText /
+ * updateCells / updateItem) is effectively idempotent on retry.
+ */
+function googleApiFetch(url, options = {}, presentationId = null) {
+  return fetchWithRetryAndTimeout(url, options, 60000, 3, presentationId, false, 0);
+}
 
 // Enable opening of Side Panel when clicking the extension action icon
 chrome.sidePanel
@@ -89,7 +111,7 @@ async function unregisterActiveCopy(presentationId) {
 
 async function deleteGoogleFile(fileId, token) {
   const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
-  const response = await fetch(url, {
+  const response = await googleApiFetch(url, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -318,28 +340,18 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await checkCancelled();
     
     // 1. Google OAuth Authentication
-    sendProgress('copy', 10, 'Authenticating with Google...');
+    sendProgress('copy', 10, { key: 'progress.authenticating' });
     await logDebug('Requesting Google OAuth token...', presentationId);
     const token = await getAuthToken();
     await logDebug('Google OAuth token acquired successfully.', presentationId);
     await checkCancelled();
     
     // 2. Duplicate Google Workspace file (Google Drive API)
-    sendProgress('copy', 25, `Duplicating ${fileTypeName} on Google Drive...`);
+    sendProgress('copy', 25, { key: 'progress.duplicating', params: { fileType: `@fileType.${fileTypeName}` } });
     const originalName = (presentationTitle || `New ${fileTypeName}`).replace(/\.(pptx?|docx?|xlsx?)$/i, '');
-    const LANG_LABELS = {
-      'zh-TW': '繁體中文',
-      'zh-CN': '简体中文',
-      'en': 'English',
-      'ja': '日本語',
-      'ko': '한국어',
-      'es': 'Español',
-      'fr': 'Français',
-      'de': 'Deutsch',
-      'vi': 'Tiếng Việt',
-      'th': 'ไทย'
-    };
-    const langLabel = LANG_LABELS[targetLang] || targetLang;
+    // Native language name, from the single language registry. Users scan Drive for
+    // "日本語" faster than for "Japanese", so the endonym is deliberate.
+    const langLabel = getLanguage(targetLang)?.endonym || targetLang;
     const translatedName = `[Translated - ${langLabel}] ${originalName}`;
     
     await logDebug(`Duplicating file. Source: ${presentationId}, Target name: "${translatedName}", MimeType: ${mimeType}`, presentationId);
@@ -352,23 +364,23 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await chrome.storage.local.set({ [`targetLang_${copyId}`]: targetLang });
     
     if (isSheet) {
-      sendProgress('extract', 40, 'Extracting spreadsheet structure...');
+      sendProgress('extract', 40, { key: 'progress.extracting.spreadsheet' });
       await checkCancelled();
       const editUrl = await translateSpreadsheet(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
-      sendProgress('done', 100, `Opening translated spreadsheet!`, null, editUrl);
+      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.spreadsheet' } }, null, editUrl);
       chrome.tabs.create({ url: editUrl });
       return;
     }
 
     if (isForm) {
-      sendProgress('extract', 40, 'Extracting form structure...');
+      sendProgress('extract', 40, { key: 'progress.extracting.form' });
       await checkCancelled();
       const editUrl = await translateForm(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'form', editUrl);
-      sendProgress('done', 100, `Opening translated form!`, null, editUrl);
+      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.form' } }, null, editUrl);
       chrome.tabs.create({ url: editUrl });
       return;
     }
@@ -378,7 +390,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     const uniqueTexts = new Set();
     
     if (isDoc) {
-      sendProgress('extract', 40, 'Extracting document elements & text...');
+      sendProgress('extract', 40, { key: 'progress.extracting.document' });
       await logDebug('Fetching copy document structure...', presentationId);
       const doc = await getDocumentDetails(copyId, token);
       await logDebug(`Successfully fetched document. Title: "${doc.title}"`, presentationId);
@@ -425,7 +437,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
         }
       }
     } else {
-      sendProgress('extract', 40, 'Extracting layout elements & text...');
+      sendProgress('extract', 40, { key: 'progress.extracting.presentation' });
       await logDebug('Fetching copy presentation slide structure...', presentationId);
       const presentation = await getPresentationDetails(copyId, token);
       await logDebug(`Successfully fetched presentation. Total slides: ${presentation.slides ? presentation.slides.length : 0}`, presentationId);
@@ -457,7 +469,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       
     if (uniqueTextsArray.length === 0) {
       await logDebug('No translatable texts found. Finalizing copying process.', presentationId);
-      sendProgress('done', 100, `No translatable text found. Opening copy...`);
+      sendProgress('done', 100, { key: 'progress.noTranslatableText' });
       chrome.tabs.create({ url: editUrl });
       return;
     }
@@ -465,13 +477,13 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await checkCancelled();
 
     // 5. Call Translation Engine
-    sendProgress('translate', 60, `Translating texts using ${config.translationEngine.toUpperCase()}...`);
+    sendProgress('translate', 60, { key: 'progress.translating', params: { engine: config.translationEngine.toUpperCase() } });
     const translationsMap = await translateTexts(uniqueTextsArray, targetLang, config);
     
     await checkCancelled();
 
     // 6. Generate replaceAllText requests
-    sendProgress('write', 80, 'Applying translations and formatting preservation...');
+    sendProgress('write', 80, { key: 'progress.applying' });
     await logDebug('Generating batch replacement requests...', presentationId);
     const requests = [];
     
@@ -570,7 +582,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await logDebug('Translation process finished. Opening new tab.', presentationId);
     await unregisterActiveCopy(presentationId);
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
-    sendProgress('done', 100, `Opening translated ${fileTypeName}!`, null, editUrl);
+    sendProgress('done', 100, { key: 'progress.opening', params: { fileType: `@fileType.${fileTypeName}` } }, null, editUrl);
     chrome.tabs.create({ url: editUrl });
     
   } catch (err) {
@@ -677,8 +689,8 @@ async function duplicatePresentation(presentationId, newName, token) {
  */
 async function getPresentationDetails(presentationId, token) {
   const url = `https://slides.googleapis.com/v1/presentations/${presentationId}`;
-  
-  const response = await fetch(url, {
+
+  const response = await googleApiFetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -699,8 +711,8 @@ async function getPresentationDetails(presentationId, token) {
  */
 async function updatePresentation(presentationId, requests, token) {
   const url = `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`;
-  
-  const response = await fetch(url, {
+
+  const response = await googleApiFetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -822,7 +834,7 @@ async function duplicateGoogleFile(fileId, newName, mimeType, token) {
   let parents = [];
   try {
     const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
-    const getRes = await fetch(getFileUrl, {
+    const getRes = await googleApiFetch(getFileUrl, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (getRes.ok) {
@@ -851,7 +863,7 @@ async function duplicateGoogleFile(fileId, newName, mimeType, token) {
     requestBody.mimeType = mimeType;
   }
   
-  const response = await fetch(url, {
+  const response = await googleApiFetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -874,8 +886,8 @@ async function duplicateGoogleFile(fileId, newName, mimeType, token) {
  */
 async function getDocumentDetails(documentId, token) {
   const url = `https://docs.googleapis.com/v1/documents/${documentId}`;
-  
-  const response = await fetch(url, {
+
+  const response = await googleApiFetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -896,8 +908,8 @@ async function getDocumentDetails(documentId, token) {
  */
 async function updateDocument(documentId, requests, token) {
   const url = `https://docs.googleapis.com/v1/documents/${documentId}:batchUpdate`;
-  
-  const response = await fetch(url, {
+
+  const response = await googleApiFetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -991,7 +1003,7 @@ async function translateSpreadsheet(copyId, targetLang, config, token, sendProgr
   const fields = 'sheets(properties(title,sheetId,gridProperties),data(rowData(values(userEnteredValue,textFormatRuns,formattedValue,hyperlink))))';
   const getSpreadsheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${copyId}?includeGridData=true&fields=${encodeURIComponent(fields)}`;
   
-  const response = await fetch(getSpreadsheetUrl, {
+  const response = await googleApiFetch(getSpreadsheetUrl, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!response.ok) {
@@ -1055,13 +1067,13 @@ async function translateSpreadsheet(copyId, targetLang, config, token, sendProgr
   }
 
   // 2. Translate via LLM API
-  sendProgress('translate', 60, `Translating ${uniqueTextsArray.length} texts using ${config.translationEngine.toUpperCase()}...`);
+  sendProgress('translate', 60, { key: 'progress.translatingCount', params: { count: uniqueTextsArray.length, engine: config.translationEngine.toUpperCase() } });
   const translationsMap = await translateTexts(uniqueTextsArray, targetLang, config);
 
   await checkCancelledGlobal(presentationId);
 
   // 3. Compile cell value updates with preserved formatting/links
-  sendProgress('write', 80, 'Preparing translated cell updates...');
+  sendProgress('write', 80, { key: 'progress.preparingCells' });
   const updateRequests = [];
 
   for (const sheet of sheets) {
@@ -1172,7 +1184,7 @@ async function translateSpreadsheet(copyId, targetLang, config, token, sendProgr
   }
 
   // 4. Renaming sheet tabs & auto-resizing columns
-  sendProgress('write', 90, 'Applying translations to tabs & auto-resizing columns...');
+  sendProgress('write', 90, { key: 'progress.applyingTabs' });
   const sheetsRequests = [];
   for (const sheet of sheets) {
     const oldTitle = sheet.properties.title;
@@ -1208,7 +1220,7 @@ async function translateSpreadsheet(copyId, targetLang, config, token, sendProgr
   if (allRequests.length > 0) {
     await logDebug(`Applying ${allRequests.length} spreadsheet batch update requests...`, presentationId);
     const updateSpreadsheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${copyId}:batchUpdate`;
-    const res = await fetch(updateSpreadsheetUrl, {
+    const res = await googleApiFetch(updateSpreadsheetUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1245,7 +1257,7 @@ async function translateForm(copyId, targetLang, config, token, sendProgress) {
   await checkCancelledGlobal(presentationId);
   await logDebug('Fetching form details...', presentationId);
   const getFormUrl = `https://forms.googleapis.com/v1/forms/${copyId}`;
-  const response = await fetch(getFormUrl, {
+  const response = await googleApiFetch(getFormUrl, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!response.ok) {
@@ -1334,13 +1346,13 @@ async function translateForm(copyId, targetLang, config, token, sendProgress) {
   }
 
   // 2. Translate via LLM API
-  sendProgress('translate', 60, `Translating ${uniqueTextsArray.length} texts using ${config.translationEngine.toUpperCase()}...`);
+  sendProgress('translate', 60, { key: 'progress.translatingCount', params: { count: uniqueTextsArray.length, engine: config.translationEngine.toUpperCase() } });
   const translationsMap = await translateTexts(uniqueTextsArray, targetLang, config);
 
   await checkCancelledGlobal(presentationId);
 
   // 3. Generate Form Update requests
-  sendProgress('write', 80, 'Applying translations to form structure...');
+  sendProgress('write', 80, { key: 'progress.applyingForm' });
   const requests = [];
 
   if (form.info) {
@@ -1551,7 +1563,7 @@ async function translateForm(copyId, targetLang, config, token, sendProgress) {
   if (requests.length > 0) {
     await logDebug(`Applying ${requests.length} batch updates to form...`, presentationId);
     const updateFormUrl = `https://forms.googleapis.com/v1/forms/${copyId}:batchUpdate`;
-    const writeRes = await fetch(updateFormUrl, {
+    const writeRes = await googleApiFetch(updateFormUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1576,7 +1588,11 @@ async function translateForm(copyId, targetLang, config, token, sendProgress) {
 /**
  * Enterprise-Grade Global Concurrency Queue Management
  */
-const MAX_CONCURRENT_TRANSLATIONS = 2;
+// How many translation jobs run their Google-API phases (copy / extract / write)
+// at once. The LLM step itself is still globally serialized by acquireApiLock(),
+// so raising this does NOT multiply LLM load — it only overlaps the Google calls.
+// 5 supports the "open 5 tabs, translate each" workflow without queuing.
+const MAX_CONCURRENT_TRANSLATIONS = 5;
 
 async function getQueueState() {
   const data = await chrome.storage.local.get(['activeTranslationIds', 'queuedTranslations']);
@@ -1620,7 +1636,7 @@ async function requestTranslationStart(presentationId, presentationTitle, fileTy
     const taskState = {
       step: 'queue',
       pct: 0,
-      status: `Waiting in queue (Position: #${queuePos})...`,
+      status: { key: 'progress.queuePosition', params: { position: queuePos } },
       error: null,
       finalUrl: null
     };
@@ -1664,7 +1680,7 @@ async function onTranslationFinished(presentationId, portMessageSender) {
       const qState = {
         step: 'queue',
         pct: 0,
-        status: `Waiting in queue (Position: #${qPos})...`,
+        status: { key: 'progress.queuePosition', params: { position: qPos } },
         error: null,
         finalUrl: null
       };
@@ -1685,7 +1701,7 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
   const taskState = {
     step: 'copy',
     pct: 0,
-    status: 'Initiating translation...',
+    status: { key: 'progress.initiating' },
     error: null,
     finalUrl: null
   };
@@ -1744,7 +1760,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
           const qState = {
             step: 'queue',
             pct: 0,
-            status: `Waiting in queue (Position: #${qPos})...`,
+            status: { key: 'progress.queuePosition', params: { position: qPos } },
             error: null,
             finalUrl: null
           };

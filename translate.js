@@ -1,16 +1,15 @@
-// Target Language ISO Code to Full Name Mapping
-const LANG_NAMES = {
-  'zh-TW': 'Traditional Chinese (繁體中文)',
-  'zh-CN': 'Simplified Chinese (简体中文)',
-  'en': 'English',
-  'ja': 'Japanese',
-  'ko': 'Korean',
-  'es': 'Spanish',
-  'fr': 'French',
-  'de': 'German',
-  'vi': 'Vietnamese',
-  'th': 'Thai'
-};
+import { getLanguage } from './i18n/languages.js';
+
+/**
+ * Human-readable target language name for the LLM prompt.
+ * Sourced from the single language registry — do not reintroduce a local copy.
+ */
+function langName(code) {
+  const lang = getLanguage(code);
+  if (!lang) return code;
+  // Both Chinese variants need the script spelled out or models drift between them.
+  return lang.code.startsWith('zh') ? `${lang.english} (${lang.endonym})` : lang.english;
+}
 
 // Enterprise-Grade Global Outgoing API Request Mutex & Cooldown scheduler
 // Formulated to stay safely below Gemini Free Tier 15 RPM (Requests Per Minute) limits globally
@@ -85,7 +84,7 @@ export async function translateTexts(texts, targetLang, config) {
     return new Map();
   }
 
-  const targetLangName = LANG_NAMES[targetLang] || targetLang;
+  const targetLangName = langName(targetLang);
   const engine = config.translationEngine || 'gemini';
   const presentationId = config?.presentationId;
 
@@ -261,7 +260,7 @@ export async function translateTexts(texts, targetLang, config) {
 /**
  * Helper to fetch with retry and timeout for handling rate limits (429) and server errors (5xx)
  */
-async function fetchWithRetryAndTimeout(url, options = {}, timeoutMs = 60000, maxRetries = 3, presentationId = null, useLock = false, cooldownMs = 4200) {
+export async function fetchWithRetryAndTimeout(url, options = {}, timeoutMs = 60000, maxRetries = 3, presentationId = null, useLock = false, cooldownMs = 4200) {
   let attempt = 0;
   let baseDelay = 6000; // increased from 2000ms — aggressive backoff for rate-limited models
   
@@ -417,6 +416,38 @@ function extractJsonBlock(str) {
 }
 
 /**
+ * Escape any backslash that is NOT part of a valid JSON escape sequence.
+ *
+ * LLMs sometimes emit a literal '\' inside a string value (a Windows path like
+ * C:\Users, a LaTeX fragment like \frac, a stray "\%" or "\x"). JSON.parse then
+ * throws "Bad escaped character in JSON" and the WHOLE batch of translations is
+ * lost. This repairs those lone backslashes so the response can be parsed.
+ *
+ * It walks the string and leaves every genuine escape (\" \\ \/ \b \f \n \r \t
+ * \uXXXX) untouched, so it cannot corrupt already-valid JSON. The one unavoidable
+ * ambiguity: a literal "\n"/"\t" the LLM meant as "backslash + letter" (e.g. a
+ * path C:\newfile) is kept as the valid escape (newline/tab). That is rare in
+ * slide/doc text and still far better than dropping the entire batch.
+ */
+function repairJsonEscapes(s) {
+  let out = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c !== '\\') { out += c; continue; }
+    const next = s[i + 1];
+    if (next === '"' || next === '\\' || next === '/' || next === 'b' ||
+        next === 'f' || next === 'n' || next === 'r' || next === 't') {
+      out += c + next; i++;                 // valid 2-char escape — keep verbatim
+    } else if (next === 'u' && /^[0-9a-fA-F]{4}$/.test(s.substr(i + 2, 4))) {
+      out += s.substr(i, 6); i += 5;        // valid \uXXXX — keep verbatim
+    } else {
+      out += '\\\\';                        // invalid escape → escape the backslash
+    }
+  }
+  return out;
+}
+
+/**
  * Helper to robustly parse JSON from LLM responses even if they have trailing markdown or text
  */
 function parseJsonRobustly(str) {
@@ -438,9 +469,49 @@ function parseJsonRobustly(str) {
           // ignore
         }
       }
-      throw e; // rethrow the original parsing error if extraction fails
+      // 3. Last resort: repair invalid escape sequences and retry. This runs ONLY
+      //    after every strict attempt has already failed, so it can never regress
+      //    a response that used to parse — it only rescues ones that were lost.
+      for (const candidate of [extracted, cleaned, trimmed]) {
+        if (!candidate) continue;
+        try {
+          return JSON.parse(repairJsonEscapes(candidate));
+        } catch (e4) {
+          // try next candidate
+        }
+      }
+      throw e; // rethrow the original parsing error if every strategy fails
     }
   }
+}
+
+/**
+ * Single source of truth for the translation system prompt (shared by all four
+ * LLM engines). Previously this text was copy-pasted into Gemini / OpenAI /
+ * Claude / Custom — editing one and forgetting the others produced "works on
+ * Gemini, breaks on OpenAI" bugs (see docs/05 M2). Change wording HERE only.
+ */
+function buildSystemPrompt(targetLangName) {
+  return `You are a professional translator localizing short text fragments extracted from a business document (Google Slides, Docs, Sheets, or Forms) into ${targetLangName}.
+
+Return ONLY a JSON object of exactly this shape, and nothing else:
+{"translations": [<one translation for each input string>]}
+- "translations" MUST contain exactly the same number of items as the input array, in the same order. Never merge, split, drop, add, or reorder items.
+- Output raw JSON only — no markdown code fences, no comments, no explanations.
+
+Quality:
+- Translate the meaning into fluent, natural ${targetLangName} as a native professional would write it — never word-for-word.
+- Preserve the source's tone and register; use the politeness/formality level that is standard for ${targetLangName}.
+- Be consistent: render the same term the same way across every item.
+- Use accurate, established terminology for technical, legal, and industry-specific wording.
+
+Keep unchanged (do NOT translate or reformat):
+- URLs (http/https/www) and email addresses.
+- Numbers, dates, measurements, currency, and product codes/SKUs.
+- Placeholders and markup such as {name}, {{var}}, %s, <tag>, and any leading/trailing spaces.
+- Brand names, product names, and acronyms, unless a widely accepted ${targetLangName} form exists.
+
+If an item is already written in ${targetLangName}, or is a proper noun/code with no meaningful translation, return it unchanged. Never return an empty array or fewer items than you were given.`;
 }
 
 /**
@@ -466,10 +537,7 @@ async function translateGemini(texts, targetLangName, config) {
     systemInstruction: {
       parts: [
         {
-          text: `You are a professional translator. Translate the given array of text strings into the target language: "${targetLangName}".
-Return a JSON object containing a single key "translations", which is a JSON array of the translated strings in the exact same order and length.
-Preserve the exact tone, layout spacing placeholders, and technical terminology. Do not explain anything.
-Do not translate, modify, or corrupt any URLs (links starting with http/https/www) or email addresses. Keep them exactly as they are in the original text.`
+          text: buildSystemPrompt(targetLangName)
         }
       ]
     },
@@ -515,10 +583,7 @@ async function translateOpenAI(texts, targetLangName, config) {
 
   await logDebug(`Sending request to OpenAI API (Model: ${model})...`, presentationId);
 
-  const systemPrompt = `You are a professional translator. Translate the given array of text strings into the target language: "${targetLangName}".
-Return a JSON object containing a single key "translations", which is a JSON array of the translated strings in the exact same order and length.
-Preserve the exact tone, layout spacing placeholders, and technical terminology. Do not explain anything.
-Do not translate, modify, or corrupt any URLs (links starting with http/https/www) or email addresses. Keep them exactly as they are in the original text.`;
+  const systemPrompt = buildSystemPrompt(targetLangName);
 
   const payload = {
     model: model,
@@ -561,10 +626,7 @@ async function translateClaude(texts, targetLangName, config) {
 
   await logDebug(`Sending request to Anthropic Claude API (Model: ${model})...`, presentationId);
 
-  const systemPrompt = `You are a professional translator. Translate the given array of text strings into the target language: "${targetLangName}".
-Return a JSON object containing a single key "translations", which is a JSON array of the translated strings in the exact same order and length.
-Preserve the exact tone, layout spacing placeholders, and technical terminology. Do not explain anything.
-Do not translate, modify, or corrupt any URLs (links starting with http/https/www) or email addresses. Keep them exactly as they are in the original text.`;
+  const systemPrompt = buildSystemPrompt(targetLangName);
 
   const prefill = '{\n  "translations": [';
   
@@ -612,10 +674,7 @@ async function translateCustomOpenAI(texts, targetLangName, config) {
 
   await logDebug(`Sending request to Custom OpenAI-compatible Endpoint: ${customUrl} (Model: ${model})...`, presentationId);
 
-  const systemPrompt = `You are a professional translator. Translate the given array of text strings into the target language: "${targetLangName}".
-Return a JSON object containing a single key "translations", which is a JSON array of the translated strings in the exact same order and length.
-Preserve the exact tone, layout spacing placeholders, and technical terminology. Do not explain anything.
-Do not translate, modify, or corrupt any URLs (links starting with http/https/www) or email addresses. Keep them exactly as they are in the original text.`;
+  const systemPrompt = buildSystemPrompt(targetLangName);
 
   const payload = {
     model: model,
