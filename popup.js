@@ -3,6 +3,7 @@ import {
   loadLocale, t, tStatus, applyI18n, formatDateTime,
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
+import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // i18n must be ready before anything renders, otherwise the user sees a flash of
@@ -377,19 +378,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Known key prefixes are only hints: providers change formats (e.g. Gemini AIzaSy… → AQ.…),
-    // so an unrecognized shape is never treated as an error — the real connection test decides.
-    const KNOWN_PREFIXES = {
-      gemini: ['AIzaSy', 'AQ.'],
-      openai: ['sk-'],
-      claude: ['sk-ant-'],
-    };
-    let state;
-    if (key.length < 10) state = 'bad';
-    else if ((KNOWN_PREFIXES[engine] || []).some((p) => key.startsWith(p))) state = 'ok';
-    else state = KNOWN_PREFIXES[engine] ? 'unknown' : 'ok';
-
-    const group = KNOWN_PREFIXES[engine] ? engine : 'generic';
+    const state = classifyApiKey(engine, key);
+    const group = KNOWN_KEY_PREFIXES[engine] ? engine : 'generic';
     apiKeyIndicator.className = `val-indicator ${{ ok: 'valid', bad: 'invalid', unknown: 'neutral' }[state]}`;
     apiKeyIndicator.textContent = state === 'unknown'
       ? t('settings.keyFormat.unknown')

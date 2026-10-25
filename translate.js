@@ -363,7 +363,7 @@ async function translateFree(texts, targetLang, config) {
  * Helper to lexically extract the first matching JSON block (object or array) from a string.
  * This ignores comments, explanations, or stray braces after the actual JSON structure.
  */
-function extractJsonBlock(str) {
+export function extractJsonBlock(str) {
   const startBrace = str.indexOf('{');
   const startBracket = str.indexOf('[');
   
@@ -429,7 +429,7 @@ function extractJsonBlock(str) {
  * path C:\newfile) is kept as the valid escape (newline/tab). That is rare in
  * slide/doc text and still far better than dropping the entire batch.
  */
-function repairJsonEscapes(s) {
+export function repairJsonEscapes(s) {
   let out = '';
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
@@ -450,7 +450,7 @@ function repairJsonEscapes(s) {
 /**
  * Helper to robustly parse JSON from LLM responses even if they have trailing markdown or text
  */
-function parseJsonRobustly(str) {
+export function parseJsonRobustly(str) {
   const trimmed = str.trim();
   try {
     return JSON.parse(trimmed);
