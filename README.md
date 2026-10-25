@@ -5,7 +5,7 @@ Chrome 擴充功能（Manifest V3）。把 Google Slides / Docs / Sheets / Forms
 
 支援翻譯引擎：Gemini、OpenAI、Claude、任何 OpenAI 相容端點、以及免金鑰的 Google Translate 網頁介面。
 
-- **目前版本**：1.4.1（唯一來源：[manifest.json](manifest.json) 的 `version` 欄位）
+- **目前版本**：1.5.0（唯一來源：[manifest.json](manifest.json) 的 `version` 欄位）
 - **介面語言**：10 種可切換語系（en / zh-TW / zh-CN / ja / ko / es / fr / de / vi / th），使用者在擴充功能內即可切換
 - **技術棧**：純原生 JavaScript（ES Module）+ HTML + CSS。**沒有** build step、沒有 npm、沒有框架、沒有測試框架。
 - **執行方式**：Chrome → `chrome://extensions` → 開啟「開發人員模式」→「載入未封裝項目」→ 選這個資料夾。改完程式碼按重新載入即可，不需編譯。
