@@ -91,14 +91,14 @@ test('sheets: current-tab scope, cell writes, capped column widening', async () 
     properties: { title, sheetId, gridProperties: { columnCount: 2 } },
     data: [{ columnMetadata: [{ pixelSize: 100 }, { pixelSize: 100 }], rowData: [{ values: [{ userEnteredValue: { stringValue: text } }, { userEnteredValue: { numberValue: 5 } }] }] }],
   });
-  api.files.x1 = { sheets: [sheet(0, 'Summary', 'Revenue'), sheet(42, 'Details', 'Operating expenses')] };
+  api.files.x1 = { sheets: [sheet(0, 'Summary', 'Revenue'), sheet(42, 'Details', 'Opex')] };
   api.llm.translate = (t) => `${t} translated with a fairly long label`;
   const before = api.llm.calls.length;
   const state = await run('x1', 'spreadsheet', { config: { scope: { sheetGid: 42 } } });
   api.llm.translate = (t) => `TR(${t})`;
   assert.equal(state.step, 'done', state.error);
   const sent = api.llm.calls.slice(before).flatMap((c) => c.texts).sort();
-  assert.deepEqual(sent, ['Details', 'Operating expenses']);
+  assert.deepEqual(sent, ['Details', 'Opex']);
   const reqs = lastBatch('sheets').requests;
   const cell = reqs.find((r) => r.updateCells);
   assert.equal(cell.updateCells.range.sheetId, 42);
@@ -238,4 +238,15 @@ test('sheets: current sheet is found by name when the copy has new IDs (converte
   const state = await run('x4', 'spreadsheet', { config: { scope: { sheetGid: 1234, sheetTitle: 'Executive Summary', currentSheetOnly: true } } });
   assert.equal(state.step, 'done', state.error);
   assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts).sort(), ['Delivery roadmap', 'Executive Summary']);
+});
+
+test('copy is named from the Drive file name, not a URL-like tab title (.xlsx)', async () => {
+  api.files.x5 = { sheets: [{ properties: { title: 'S', sheetId: 1, gridProperties: { columnCount: 1 } }, data: [{ rowData: [{ values: [{ userEnteredValue: { stringValue: 'Hello' } }] }] }] }] };
+  api.names.x5 = 'Taiwan_Mobile_GWS_Rebalanced_WBS.xlsx';
+  panel = fake.connectPanel('x5');
+  await panel.send({ action: 'startTranslation', presentationId: 'x5', presentationTitle: 'docs.google.com/spreadsheets/d/x5/edit',
+    fileType: 'spreadsheet', targetLang: 'zh-TW', tabId: 7, config: { ...baseConfig } });
+  const state = await fake.waitForTask('x5');
+  assert.equal(state.step, 'done', state.error);
+  assert.equal(api.copyNames.at(-1), '[Translated - 繁體中文] Taiwan_Mobile_GWS_Rebalanced_WBS');
 });

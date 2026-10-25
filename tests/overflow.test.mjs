@@ -69,3 +69,19 @@ test('slides tables: cells are measured and shrunk with cellLocation', () => {
   assert.deepEqual(requests[0].updateTextStyle.cellLocation, { rowIndex: 0, columnIndex: 1 });
   assert.equal(requests[0].updateTextStyle.objectId, 't1');
 });
+
+test('sheets fit: skips merged, spilling, wrapped and not-grown cells', () => {
+  const cells = [
+    { row: 0, col: 0, text: 'Taiwan Mobile Google Workspace — 重新評估的三階段工作分解結構', original: 'Taiwan Mobile Google Workspace — Re-evaluated WBS', inMerge: true },
+    { row: 5, col: 0, text: '9月14日至30日交付窗口的說明文字很長很長', original: '14–30 September delivery window', rightEmpty: true },
+    { row: 6, col: 1, text: '一段會自動換行的很長很長的說明文字', original: 'wrapped text', wrap: 'WRAP' },
+    { row: 7, col: 2, text: '短', original: 'A much longer original' },
+  ];
+  const { requests } = planColumnFit(3, [245, 145, 145], cells);
+  assert.deepEqual(requests, []);
+});
+
+test('sheets fit: widens only when the original fit and the translation does not', () => {
+  const { requests } = planColumnFit(3, [100], [{ row: 1, col: 0, text: '專案經理人天合計數字', original: 'PM days' }]);
+  assert.ok(requests.some((r) => r.updateDimensionProperties));
+});

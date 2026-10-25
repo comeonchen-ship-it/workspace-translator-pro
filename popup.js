@@ -1015,7 +1015,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       // ─────────────────────────────────────────────────────────────────────
 
 
-      const newPresentationTitle = cleanTitle || fileTypeName;
+      // .xlsx/.docx/.pptx tabs can show the URL as their title until the editor
+      // loads; treat that as "unknown" and pick up the real title on a later update.
+      const looksLikeUrl = /^(https?:\/\/)?docs\.google\.com\//i.test(cleanTitle.trim());
+      const newPresentationTitle = (!looksLikeUrl && cleanTitle) || fileTypeName;
       
       // Apply body class for dynamic theme variables
       document.body.className = `theme-${newFileType}`;
@@ -1077,6 +1080,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Restore / Reset UI for this presentation
         resetUIForPresentation(currentPresentationId);
+      } else if (newPresentationTitle !== currentPresentationTitle) {
+        // Same file, title finished loading — update the name only.
+        currentPresentationTitle = newPresentationTitle;
+        slideTitleEl.textContent = currentPresentationTitle;
       }
       
       warningPanel.style.display = 'none';

@@ -1,6 +1,6 @@
 import { translateTexts, logDebug } from './translate.js';
 import {
-  googleApiFetch, getAuthToken, getCachedToken, deleteGoogleFile, duplicateGoogleFile,
+  googleApiFetch, getAuthToken, getCachedToken, deleteGoogleFile, duplicateGoogleFile, getDriveFileName,
   getPresentationDetails, updatePresentation, getDocumentDetails, updateDocument,
 } from './lib/google-api.js';
 import { getTaskState, setTaskState, checkCancelledGlobal } from './lib/task-state.js';
@@ -454,7 +454,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     
     // 2. Duplicate Google Workspace file (Google Drive API)
     sendProgress('copy', 25, { key: 'progress.duplicating', params: { fileType: `@fileType.${fileTypeName}` } });
-    const originalName = (presentationTitle || `New ${fileTypeName}`).replace(/\.(pptx?|docx?|xlsx?)$/i, '');
+    // Prefer Drive's name: the tab title the panel sent can be a URL (.xlsx etc.).
+    const driveName = await getDriveFileName(presentationId, token);
+    const originalName = (driveName || presentationTitle || `New ${fileTypeName}`).replace(/\.(pptx?|docx?|xlsx?)$/i, '');
     // Native language name, from the single language registry. Users scan Drive for
     // "日本語" faster than for "Japanese", so the endonym is deliberate.
     const langLabel = getLanguage(targetLang)?.endonym || targetLang;
@@ -477,7 +479,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
       const summary = summarize({ columnsFitted: config.columnsFitted || 0 });
       sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -489,7 +491,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await saveToHistory(copyId, translatedName, 'form', editUrl);
       const summary = summarize();
       sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -584,7 +586,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await logDebug('No translatable texts found. Finalizing copying process.', presentationId);
       const summary = summarize({ segments: 0 });
       sendProgress('done', 100, { key: 'progress.noTranslatableText' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
     
@@ -717,7 +719,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
     const summary = summarize({ segments: uniqueTextsArray.length, overflowFixed });
     sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-    await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
+    await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
     
   } catch (err) {
     await logDebug(`Error occurred during translation workflow: ${err.message}`, presentationId);

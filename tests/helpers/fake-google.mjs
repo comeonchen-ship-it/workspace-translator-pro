@@ -9,6 +9,8 @@ export function installFakeFetch() {
     files: {},              // copyId → resource JSON (presentation / document / spreadsheet / form)
     batchUpdates: [],       // { api, id, requests }
     copies: 0,
+    names: {},              // fileId → Drive file name
+    copyNames: [],          // names given to copies
     validTokens: new Set(['tok-1']),
     llm: { calls: [], translate: (t) => `TR(${t})`, override: null },
     failNext: {},           // url substring → status (one-shot)
@@ -45,9 +47,12 @@ export function installFakeFetch() {
 
     // Drive
     let m;
-    if ((m = url.match(/drive\/v3\/files\/([^/?]+)\?fields=parents/))) return json({ parents: ['root'] });
+    if ((m = url.match(/drive\/v3\/files\/([^/?]+)\?fields=/))) {
+      return json({ parents: ['root'], name: state.names[m[1]] || `Drive name of ${m[1]}` });
+    }
     if ((m = url.match(/drive\/v3\/files\/([^/?]+)\/copy/))) {
       const copyId = `copy${++state.copies}`;
+      state.copyNames.push(body.name);
       state.files[copyId] = structuredClone(state.files[m[1]]);
       return json({ id: copyId, name: body.name });
     }
