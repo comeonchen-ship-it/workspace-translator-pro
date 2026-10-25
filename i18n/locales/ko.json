@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "번역어",
   "settings.modelHelp.summary": "모델은 어떻게 고르나요?",
   "settings.unsaved.note": "● 저장하지 않은 변경 사항이 있습니다(저장해야 적용)",
-  "settings.unsaved.confirm": "저장하지 않은 변경 사항이 있습니다. 버릴까요?"
+  "settings.unsaved.confirm": "저장하지 않은 변경 사항이 있습니다. 버릴까요?",
+  "done.partialTitle": "⚠ 일부 언어는 완료됨",
+  "error.sheetNotFound": "보고 있던 시트가 더 이상 없습니다.\n스프레드시트를 새로고침하고 번역할 시트를 연 뒤 다시 시도하세요."
 }

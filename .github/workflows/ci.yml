@@ -17,6 +17,7 @@ jobs:
         run: for f in *.js lib/*.js i18n/*.js; do node --check "$f"; done
       - name: Unit tests
         run: node --test 'tests/*.test.mjs'
+        timeout-minutes: 5
       - name: Validate locales
         working-directory: i18n
         run: node build-qa-locale.mjs && node validate.mjs

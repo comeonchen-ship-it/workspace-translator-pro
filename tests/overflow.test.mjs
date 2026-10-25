@@ -57,3 +57,15 @@ test('sheets: never shrinks a wide column', () => {
   const { requests } = planColumnFit(1, [500], [{ row: 0, col: 0, text: 'ok' }]);
   assert.equal(requests.length, 0);
 });
+
+test('slides tables: cells are measured and shrunk with cellLocation', () => {
+  const table = (text) => ({ slides: [{ pageElements: [{ objectId: 't1', table: { tableRows: [{ tableCells: [
+    { text: { textElements: [{ startIndex: 0, endIndex: 3, textRun: { content: 'ok\n', style: { fontSize: { magnitude: 14, unit: 'PT' } } } }] } },
+    { text: { textElements: [{ startIndex: 0, endIndex: text.length, textRun: { content: text, style: { fontSize: { magnitude: 14, unit: 'PT' } } } }] } },
+  ] }] } }] }] });
+  const before = measureShapes(table('Sales\n'));
+  const { requests } = planFontScaling(before, table('Umsatzentwicklung gesamt\n'));
+  assert.equal(requests.length, 1);
+  assert.deepEqual(requests[0].updateTextStyle.cellLocation, { rowIndex: 0, columnIndex: 1 });
+  assert.equal(requests[0].updateTextStyle.objectId, 't1');
+});

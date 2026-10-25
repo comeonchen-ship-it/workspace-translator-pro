@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "Übersetzung",
   "settings.modelHelp.summary": "Wie wähle ich ein Modell?",
   "settings.unsaved.note": "● Ungespeicherte Änderungen – zum Übernehmen speichern",
-  "settings.unsaved.confirm": "Es gibt ungespeicherte Änderungen. Verwerfen?"
+  "settings.unsaved.confirm": "Es gibt ungespeicherte Änderungen. Verwerfen?",
+  "done.partialTitle": "⚠ Einige Sprachen sind fertig",
+  "error.sheetNotFound": "Das geöffnete Tabellenblatt existiert nicht mehr.\nLade die Tabelle neu, öffne das gewünschte Blatt und versuche es erneut."
 }

@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "Traduction",
   "settings.modelHelp.summary": "Comment choisir un modèle ?",
   "settings.unsaved.note": "● Modifications non enregistrées — enregistrez pour les appliquer",
-  "settings.unsaved.confirm": "Vous avez des modifications non enregistrées. Les abandonner ?"
+  "settings.unsaved.confirm": "Vous avez des modifications non enregistrées. Les abandonner ?",
+  "done.partialTitle": "⚠ Certaines langues sont terminées",
+  "error.sheetNotFound": "L'onglet affiché n'existe plus.\nRechargez la feuille de calcul, ouvrez l'onglet voulu et réessayez."
 }

@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Read the live URL: switching sheet tabs only changes the #gid fragment.
       const tab = await chrome.tabs.get(currentTabId).catch(() => null);
       const gid = sheetGidFromUrl(tab?.url);
-      return { sheetGid: gid ?? 0 };
+      return { sheetGid: gid, currentSheetOnly: true };
     }
     return {};
   }
@@ -1279,6 +1279,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
 
+  // Back to the editable form when a job could not be started at all.
+  function resetToIdle() {
+    mainPanel.classList.remove('is-busy');
+    progressSection.style.display = 'none';
+    btnTranslate.disabled = false;
+    btnSettings.disabled = false;
+    btnHelp.disabled = false;
+  }
+
   async function startTranslation(items, translationEngine, apiKey) {
     const scope = await buildScopeForJob();
     if (!scope) return;
@@ -1319,9 +1328,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         } catch (err) {
           console.error('Failed to post startTranslation message:', err);
+          resetToIdle();
           alert(t('alert.commFailed'));
         }
       } else {
+        resetToIdle();
         alert(t('alert.notConnected'));
         connectToBackground();
       }
@@ -1418,6 +1429,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return t('error.400');
     }
 
+    // lib/sheets.js: "only the current sheet" but that tab no longer exists.
+    if (err.includes("Sheet tab not found")) {
+      return t('error.sheetNotFound');
+    }
+
     // Our own guard in translate.js: the model returned a different array length.
     if (err.includes("Translation mismatch")) {
       return t('error.mismatch');
@@ -1461,6 +1477,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       progressSection.style.display = 'flex';
       
       mainPanel.classList.remove('is-busy');
+      // Multi-language run that failed part-way: keep the finished copies reachable.
+      if (message.summary?.results?.length) {
+        showCompletion({ title: t('done.partialTitle'), sub: '', summary: message.summary, url: null, dismissKey: null });
+      }
       const humanError = translateErrorToHuman(error, selectEngine.value);
       progressStatus.textContent = humanError;
       progressStatus.style.color = '#ff7675';

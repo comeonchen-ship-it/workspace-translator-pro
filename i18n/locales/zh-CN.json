@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "译文",
   "settings.modelHelp.summary": "模型怎么选？",
   "settings.unsaved.note": "● 有未保存的更改，点「保存设置」才会生效",
-  "settings.unsaved.confirm": "有未保存的更改，确定要放弃吗？"
+  "settings.unsaved.confirm": "有未保存的更改，确定要放弃吗？",
+  "done.partialTitle": "⚠ 部分语言已完成",
+  "error.sheetNotFound": "你所在的工作表已不存在。\n请刷新表格，切换到要翻译的工作表后再试一次。"
 }

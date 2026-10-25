@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "訳語",
   "settings.modelHelp.summary": "モデルの選び方",
   "settings.unsaved.note": "● 未保存の変更があります（保存すると反映されます）",
-  "settings.unsaved.confirm": "未保存の変更があります。破棄しますか？"
+  "settings.unsaved.confirm": "未保存の変更があります。破棄しますか？",
+  "done.partialTitle": "⚠ 一部の言語は完了しました",
+  "error.sheetNotFound": "開いていたシートが見つかりません。\nスプレッドシートを再読み込みし、翻訳したいシートを開いてから再試行してください。"
 }

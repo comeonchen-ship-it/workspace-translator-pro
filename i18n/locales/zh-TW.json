@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "譯文",
   "settings.modelHelp.summary": "模型怎麼選？",
   "settings.unsaved.note": "● 有未儲存的變更，按「儲存設定」才會生效",
-  "settings.unsaved.confirm": "有未儲存的變更，確定要捨棄嗎？"
+  "settings.unsaved.confirm": "有未儲存的變更，確定要捨棄嗎？",
+  "done.partialTitle": "⚠ 部分語言已完成",
+  "error.sheetNotFound": "你所在的工作表已不存在。\n請重新整理試算表，切到要翻譯的工作表後再試一次。"
 }

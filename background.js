@@ -95,7 +95,21 @@ function stopKeepAlive() {
   keepAliveTimer = null;
 }
 
-async function setResumableTask(task) {
+// Up to MAX_CONCURRENT_TRANSLATIONS jobs update the same storage maps
+// (resumableTasks, activeCopies). Each get→modify→set runs through this chain so
+// two jobs never overwrite each other's entry.
+let storageChain = Promise.resolve();
+function withStorageLock(fn) {
+  const run = storageChain.then(fn, fn);
+  storageChain = run.catch(() => {});
+  return run;
+}
+
+function setResumableTask(task) {
+  return withStorageLock(() => writeResumableTask(task));
+}
+
+async function writeResumableTask(task) {
   const data = await chrome.storage.local.get('resumableTasks');
   const tasks = data.resumableTasks || {};
   if (task.config) {
@@ -117,7 +131,11 @@ async function registerTabMapping(tabId, presentationId) {
   }
 }
 
-async function registerActiveCopy(presentationId, copyId, token) {
+function registerActiveCopy(presentationId, copyId, token) {
+  return withStorageLock(() => writeActiveCopy(presentationId, copyId, token));
+}
+
+async function writeActiveCopy(presentationId, copyId, token) {
   try {
     const data = await chrome.storage.local.get('activeCopies');
     const copies = data.activeCopies || {};
@@ -128,7 +146,11 @@ async function registerActiveCopy(presentationId, copyId, token) {
   }
 }
 
-async function unregisterActiveCopy(presentationId) {
+function unregisterActiveCopy(presentationId) {
+  return withStorageLock(() => removeActiveCopy(presentationId));
+}
+
+async function removeActiveCopy(presentationId) {
   try {
     const data = await chrome.storage.local.get('activeCopies');
     const copies = data.activeCopies || {};
@@ -837,7 +859,7 @@ async function onTranslationFinished(presentationId, portMessageSender) {
 function triggerTranslation(presentationId, presentationTitle, fileType, targetLang, config, portMessageSender) {
   // Snapshot params before the workflow mutates config (pageTextMap etc.) so a
   // restarted service worker can rerun the job.
-  setResumableTask({ presentationId, presentationTitle, fileType, targetLang, config: { ...config } });
+  const snapshotSaved = setResumableTask({ presentationId, presentationTitle, fileType, targetLang, config: { ...config } });
   startKeepAlive();
 
   const taskState = {
@@ -860,7 +882,8 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
     }
   };
 
-  runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress)
+  snapshotSaved
+    .then(() => runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress))
     .then(() => {
       onTranslationFinished(presentationId, portMessageSender);
     })
@@ -880,7 +903,8 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
 async function runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
   const langs = [targetLang, ...(config.extraLangs || []).filter((l) => l && l !== targetLang)];
   const total = langs.length;
-  const results = [];
+  // Copies finished before a service-worker restart (see resume snapshot below).
+  const results = [...(config.priorResults || [])];
   for (let i = 0; i < total; i++) {
     const lang = langs[i];
     const isLast = i === total - 1;
@@ -891,9 +915,19 @@ async function runAllLanguages(presentationId, presentationTitle, fileType, targ
       if (step === 'done') {
         results.push({ lang, url: finalUrl });
         if (!isLast) {
+          // Resume from the next language, not from the first, if the worker restarts.
+          await setResumableTask({
+            presentationId, presentationTitle, fileType, targetLang: langs[i + 1],
+            config: { ...config, extraLangs: langs.slice(i + 2), priorResults: [...results] },
+          });
           return sendProgress('translate', overall, { key: 'progress.langDone', params: { done: i + 1, total } });
         }
-        return sendProgress('done', 100, status, null, finalUrl, total > 1 ? { ...summary, results } : summary);
+        const multi = results.length > 1;
+        return sendProgress('done', 100, status, null, finalUrl, multi ? { ...summary, results } : summary);
+      }
+      if (error && results.length) {
+        // Keep the copies that did finish reachable from the error state.
+        return sendProgress(step, 0, status, error, null, { results });
       }
       return sendProgress(step, total > 1 ? overall : pct, status, error, finalUrl, summary);
     };

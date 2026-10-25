@@ -230,5 +230,7 @@
   "prefs.terms.colDst": "Traducción",
   "settings.modelHelp.summary": "¿Cómo elijo un modelo?",
   "settings.unsaved.note": "● Cambios sin guardar: guarda para aplicarlos",
-  "settings.unsaved.confirm": "Tienes cambios sin guardar. ¿Descartarlos?"
+  "settings.unsaved.confirm": "Tienes cambios sin guardar. ¿Descartarlos?",
+  "done.partialTitle": "⚠ Algunos idiomas terminaron",
+  "error.sheetNotFound": "La hoja en la que estabas ya no existe.\nRecarga la hoja de cálculo, abre la pestaña deseada e inténtalo de nuevo."
 }

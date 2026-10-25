@@ -249,12 +249,13 @@ export async function translateTexts(texts, targetLang, config) {
         config.onBatchProgress(idx + 1, batches.length);
       }
 
-      // Map responses and save to cache
+      // Map responses and save to cache. After the custom-instruction fallback the
+      // results no longer match this cache key's prefs, so they are not cached.
       for (let i = 0; i < batch.length; i++) {
         const original = batch[i];
         const translated = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
         translationsMap.set(original, translated);
-        cache[original.trim()] = translated;
+        if (!config.prefsCustomDropped) cache[original.trim()] = translated;
       }
     }
   }
