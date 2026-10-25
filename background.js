@@ -322,11 +322,55 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /**
+ * Hands the finished copy to the user. The tab opens in the foreground only when
+ * "auto-switch to result" is on (default); otherwise it opens behind so the side
+ * panel keeps showing the completion card. If the panel is not watching this job
+ * (closed, or on another file), a system notification announces it instead.
+ */
+async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summary) {
+  const { autoOpenResult = true } = await chrome.storage.local.get('autoOpenResult');
+  // Lets the panel show "translated from …" when it lands on the copy.
+  await chrome.storage.local.set({ [`completedInfo_${copyId}`]: { sourceTitle, summary, at: Date.now() } });
+  chrome.tabs.create({ url: editUrl, active: autoOpenResult });
+
+  const panelWatching = activePort && activeViewPresentationId === presentationId;
+  if (!panelWatching || !autoOpenResult) {
+    const lang = getLanguage(summary.targetLang)?.endonym || summary.targetLang;
+    chrome.notifications.create(`done:${copyId}`, {
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: '✅ ' + (sourceTitle || 'Workspace Translator Pro'),
+      message: `→ ${lang}`,
+      priority: 1,
+    });
+    await chrome.storage.local.set({ [`notifUrl_done:${copyId}`]: editUrl });
+  }
+}
+
+chrome.notifications.onClicked.addListener(async (notificationId) => {
+  const key = `notifUrl_${notificationId}`;
+  const data = await chrome.storage.local.get(key);
+  if (data[key]) {
+    chrome.tabs.create({ url: data[key] });
+    await chrome.storage.local.remove(key);
+  }
+  chrome.notifications.clear(notificationId);
+});
+
+/**
  * Main translation workflow orchestration
  */
 async function runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
   let copyId = null;
   config.presentationId = presentationId;
+  const startedAt = Date.now();
+  const summarize = (extra = {}) => ({
+    durationMs: Date.now() - startedAt,
+    engine: config.translationEngine,
+    model: config.translationEngine === 'free' ? null : config.modelName,
+    targetLang,
+    ...extra,
+  });
   
   const checkCancelled = async () => {
     await checkCancelledGlobal(presentationId);
@@ -384,8 +428,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const editUrl = await translateSpreadsheet(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
-      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.spreadsheet' } }, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize();
+      sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
       return;
     }
 
@@ -395,8 +440,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const editUrl = await translateForm(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'form', editUrl);
-      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.form' } }, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize();
+      sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
       return;
     }
 
@@ -484,8 +530,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       
     if (uniqueTextsArray.length === 0) {
       await logDebug('No translatable texts found. Finalizing copying process.', presentationId);
-      sendProgress('done', 100, { key: 'progress.noTranslatableText' });
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize({ segments: 0 });
+      sendProgress('done', 100, { key: 'progress.noTranslatableText' }, null, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
       return;
     }
     
@@ -597,8 +644,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await logDebug('Translation process finished. Opening new tab.', presentationId);
     await unregisterActiveCopy(presentationId);
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
-    sendProgress('done', 100, { key: 'progress.opening', params: { fileType: `@fileType.${fileTypeName}` } }, null, editUrl);
-    chrome.tabs.create({ url: editUrl });
+    const summary = summarize({ segments: uniqueTextsArray.length });
+    sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+    await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
     
   } catch (err) {
     await logDebug(`Error occurred during translation workflow: ${err.message}`, presentationId);
@@ -755,8 +803,8 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
     portMessageSender(presentationId, taskState);
   }
   
-  const sendProgress = async (step, pct, status, error = null, finalUrl = null) => {
-    const updatedState = { step, pct, status, error, finalUrl };
+  const sendProgress = async (step, pct, status, error = null, finalUrl = null, summary = null) => {
+    const updatedState = { step, pct, status, error, finalUrl, summary };
     await setTaskState(presentationId, updatedState);
     if (portMessageSender) {
       portMessageSender(presentationId, updatedState);

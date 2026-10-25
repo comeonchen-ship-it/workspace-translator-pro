@@ -152,5 +152,16 @@
   "error.modelNotFound": "设置中的 {engine} 模型已停用或名称拼错（404）。\n请打开设置（⚙️）改成当前可用的模型名称（可参考官方模型列表），再点「测试连接」。",
   "error.noCopyPermission": "Google 云端硬盘不允许你复制这个文件。\n你可能只有查看／评论权限，或所有者关闭了复制功能。请向所有者申请编辑权限，或先用「文件 → 创建副本」，再翻译你的副本。",
   "error.signIn": "Google 登录已过期或未完成。\n请再点一次「翻译并创建副本」，并在弹出的 Google 登录窗口完成登录。",
-  "error.network": "无法连接到服务器，可能已离线或连接被阻止。\n请检查网络连接（或 VPN／防火墙）后再试一次。"
+  "error.network": "无法连接到服务器，可能已离线或连接被阻止。\n请检查网络连接（或 VPN／防火墙）后再试一次。",
+  "done.title": "✅ 翻译完成",
+  "done.open": "打开翻译后的文件",
+  "done.again": "再翻译成另一种语言",
+  "done.copyTitle": "✅ 这是翻译完成的副本",
+  "done.copySub": "由《{title}》翻译而来，请检查用词与版面。",
+  "done.durationMin": "{m} 分 {s} 秒",
+  "done.durationSec": "{s} 秒",
+  "done.segments": "{n} 段文字",
+  "done.overflowFixed": "{n} 个文本框已缩小字号以免溢出",
+  "settings.section.result": "翻译完成后",
+  "settings.autoOpenResult": "完成后自动切换到译文"
 }

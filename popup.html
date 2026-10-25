@@ -90,6 +90,21 @@
         </button>
       </div>
 
+      <!-- Completion card: shown on the source file when a job finishes, and on the
+           translated copy ("translated from …"). Filled by popup.js showCompletion(). -->
+      <div class="completion-card hidden" id="completion-card">
+        <div class="completion-head">
+          <span class="completion-title" id="completion-title" data-i18n="done.title">✅ Translation complete</span>
+          <button class="close-btn completion-close" id="btn-completion-close" data-i18n-title="settings.close">&times;</button>
+        </div>
+        <div class="completion-sub" id="completion-sub"></div>
+        <div class="completion-stats" id="completion-stats"></div>
+        <div class="completion-actions" id="completion-actions">
+          <button class="btn btn-primary btn-sm" id="btn-open-result" data-i18n="done.open">Open translated file</button>
+          <button class="btn btn-secondary btn-sm" id="btn-translate-again" data-i18n="done.again">Translate to another language</button>
+        </div>
+      </div>
+
       <!-- Progress Tracking Panel (Hidden by Default) -->
       <div class="progress-section" id="progress-section">
         <div class="progress-header">
@@ -232,6 +247,14 @@
             </div>
             <div class="test-result-msg" id="test-result-msg"></div>
           </div>
+        </div>
+        <!-- What happens when a job finishes. Saved with the Save button. -->
+        <div class="setting-group-card">
+          <h4 data-i18n="settings.section.result">After Translation</h4>
+          <label class="checkbox-row" for="auto-open-result">
+            <input type="checkbox" id="auto-open-result" checked>
+            <span data-i18n="settings.autoOpenResult">Switch to the translated file automatically</span>
+          </label>
         </div>
       </div>
 

@@ -152,5 +152,16 @@
   "error.modelNotFound": "Le modèle {engine} indiqué dans les paramètres n'existe plus ou est mal orthographié (404).\nOuvrez les paramètres (⚙️), saisissez un nom de modèle actuel, puis cliquez sur « Tester la connexion ».",
   "error.noCopyPermission": "Google Drive n'autorise pas la copie de ce fichier.\nVous n'avez peut-être qu'un accès en lecture/commentaire, ou le propriétaire a désactivé la copie. Demandez un accès en modification, ou faites Fichier → Créer une copie puis traduisez la copie.",
   "error.signIn": "Votre connexion Google a expiré ou n'a pas abouti.\nCliquez à nouveau sur « Traduire et copier » et terminez la connexion Google.",
-  "error.network": "Impossible de joindre le serveur — vous semblez hors ligne ou la connexion est bloquée.\nVérifiez votre connexion (ou VPN/pare-feu), puis réessayez."
+  "error.network": "Impossible de joindre le serveur — vous semblez hors ligne ou la connexion est bloquée.\nVérifiez votre connexion (ou VPN/pare-feu), puis réessayez.",
+  "done.title": "✅ Traduction terminée",
+  "done.open": "Ouvrir le fichier traduit",
+  "done.again": "Traduire dans une autre langue",
+  "done.copyTitle": "✅ Ceci est une copie traduite",
+  "done.copySub": "Traduit depuis « {title} ». Vérifiez la formulation et la mise en page.",
+  "done.durationMin": "{m} min {s} s",
+  "done.durationSec": "{s} s",
+  "done.segments": "{n} segments de texte",
+  "done.overflowFixed": "{n} zones de texte réduites pour tenir",
+  "settings.section.result": "Après la traduction",
+  "settings.autoOpenResult": "Basculer automatiquement vers le fichier traduit"
 }

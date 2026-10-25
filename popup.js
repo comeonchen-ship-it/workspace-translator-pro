@@ -53,6 +53,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
   const apiKeyIndicator = document.getElementById('api-key-indicator');
+  const inputAutoOpen = document.getElementById('auto-open-result');
+  const completionCard = document.getElementById('completion-card');
+  const completionTitle = document.getElementById('completion-title');
+  const completionSub = document.getElementById('completion-sub');
+  const completionStats = document.getElementById('completion-stats');
+  const completionActions = document.getElementById('completion-actions');
+  let completionUrl = null;
+  let completionDismissKey = null;
   
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
@@ -156,9 +164,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     'apiKey',
     'modelName',
     'customUrl',
-    'apiKeyStatus'
+    'apiKeyStatus',
+    'autoOpenResult'
   ], (items) => {
     selectEngine.value = items.translationEngine || 'gemini';
+    if (inputAutoOpen) inputAutoOpen.checked = items.autoOpenResult !== false;
     inputApiKey.value = items.apiKey || '';
     inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
     inputCustomUrl.value = items.customUrl || '';
@@ -439,7 +449,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       translationEngine,
       apiKey,
       modelName,
-      customUrl
+      customUrl,
+      autoOpenResult: inputAutoOpen ? inputAutoOpen.checked : true
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       closeSettings();
@@ -879,10 +890,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSettings.disabled = false;
     btnHelp.disabled = false;
     progressSection.style.display = 'none';
+    hideCompletion();
     
     resetProgress();
     
     logConsoleContent.textContent = t('logs.waiting');
+
+    // Landing on a freshly translated copy: say where it came from.
+    const infoKey = `completedInfo_${presentationId}`;
+    chrome.storage.local.get(infoKey, (data) => {
+      const info = data[infoKey];
+      if (info && currentPresentationId === presentationId && Date.now() - info.at < 24 * 3600 * 1000) {
+        showCompletion({
+          title: t('done.copyTitle'),
+          sub: t('done.copySub', { title: info.sourceTitle || '' }),
+          summary: info.summary,
+          url: null,
+          dismissKey: infoKey,
+        });
+      }
+    });
     
     // Start periodic log polling for this specific presentation
     lastProgressTime = Date.now();
@@ -942,6 +969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   function startTranslation(items, translationEngine, apiKey) {
+    hideCompletion();
     // Start translation UI state
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
@@ -1199,23 +1227,70 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateLogDisplay(data[key] || []);
       });
 
-      const completedId = currentPresentationId;
-
-      // Lock tab-change detection for 15 seconds so the newly opened
-      // translated file doesn't hijack the UI title display.
-      tabChangeLocked = true;
-      setTimeout(() => { tabChangeLocked = false; }, 15000);
-
-      setTimeout(() => {
-        if (currentPresentationId === completedId) {
-          progressSection.style.display = 'none';
-          btnTranslate.disabled = false;
-          btnSettings.disabled = false;
-          btnHelp.disabled = false;
-        }
-      }, 3000);
+      // Keep the result on screen until the user dismisses it or starts again —
+      // it used to vanish after 3s, often before the user ever saw it.
+      progressSection.style.display = 'none';
+      btnTranslate.disabled = false;
+      btnSettings.disabled = false;
+      btnHelp.disabled = false;
+      showCompletion({
+        title: t('done.title'),
+        sub: '',
+        summary: message.summary,
+        url: finalUrl,
+        dismissKey: `taskState_${currentPresentationId}`,
+      });
     }
   }
+
+
+  // ── Completion card ───────────────────────────────────────────────────────
+  function formatDuration(ms) {
+    const total = Math.max(1, Math.round(ms / 1000));
+    const m = Math.floor(total / 60);
+    const sec = total % 60;
+    return m > 0 ? t('done.durationMin', { m, s: sec }) : t('done.durationSec', { s: sec });
+  }
+
+  function summaryText(summary) {
+    if (!summary) return '';
+    const parts = [];
+    if (typeof summary.segments === 'number') parts.push(t('done.segments', { n: summary.segments }));
+    if (summary.durationMs) parts.push(formatDuration(summary.durationMs));
+    if (summary.engine) parts.push(summary.model ? `${summary.engine.toUpperCase()} · ${summary.model}` : summary.engine.toUpperCase());
+    if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
+    return parts.join(' · ');
+  }
+
+  function showCompletion({ title, sub, summary, url, dismissKey }) {
+    if (!completionCard) return;
+    completionTitle.textContent = title;
+    completionSub.textContent = sub || '';
+    completionStats.textContent = summaryText(summary);
+    completionUrl = url;
+    completionDismissKey = dismissKey;
+    completionActions.classList.toggle('hidden', !url);
+    completionCard.classList.remove('hidden');
+  }
+
+  function hideCompletion() {
+    if (completionCard) completionCard.classList.add('hidden');
+    completionUrl = null;
+    completionDismissKey = null;
+  }
+
+  document.getElementById('btn-open-result')?.addEventListener('click', () => {
+    if (completionUrl) chrome.tabs.create({ url: completionUrl });
+  });
+  document.getElementById('btn-translate-again')?.addEventListener('click', () => {
+    if (completionDismissKey) chrome.storage.local.remove(completionDismissKey);
+    hideCompletion();
+    selectLang.focus();
+  });
+  document.getElementById('btn-completion-close')?.addEventListener('click', () => {
+    if (completionDismissKey) chrome.storage.local.remove(completionDismissKey);
+    hideCompletion();
+  });
 
   // 5. Translation History functionality
   btnHistory.addEventListener('click', () => {

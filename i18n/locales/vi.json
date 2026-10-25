@@ -152,5 +152,16 @@
   "error.modelNotFound": "Mô hình {engine} trong Cài đặt không còn tồn tại hoặc sai tên (404).\nMở Cài đặt (⚙️), nhập tên mô hình hiện có rồi nhấn \"Kiểm tra kết nối\".",
   "error.noCopyPermission": "Google Drive không cho phép sao chép tệp này.\nCó thể bạn chỉ có quyền xem/nhận xét hoặc chủ sở hữu đã tắt sao chép. Hãy xin quyền chỉnh sửa, hoặc dùng Tệp → Tạo bản sao rồi dịch bản sao đó.",
   "error.signIn": "Phiên đăng nhập Google đã hết hạn hoặc chưa hoàn tất.\nNhấn lại \"Dịch và tạo bản sao\" và hoàn tất cửa sổ đăng nhập Google.",
-  "error.network": "Không thể kết nối máy chủ — có vẻ bạn đang ngoại tuyến hoặc kết nối bị chặn.\nKiểm tra kết nối mạng (hoặc VPN/tường lửa) rồi thử lại."
+  "error.network": "Không thể kết nối máy chủ — có vẻ bạn đang ngoại tuyến hoặc kết nối bị chặn.\nKiểm tra kết nối mạng (hoặc VPN/tường lửa) rồi thử lại.",
+  "done.title": "✅ Dịch xong",
+  "done.open": "Mở tệp đã dịch",
+  "done.again": "Dịch sang ngôn ngữ khác",
+  "done.copyTitle": "✅ Đây là bản sao đã dịch",
+  "done.copySub": "Dịch từ “{title}”. Hãy kiểm tra cách diễn đạt và bố cục.",
+  "done.durationMin": "{m} phút {s} giây",
+  "done.durationSec": "{s} giây",
+  "done.segments": "{n} đoạn văn bản",
+  "done.overflowFixed": "Đã thu nhỏ {n} hộp văn bản cho vừa",
+  "settings.section.result": "Sau khi dịch",
+  "settings.autoOpenResult": "Tự động chuyển sang tệp đã dịch"
 }

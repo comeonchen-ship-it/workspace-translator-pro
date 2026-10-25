@@ -1330,3 +1330,53 @@ body.theme-form {
 .val-indicator.neutral {
   color: var(--text-muted);
 }
+
+/* ── Completion card ───────────────────────────────────────────────────── */
+.completion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 206, 201, 0.08);
+  border: 1px solid rgba(0, 206, 201, 0.35);
+  border-radius: 12px;
+  padding: 12px;
+  animation: slideDown 0.3s ease-out forwards;
+}
+.completion-card.hidden { display: none; }
+.completion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.completion-title {
+  font-weight: 600;
+  color: var(--accent);
+}
+.completion-close { font-size: 18px; }
+.completion-sub {
+  font-size: 12px;
+  color: var(--text-main, #fff);
+  word-break: break-word;
+}
+.completion-sub:empty, .completion-stats:empty { display: none; }
+.completion-stats {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.completion-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+.completion-actions.hidden { display: none; }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }

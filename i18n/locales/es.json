@@ -152,5 +152,16 @@
   "error.modelNotFound": "El modelo de {engine} de Ajustes ya no existe o está mal escrito (404).\nAbre Ajustes (⚙️), escribe un nombre de modelo actual y pulsa «Probar conexión».",
   "error.noCopyPermission": "Google Drive no permite copiar este archivo.\nPuede que solo tengas acceso de lectura/comentario o que el propietario haya desactivado la copia. Pide acceso de edición, o usa Archivo → Hacer una copia y traduce tu copia.",
   "error.signIn": "Tu inicio de sesión de Google caducó o no se completó.\nPulsa de nuevo «Traducir y copiar» y completa el inicio de sesión de Google.",
-  "error.network": "No se pudo conectar con el servidor: parece que no hay conexión o está bloqueada.\nRevisa tu conexión (o VPN/cortafuegos) e inténtalo de nuevo."
+  "error.network": "No se pudo conectar con el servidor: parece que no hay conexión o está bloqueada.\nRevisa tu conexión (o VPN/cortafuegos) e inténtalo de nuevo.",
+  "done.title": "✅ Traducción completada",
+  "done.open": "Abrir archivo traducido",
+  "done.again": "Traducir a otro idioma",
+  "done.copyTitle": "✅ Esta es una copia traducida",
+  "done.copySub": "Traducido de «{title}». Revisa la redacción y el diseño.",
+  "done.durationMin": "{m} min {s} s",
+  "done.durationSec": "{s} s",
+  "done.segments": "{n} fragmentos de texto",
+  "done.overflowFixed": "{n} cuadros de texto reducidos para ajustarse",
+  "settings.section.result": "Después de traducir",
+  "settings.autoOpenResult": "Cambiar automáticamente al archivo traducido"
 }
