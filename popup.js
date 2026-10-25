@@ -68,7 +68,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefsCard = document.getElementById('prefs-card');
   const prefsFreeNote = document.getElementById('prefs-free-note');
   const prefTone = document.getElementById('pref-tone');
-  const keepBoxes = Object.fromEntries(KEEP_CATEGORIES.map((k) => [k, document.getElementById(`keep-${k}`)]));
+  // Keep-original categories are toggle chips; expose them like checkboxes.
+  const keepBoxes = Object.fromEntries(KEEP_CATEGORIES.map((k) => {
+    const chip = document.getElementById(`keep-${k}`);
+    chip.addEventListener('click', () => {
+      chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
+      chip.dispatchEvent(new Event('change'));
+    });
+    return [k, {
+      get checked() { return chip.getAttribute('aria-pressed') === 'true'; },
+      set checked(v) { chip.setAttribute('aria-pressed', String(!!v)); },
+      addEventListener: (type, fn) => chip.addEventListener(type, fn),
+    }];
+  }));
   const rulesPreviewList = document.getElementById('rules-preview-list');
   const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview });
   const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms });
@@ -1109,6 +1121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSettings.disabled = false;
     btnHelp.disabled = false;
     progressSection.style.display = 'none';
+    mainPanel.classList.remove('is-busy');
     hideCompletion();
     updateScopeControls();
     
@@ -1224,6 +1237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const scope = await buildScopeForJob();
     if (!scope) return;
     hideCompletion();
+    mainPanel.classList.add('is-busy');
     // Start translation UI state
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
@@ -1400,6 +1414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Ensure the progress section remains visible to show the error message
       progressSection.style.display = 'flex';
       
+      mainPanel.classList.remove('is-busy');
       const humanError = translateErrorToHuman(error, selectEngine.value);
       progressStatus.textContent = humanError;
       progressStatus.style.color = '#ff7675';
@@ -1439,6 +1454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     progressSection.style.display = 'flex';
+    mainPanel.classList.toggle('is-busy', step !== 'done');
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
     btnHelp.disabled = true;
@@ -1541,7 +1557,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     completionUrl = url;
     completionDismissKey = dismissKey;
+    // Multi-language runs list one link per copy, which replaces the single button.
+    const hasResults = (summary?.results || []).length > 0;
     completionActions.classList.toggle('hidden', !url);
+    document.getElementById('btn-open-result').hidden = hasResults;
     completionCard.classList.remove('hidden');
   }
 

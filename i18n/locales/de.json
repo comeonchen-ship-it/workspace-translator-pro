@@ -28,7 +28,7 @@
   "steps.extract": "Elemente und Text extrahieren",
   "steps.translate": "Text über die LLM-API übersetzen",
   "steps.write": "Übersetzung in die Kopie schreiben",
-  "progress.warningBanner": "Übersetzung läuft. Diesen Tab und das Seitenpanel bis zum Abschluss geöffnet lassen.",
+  "progress.warningBanner": "Du kannst die Seitenleiste schließen – wir benachrichtigen dich. Schließe nicht den Tab dieser Datei.",
   "progress.connecting": "Verbinden …",
   "progress.slow": "Dauert länger als erwartet. Verbindung oder Protokoll prüfen …",
   "progress.complete": "Übersetzung abgeschlossen!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "Firmen-, Marken- und Produktnamen",
   "prefs.keep.places": "Ortsnamen",
   "prefs.terms.label": "Bestimmte Begriffe (alle Dateien)",
-  "prefs.terms.srcPlaceholder": "z. B. AI",
-  "prefs.terms.dstPlaceholder": "z. B. KI",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "KI",
   "prefs.terms.mode.translate": "übersetzen mit",
   "prefs.terms.mode.keep": "unverändert lassen",
   "prefs.terms.remove": "Entfernen",
@@ -227,5 +227,6 @@
   "multi.picked": " ({n} ausgewählt)",
   "prefs.terms.colSrc": "Wort in der Datei",
   "prefs.terms.colMode": "Aktion",
-  "prefs.terms.colDst": "Übersetzung"
+  "prefs.terms.colDst": "Übersetzung",
+  "settings.modelHelp.summary": "Wie wähle ich ein Modell?"
 }

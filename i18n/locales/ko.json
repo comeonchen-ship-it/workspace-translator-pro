@@ -28,7 +28,7 @@
   "steps.extract": "요소 및 텍스트 추출",
   "steps.translate": "LLM API로 텍스트 번역",
   "steps.write": "번역문을 사본에 반영",
-  "progress.warningBanner": "번역 진행 중입니다. 완료될 때까지 이 탭과 사이드 패널을 열어 두세요.",
+  "progress.warningBanner": "사이드 패널은 닫아도 됩니다(완료 시 알림). 이 파일의 탭은 닫지 마세요.",
   "progress.connecting": "연결 중…",
   "progress.slow": "예상보다 오래 걸리고 있습니다. 연결 상태나 로그를 확인해 주세요…",
   "progress.complete": "번역이 완료되었습니다!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "회사·브랜드·제품 이름",
   "prefs.keep.places": "지명",
   "prefs.terms.label": "지정 용어(모든 파일)",
-  "prefs.terms.srcPlaceholder": "예: AI",
-  "prefs.terms.dstPlaceholder": "예: 인공지능",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "인공지능",
   "prefs.terms.mode.translate": "번역:",
   "prefs.terms.mode.keep": "원문 유지",
   "prefs.terms.remove": "삭제",
@@ -227,5 +227,6 @@
   "multi.picked": " ({n}개 선택됨)",
   "prefs.terms.colSrc": "파일 속 단어",
   "prefs.terms.colMode": "처리",
-  "prefs.terms.colDst": "번역어"
+  "prefs.terms.colDst": "번역어",
+  "settings.modelHelp.summary": "모델은 어떻게 고르나요?"
 }

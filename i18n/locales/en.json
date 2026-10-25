@@ -28,7 +28,7 @@
   "steps.extract": "Extract elements & text runs",
   "steps.translate": "Translate text runs via LLM API",
   "steps.write": "Write back translations to copy",
-  "progress.warningBanner": "Translation in progress. Keep this tab and the side panel open until it's done.",
+  "progress.warningBanner": "You can close the side panel — we'll notify you when it's done. Don't close this file's tab.",
   "progress.connecting": "Connecting...",
   "progress.slow": "Taking longer than expected. Check connection/logs...",
   "progress.complete": "Translation Complete!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "Company, brand and product names",
   "prefs.keep.places": "Place names",
   "prefs.terms.label": "Specific terms (all files)",
-  "prefs.terms.srcPlaceholder": "e.g. AI",
-  "prefs.terms.dstPlaceholder": "e.g. IA",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "IA",
   "prefs.terms.mode.translate": "translate as",
   "prefs.terms.mode.keep": "keep original",
   "prefs.terms.remove": "Remove",
@@ -227,5 +227,6 @@
   "multi.picked": " ({n} selected)",
   "prefs.terms.colSrc": "Word in the file",
   "prefs.terms.colMode": "How",
-  "prefs.terms.colDst": "Translation"
+  "prefs.terms.colDst": "Translation",
+  "settings.modelHelp.summary": "How do I choose a model?"
 }

@@ -28,7 +28,7 @@
   "steps.extract": "Extraire les éléments et le texte",
   "steps.translate": "Traduire le texte via l'API du LLM",
   "steps.write": "Réécrire la traduction dans la copie",
-  "progress.warningBanner": "Traduction en cours. Gardez cet onglet et le panneau latéral ouverts jusqu'à la fin.",
+  "progress.warningBanner": "Vous pouvez fermer le panneau latéral, une notification vous préviendra. Ne fermez pas l'onglet de ce fichier.",
   "progress.connecting": "Connexion...",
   "progress.slow": "Cela prend plus de temps que prévu. Vérifiez la connexion ou les journaux...",
   "progress.complete": "Traduction terminée !",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "Noms d'entreprises, de marques et de produits",
   "prefs.keep.places": "Noms de lieux",
   "prefs.terms.label": "Termes précis (tous les fichiers)",
-  "prefs.terms.srcPlaceholder": "ex. AI",
-  "prefs.terms.dstPlaceholder": "ex. IA",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "IA",
   "prefs.terms.mode.translate": "traduire par",
   "prefs.terms.mode.keep": "garder tel quel",
   "prefs.terms.remove": "Supprimer",
@@ -227,5 +227,6 @@
   "multi.picked": " ({n} sélectionnée(s))",
   "prefs.terms.colSrc": "Mot du fichier",
   "prefs.terms.colMode": "Action",
-  "prefs.terms.colDst": "Traduction"
+  "prefs.terms.colDst": "Traduction",
+  "settings.modelHelp.summary": "Comment choisir un modèle ?"
 }

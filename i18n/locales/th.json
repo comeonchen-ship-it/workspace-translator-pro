@@ -28,7 +28,7 @@
   "steps.extract": "ดึงองค์ประกอบและข้อความ",
   "steps.translate": "แปลข้อความผ่าน LLM API",
   "steps.write": "เขียนคำแปลกลับลงในสำเนา",
-  "progress.warningBanner": "กำลังแปล โปรดเปิดแท็บนี้และแผงด้านข้างไว้จนกว่าจะเสร็จ",
+  "progress.warningBanner": "ปิดแผงด้านข้างได้ เราจะแจ้งเมื่อเสร็จ แต่อย่าปิดแท็บของไฟล์นี้",
   "progress.connecting": "กำลังเชื่อมต่อ…",
   "progress.slow": "ใช้เวลานานกว่าที่คาด โปรดตรวจสอบการเชื่อมต่อหรือบันทึก…",
   "progress.complete": "แปลเสร็จแล้ว!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "ชื่อบริษัท แบรนด์ และสินค้า",
   "prefs.keep.places": "ชื่อสถานที่",
   "prefs.terms.label": "คำที่กำหนดเอง (ทุกไฟล์)",
-  "prefs.terms.srcPlaceholder": "เช่น AI",
-  "prefs.terms.dstPlaceholder": "เช่น ปัญญาประดิษฐ์",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "ปัญญาประดิษฐ์",
   "prefs.terms.mode.translate": "แปลเป็น",
   "prefs.terms.mode.keep": "คงเดิม",
   "prefs.terms.remove": "ลบ",
@@ -227,5 +227,6 @@
   "multi.picked": " (เลือกแล้ว {n})",
   "prefs.terms.colSrc": "คำในไฟล์",
   "prefs.terms.colMode": "วิธีจัดการ",
-  "prefs.terms.colDst": "คำแปล"
+  "prefs.terms.colDst": "คำแปล",
+  "settings.modelHelp.summary": "เลือกโมเดลอย่างไร?"
 }

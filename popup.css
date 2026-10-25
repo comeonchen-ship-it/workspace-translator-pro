@@ -568,9 +568,25 @@ select option {
   color: #a0a5c0;
 }
 .progress-steps li.success .step-bullet {
+  /* Done steps get a check so they read differently from the running one. */
+  width: 12px;
+  height: 12px;
   background: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
+  box-shadow: none;
+  position: relative;
 }
+.progress-steps li.success .step-bullet::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  font-size: 9px;
+  line-height: 12px;
+  text-align: center;
+  color: #0b1020;
+  font-weight: 700;
+}
+.progress-steps li.active .step-bullet { animation: stepPulse 1.2s ease-in-out infinite; }
+@keyframes stepPulse { 50% { transform: scale(1.5); } }
 
 /* Settings Panel */
 .settings-panel {
@@ -1342,8 +1358,8 @@ body.theme-form {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(0, 206, 201, 0.08);
-  border: 1px solid rgba(0, 206, 201, 0.35);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
   border-radius: 12px;
   padding: 12px;
   animation: slideDown 0.3s ease-out forwards;
@@ -1453,7 +1469,8 @@ body.theme-form {
   gap: 6px;
   margin-top: 8px;
 }
-.lang-chip {
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip, .lang-chip {
   font: inherit;
   font-size: 12px;
   padding: 4px 10px;
@@ -1464,14 +1481,14 @@ body.theme-form {
   cursor: pointer;
   transition: var(--transition);
 }
-.lang-chip:hover { border-color: var(--accent); }
-.lang-chip[aria-pressed="true"] {
+.chip:hover, .lang-chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"], .lang-chip[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
   color: #0b1020;
   font-weight: 600;
 }
-.lang-chip[aria-pressed="true"]::before { content: '✓ '; }
+.chip[aria-pressed="true"]::before, .lang-chip[aria-pressed="true"]::before { content: '✓ '; }
 .lang-chip[hidden] { display: none; }
 .completion-results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
 .completion-results:empty { display: none; }
@@ -1482,7 +1499,7 @@ body.theme-form {
 .term-editor { display: flex; flex-direction: column; gap: 6px; }
 .term-head, .term-row {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) 78px minmax(0, 1.15fr) 16px;
+  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1.25fr) 14px;
   gap: 4px;
   align-items: center;
 }
@@ -1512,9 +1529,42 @@ body.theme-form {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(0, 206, 201, 0.06);
-  border: 1px solid rgba(0, 206, 201, 0.25);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   font-size: 12px;
 }
 .rules-preview-title { font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
 .rules-preview ul { margin: 0; padding-left: 18px; color: var(--text-main); line-height: 1.6; }
+
+/* ── UX pass ───────────────────────────────────────────────────────────── */
+/* Disabled buttons must look disabled (the setup "Start" looked clickable). */
+.btn:disabled, .btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Job options share the panel's vertical rhythm, and step aside while a job
+   runs so progress (and then the result) is the first thing on screen. */
+.job-options { display: flex; flex-direction: column; gap: 16px; }
+.active-panel.is-busy .job-options,
+.active-panel.is-busy .action-trigger { display: none; }
+
+/* One collapsed line instead of two stacked warning boxes under the model. */
+.model-help { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+.model-help summary { cursor: pointer; color: var(--accent); list-style: none; }
+.model-help summary::-webkit-details-marker { display: none; }
+.model-help summary::before { content: 'ⓘ '; }
+.model-help p { margin: 6px 0 0; line-height: 1.5; }
+.model-help .tip-link { color: var(--accent); }
+
+/* Setup footer: one clear primary action, skip as a quiet link. */
+.setup-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 12px; }
+.link-btn {
+  background: none; border: none; padding: 4px;
+  font: inherit; font-size: 12px; color: var(--text-muted);
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.link-btn:hover { color: var(--text-main); }
+.btn[hidden] { display: none; }

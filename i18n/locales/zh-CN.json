@@ -28,7 +28,7 @@
   "steps.extract": "提取版面元素与文字",
   "steps.translate": "通过 LLM API 翻译文字",
   "steps.write": "将译文写回副本",
-  "progress.warningBanner": "翻译进行中，请保持此标签页与侧边栏开启，直到完成。",
+  "progress.warningBanner": "可以关闭侧边栏，完成时会通知你；请勿关闭这份文件的标签页。",
   "progress.connecting": "正在连接…",
   "progress.slow": "耗时较久，请检查网络连接或查看日志…",
   "progress.complete": "翻译完成！",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "公司、品牌、产品名称",
   "prefs.keep.places": "地名",
   "prefs.terms.label": "指定词语（所有文件）",
-  "prefs.terms.srcPlaceholder": "例：AI",
-  "prefs.terms.dstPlaceholder": "例：人工智能",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "人工智能",
   "prefs.terms.mode.translate": "译成",
   "prefs.terms.mode.keep": "保持原文",
   "prefs.terms.remove": "删除",
@@ -227,5 +227,6 @@
   "multi.picked": "（已选 {n} 种）",
   "prefs.terms.colSrc": "文件中的词",
   "prefs.terms.colMode": "处理方式",
-  "prefs.terms.colDst": "译文"
+  "prefs.terms.colDst": "译文",
+  "settings.modelHelp.summary": "模型怎么选？"
 }

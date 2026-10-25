@@ -28,7 +28,7 @@
   "steps.extract": "要素とテキストを抽出",
   "steps.translate": "LLM API でテキストを翻訳",
   "steps.write": "訳文をコピーに書き戻し",
-  "progress.warningBanner": "翻訳中です。完了するまでこのタブとサイドパネルを開いたままにしてください。",
+  "progress.warningBanner": "サイドパネルは閉じても大丈夫です（完了時に通知します）。このファイルのタブは閉じないでください。",
   "progress.connecting": "接続中…",
   "progress.slow": "予想より時間がかかっています。接続やログをご確認ください…",
   "progress.complete": "翻訳が完了しました！",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "会社名・ブランド名・製品名",
   "prefs.keep.places": "地名",
   "prefs.terms.label": "指定する語句（全ファイル）",
-  "prefs.terms.srcPlaceholder": "例：AI",
-  "prefs.terms.dstPlaceholder": "例：人工知能",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "人工知能",
   "prefs.terms.mode.translate": "の訳は",
   "prefs.terms.mode.keep": "原文のまま",
   "prefs.terms.remove": "削除",
@@ -227,5 +227,6 @@
   "multi.picked": "（{n} 言語を選択中）",
   "prefs.terms.colSrc": "ファイル内の語",
   "prefs.terms.colMode": "扱い",
-  "prefs.terms.colDst": "訳語"
+  "prefs.terms.colDst": "訳語",
+  "settings.modelHelp.summary": "モデルの選び方"
 }

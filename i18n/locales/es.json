@@ -28,7 +28,7 @@
   "steps.extract": "Extraer elementos y texto",
   "steps.translate": "Traducir el texto con la API del LLM",
   "steps.write": "Escribir la traducción en la copia",
-  "progress.warningBanner": "Traducción en curso. Mantén esta pestaña y el panel lateral abiertos hasta que termine.",
+  "progress.warningBanner": "Puedes cerrar el panel lateral; te avisaremos al terminar. No cierres la pestaña de este archivo.",
   "progress.connecting": "Conectando...",
   "progress.slow": "Está tardando más de lo esperado. Revisa la conexión o los registros...",
   "progress.complete": "¡Traducción completada!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "Nombres de empresas, marcas y productos",
   "prefs.keep.places": "Nombres de lugares",
   "prefs.terms.label": "Términos concretos (todos los archivos)",
-  "prefs.terms.srcPlaceholder": "p. ej. AI",
-  "prefs.terms.dstPlaceholder": "p. ej. IA",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "IA",
   "prefs.terms.mode.translate": "traducir como",
   "prefs.terms.mode.keep": "dejar igual",
   "prefs.terms.remove": "Eliminar",
@@ -227,5 +227,6 @@
   "multi.picked": " ({n} seleccionados)",
   "prefs.terms.colSrc": "Palabra del archivo",
   "prefs.terms.colMode": "Acción",
-  "prefs.terms.colDst": "Traducción"
+  "prefs.terms.colDst": "Traducción",
+  "settings.modelHelp.summary": "¿Cómo elijo un modelo?"
 }

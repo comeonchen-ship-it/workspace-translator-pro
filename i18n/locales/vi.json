@@ -28,7 +28,7 @@
   "steps.extract": "Trích xuất phần tử và văn bản",
   "steps.translate": "Dịch văn bản qua API LLM",
   "steps.write": "Ghi bản dịch vào bản sao",
-  "progress.warningBanner": "Đang dịch. Hãy giữ tab này và bảng bên mở cho đến khi hoàn tất.",
+  "progress.warningBanner": "Bạn có thể đóng bảng bên — sẽ có thông báo khi xong. Đừng đóng thẻ của tệp này.",
   "progress.connecting": "Đang kết nối...",
   "progress.slow": "Mất nhiều thời gian hơn dự kiến. Hãy kiểm tra kết nối hoặc nhật ký...",
   "progress.complete": "Đã dịch xong!",
@@ -210,8 +210,8 @@
   "prefs.keep.brands": "Tên công ty, thương hiệu, sản phẩm",
   "prefs.keep.places": "Địa danh",
   "prefs.terms.label": "Từ ngữ chỉ định (mọi tệp)",
-  "prefs.terms.srcPlaceholder": "VD: AI",
-  "prefs.terms.dstPlaceholder": "VD: trí tuệ nhân tạo",
+  "prefs.terms.srcPlaceholder": "AI",
+  "prefs.terms.dstPlaceholder": "trí tuệ nhân tạo",
   "prefs.terms.mode.translate": "dịch thành",
   "prefs.terms.mode.keep": "giữ nguyên",
   "prefs.terms.remove": "Xóa",
@@ -227,5 +227,6 @@
   "multi.picked": " (đã chọn {n})",
   "prefs.terms.colSrc": "Từ trong tệp",
   "prefs.terms.colMode": "Cách xử lý",
-  "prefs.terms.colDst": "Bản dịch"
+  "prefs.terms.colDst": "Bản dịch",
+  "settings.modelHelp.summary": "Chọn mô hình thế nào?"
 }
