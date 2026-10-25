@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseGlossary, mergeGlossaries, buildPrefsBlock, prefsFingerprint, normalizePrefs } from '../lib/prefs.js';
+import { parseGlossary, mergeGlossaries, buildPrefsBlock, prefsFingerprint, normalizePrefs, rowsToGlossary, glossaryTextToRows } from '../lib/prefs.js';
 import { buildSystemPrompt } from '../translate.js';
 
 test('parseGlossary: mappings, keep-as-is terms, comments, duplicates', () => {
@@ -38,4 +38,26 @@ test('custom text is capped and cannot close its fence', () => {
 
 test('fingerprint changes with prefs', () => {
   assert.notEqual(prefsFingerprint({ tone: 'formal' }), prefsFingerprint({ tone: 'casual' }));
+});
+
+test('rows → glossary: keep rows, complete translate rows, skip incomplete', () => {
+  assert.deepEqual(rowsToGlossary([
+    { src: 'iPhone', mode: 'keep', dst: 'ignored' },
+    { src: 'AI', mode: 'translate', dst: '人工智慧' },
+    { src: 'cloud', mode: 'translate', dst: '' },
+    { src: ' ', mode: 'keep' },
+  ]), [{ src: 'iPhone', dst: '' }, { src: 'AI', dst: '人工智慧' }]);
+});
+
+test('legacy glossary text migrates to rows', () => {
+  assert.deepEqual(glossaryTextToRows('iPhone\nAI = 人工智慧'), [
+    { src: 'iPhone', mode: 'keep', dst: '' },
+    { src: 'AI', mode: 'translate', dst: '人工智慧' },
+  ]);
+});
+
+test('keep categories add one do-not-translate rule', () => {
+  const block = buildPrefsBlock({ keep: { people: true, brands: true, places: false } }, 'Korean');
+  assert.match(block, /Do not translate these; copy them unchanged: people's names .*; company, brand/);
+  assert.doesNotMatch(block, /place names/);
 });

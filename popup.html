@@ -81,7 +81,7 @@
       <!-- Extra target languages: one copy per language in a single run.
            Checkboxes are generated from TARGET_LANGUAGES by popup.js. -->
       <details class="extra-langs" id="extra-langs-box">
-        <summary><span data-i18n="multi.summary">Also translate into…</span> <span id="extra-langs-count"></span></summary>
+        <summary><span data-i18n="multi.summary">＋ Also translate into other languages</span><span id="extra-langs-count" class="extra-langs-picked"></span></summary>
         <div class="extra-langs-grid" id="extra-langs-grid"></div>
       </details>
 
@@ -100,7 +100,7 @@
       <!-- Per-file glossary, merged over the global one (saved as you type) -->
       <details class="doc-glossary" id="doc-glossary-box">
         <summary data-i18n="prefs.docGlossary.summary">Glossary for this file</summary>
-        <textarea id="doc-glossary" rows="3" spellcheck="false" data-i18n-placeholder="prefs.glossary.placeholder" placeholder="iPhone&#10;Microsoft Teams&#10;cloud = nube&#10;AI = IA"></textarea>
+        <div class="term-editor" id="terms-doc"></div>
         <div class="field-hint" data-i18n="prefs.docGlossary.hint">Overrides the global glossary for the same term. AI engines only.</div>
       </details>
 
@@ -293,16 +293,40 @@
             </div>
           </div>
 
+          <!-- Keep-as-is categories: the model recognises names itself, so users
+               tick a category instead of listing every name. -->
           <div class="form-group">
-            <label for="pref-glossary" data-i18n="prefs.glossary.label">Glossary (all files)</label>
-            <textarea id="pref-glossary" rows="4" spellcheck="false" data-i18n-placeholder="prefs.glossary.placeholder" placeholder="iPhone&#10;Microsoft Teams&#10;cloud = nube&#10;AI = IA"></textarea>
-            <div class="field-hint" data-i18n="prefs.glossary.hint">One term per line, copied exactly as it appears in the file.</div>
+            <label data-i18n="prefs.keep.label">Keep in the original language (the AI recognises them)</label>
+            <label class="checkbox-row" for="keep-people">
+              <input type="checkbox" id="keep-people">
+              <span data-i18n="prefs.keep.people">People's names</span>
+            </label>
+            <label class="checkbox-row" for="keep-brands">
+              <input type="checkbox" id="keep-brands" checked>
+              <span data-i18n="prefs.keep.brands">Company, brand and product names</span>
+            </label>
+            <label class="checkbox-row" for="keep-places">
+              <input type="checkbox" id="keep-places">
+              <span data-i18n="prefs.keep.places">Place names</span>
+            </label>
+          </div>
+
+          <!-- Specific terms, one sentence-like row each: [term] [translate as ▾ / keep] [target] -->
+          <div class="form-group">
+            <label data-i18n="prefs.terms.label">Specific terms (all files)</label>
+            <div class="term-editor" id="terms-global"></div>
           </div>
 
           <div class="form-group">
             <label for="pref-custom" data-i18n="prefs.custom.label">Additional instructions</label>
             <textarea id="pref-custom" rows="3" maxlength="500" data-i18n-placeholder="prefs.custom.placeholder" placeholder="e.g. The audience is Japanese clients; keep sentences short."></textarea>
             <div class="field-hint"><span data-i18n="prefs.custom.hint">Any language is fine. Cannot change the output format.</span> <span id="pref-custom-count">0/500</span></div>
+          </div>
+
+          <!-- Read-only, plain-language summary of everything above -->
+          <div class="rules-preview" id="rules-preview">
+            <div class="rules-preview-title" data-i18n="prefs.preview.title">When translating, the AI will:</div>
+            <ul id="rules-preview-list"></ul>
           </div>
         </div>
 

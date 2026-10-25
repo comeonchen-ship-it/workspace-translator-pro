@@ -4,7 +4,8 @@ import {
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
 import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
-import { parseGlossary, mergeGlossaries, CUSTOM_MAX_CHARS } from './lib/prefs.js';
+import { mergeGlossaries, rowsToGlossary, glossaryTextToRows, DEFAULT_KEEP, KEEP_CATEGORIES, CUSTOM_MAX_CHARS } from './lib/prefs.js';
+import { createTermEditor } from './lib/term-editor.js';
 import { parseSlideRange, sheetGidFromUrl } from './lib/range.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -67,10 +68,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefsCard = document.getElementById('prefs-card');
   const prefsFreeNote = document.getElementById('prefs-free-note');
   const prefTone = document.getElementById('pref-tone');
-  const prefGlossary = document.getElementById('pref-glossary');
+  const keepBoxes = Object.fromEntries(KEEP_CATEGORIES.map((k) => [k, document.getElementById(`keep-${k}`)]));
+  const rulesPreviewList = document.getElementById('rules-preview-list');
+  const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview });
+  const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms });
   const prefCustom = document.getElementById('pref-custom');
   const prefCustomCount = document.getElementById('pref-custom-count');
-  const docGlossary = document.getElementById('doc-glossary');
   const docGlossaryBox = document.getElementById('doc-glossary-box');
   const scopeSlides = document.getElementById('scope-slides');
   const slideRange = document.getElementById('slide-range');
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     slideRange.value = '';
     slideRangeError.classList.add('hidden');
     sheetCurrentOnly.checked = false;
-    document.querySelectorAll('#extra-langs-grid input').forEach((b) => { b.checked = false; });
+    document.querySelectorAll('#extra-langs-grid .lang-chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
     document.getElementById('extra-langs-box').open = false;
     updateExtraLangsCount();
   }
@@ -142,14 +145,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   function getExtraLangs() {
-    return [...document.querySelectorAll('#extra-langs-grid input:checked')]
-      .map((b) => b.value)
+    return [...document.querySelectorAll('#extra-langs-grid .lang-chip[aria-pressed="true"]')]
+      .map((c) => c.dataset.code)
       .filter((code) => code !== selectLang.value);
   }
 
+  // Hides the primary target's chip and lists the picked languages next to the toggle.
   function updateExtraLangsCount() {
-    const n = getExtraLangs().length;
-    document.getElementById('extra-langs-count').textContent = n ? `(+${n})` : '';
+    for (const chip of document.querySelectorAll('#extra-langs-grid .lang-chip')) {
+      chip.hidden = chip.dataset.code === selectLang.value;
+    }
+    const names = getExtraLangs().map((code) => TARGET_LANGUAGES.find((l) => l.code === code)?.endonym || code);
+    document.getElementById('extra-langs-count').textContent = names.length
+      ? t('multi.picked', { list: names.join(t('prefs.preview.listSep')) })
+      : '';
   }
 
   // ── Language pickers ──────────────────────────────────────────────────────
@@ -158,19 +167,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const selectUiLang = document.getElementById('select-ui-lang');
 
   function populateLanguagePickers() {
-    // Extra-language checkboxes: keep the user's ticks across a UI-language switch.
+    // Extra-language chips (native names only — short, never wrap awkwardly).
+    // Keep the user's selection across a UI-language switch.
     const extraGrid = document.getElementById('extra-langs-grid');
     const ticked = new Set(getExtraLangs());
     extraGrid.innerHTML = '';
     for (const lang of TARGET_LANGUAGES) {
-      const label = document.createElement('label');
-      const box = document.createElement('input');
-      box.type = 'checkbox';
-      box.value = lang.code;
-      box.checked = ticked.has(lang.code);
-      box.addEventListener('change', updateExtraLangsCount);
-      label.append(box, document.createTextNode(targetLabel(lang)));
-      extraGrid.appendChild(label);
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'lang-chip';
+      chip.dataset.code = lang.code;
+      chip.textContent = lang.endonym;
+      chip.setAttribute('aria-pressed', String(ticked.has(lang.code)));
+      chip.addEventListener('click', () => {
+        chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
+        updateExtraLangsCount();
+      });
+      extraGrid.appendChild(chip);
     }
     updateExtraLangsCount();
 
@@ -209,6 +222,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     validateApiKey();
     loadHistory();
+    globalTerms.rerender();
+    docTerms.rerender();
+    updateRulesPreview();
   }
 
   /**
@@ -252,9 +268,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputFitText) inputFitText.checked = items.fitTextToBoxes !== false;
     const prefs = items.translationPrefs || {};
     prefTone.value = prefs.tone || 'keep';
-    prefGlossary.value = prefs.glossaryText || '';
+    // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
+    globalTerms.setRows(prefs.terms || glossaryTextToRows(prefs.glossaryText));
+    for (const k of KEEP_CATEGORIES) keepBoxes[k].checked = (prefs.keep || DEFAULT_KEEP)[k];
     prefCustom.value = prefs.custom || '';
     updateCustomCount();
+    updateRulesPreview();
     selectEngine.value = items.translationEngine || 'gemini';
     if (inputAutoOpen) inputAutoOpen.checked = items.autoOpenResult !== false;
     inputApiKey.value = items.apiKey || '';
@@ -348,7 +367,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateCustomCount() {
     prefCustomCount.textContent = `${prefCustom.value.length}/${CUSTOM_MAX_CHARS}`;
   }
-  prefCustom.addEventListener('input', updateCustomCount);
+  prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
+  prefTone.addEventListener('change', updateRulesPreview);
+  for (const k of KEEP_CATEGORIES) keepBoxes[k].addEventListener('change', updateRulesPreview);
+
+  // Plain-language summary of the current preference rules (read-only).
+  function updateRulesPreview() {
+    const items = [];
+    if (prefTone.value !== 'keep') items.push(t('prefs.preview.tone', { tone: t(`prefs.tone.${prefTone.value}`) }));
+    const kept = KEEP_CATEGORIES.filter((k) => keepBoxes[k].checked).map((k) => t(`prefs.keep.${k}`));
+    if (kept.length) items.push(t('prefs.preview.keepCategories', { list: kept.join(t('prefs.preview.listSep')) }));
+    for (const { src, dst } of rowsToGlossary(globalTerms.getRows())) {
+      items.push(dst ? t('prefs.preview.translate', { src, dst }) : t('prefs.preview.keep', { src }));
+    }
+    if (prefCustom.value.trim()) items.push(t('prefs.preview.custom'));
+    rulesPreviewList.innerHTML = '';
+    if (!items.length) items.push(t('prefs.preview.none'));
+    for (const text of items) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      rulesPreviewList.appendChild(li);
+    }
+  }
 
   function toggleEngineFields(engine) {
     // Preferences are prompt instructions — the basic free engine has no prompt.
@@ -627,7 +667,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       fitTextToBoxes: inputFitText ? inputFitText.checked : true,
       translationPrefs: {
         tone: prefTone.value,
-        glossaryText: prefGlossary.value,
+        keep: Object.fromEntries(KEEP_CATEGORIES.map((k) => [k, keepBoxes[k].checked])),
+        terms: globalTerms.getRows().filter((r) => r.src.trim()),
         custom: prefCustom.value.trim().slice(0, CUSTOM_MAX_CHARS),
       }
     }, () => {
@@ -1076,11 +1117,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     logConsoleContent.textContent = t('logs.waiting');
 
-    const docGlossaryKey = `docGlossary_${presentationId}`;
-    chrome.storage.local.get(docGlossaryKey, (data) => {
+    const docTermsKey = `docTerms_${presentationId}`;
+    const legacyDocKey = `docGlossary_${presentationId}`;
+    chrome.storage.local.get([docTermsKey, legacyDocKey], (data) => {
       if (currentPresentationId !== presentationId) return;
-      docGlossary.value = data[docGlossaryKey] || '';
-      docGlossaryBox.open = !!docGlossary.value;
+      const rows = data[docTermsKey] || glossaryTextToRows(data[legacyDocKey]);
+      docTerms.setRows(rows);
+      docGlossaryBox.open = rowsToGlossary(rows).length > 0;
     });
 
     // Landing on a freshly translated copy: say where it came from.
@@ -1156,18 +1199,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  docGlossary.addEventListener('input', () => {
+  function saveDocTerms(rows) {
     if (!currentPresentationId) return;
-    const key = `docGlossary_${currentPresentationId}`;
-    if (docGlossary.value.trim()) chrome.storage.local.set({ [key]: docGlossary.value });
+    const key = `docTerms_${currentPresentationId}`;
+    const filled = rows.filter((r) => r.src.trim());
+    if (filled.length) chrome.storage.local.set({ [key]: filled });
     else chrome.storage.local.remove(key);
-  });
+    chrome.storage.local.remove(`docGlossary_${currentPresentationId}`); // migrated
+  }
 
   function buildPrefsForJob(stored) {
     const p = stored || {};
     return {
       tone: p.tone || 'keep',
-      glossary: mergeGlossaries(parseGlossary(p.glossaryText), parseGlossary(docGlossary.value)),
+      keep: p.keep || DEFAULT_KEEP,
+      glossary: mergeGlossaries(
+        rowsToGlossary(p.terms || glossaryTextToRows(p.glossaryText)),
+        rowsToGlossary(docTerms.getRows())
+      ),
       custom: p.custom || '',
     };
   }
