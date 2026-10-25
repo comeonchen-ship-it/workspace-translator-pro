@@ -1505,7 +1505,7 @@ body.theme-form {
 .term-editor { display: flex; flex-direction: column; gap: 6px; }
 .term-head, .term-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1.25fr) 14px;
+  grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1.2fr) 14px;
   gap: 4px;
   align-items: center;
 }
