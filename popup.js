@@ -258,9 +258,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       let resp;
       if (engine === 'gemini') {
         resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`,
           { method: 'POST', signal: controller.signal,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
             body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply ok.' }] }], generationConfig: { maxOutputTokens: 5 } }) }
         );
       } else if (engine === 'openai') {
@@ -354,17 +354,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Per-engine key shape checks; anything else falls back to a length sanity check.
-    const CHECKS = {
-      gemini: (k) => k.startsWith('AIzaSy') && k.length >= 35,
-      openai: (k) => (k.startsWith('sk-') || k.startsWith('sk-proj-')) && k.length >= 20,
-      claude: (k) => k.startsWith('sk-ant-') && k.length >= 25,
+    // Known key prefixes are only hints: providers change formats (e.g. Gemini AIzaSy… → AQ.…),
+    // so an unrecognized shape is never treated as an error — the real connection test decides.
+    const KNOWN_PREFIXES = {
+      gemini: ['AIzaSy', 'AQ.'],
+      openai: ['sk-'],
+      claude: ['sk-ant-'],
     };
-    const group = CHECKS[engine] ? engine : 'generic';
-    const ok = (CHECKS[engine] || ((k) => k.length >= 10))(key);
+    let state;
+    if (key.length < 10) state = 'bad';
+    else if ((KNOWN_PREFIXES[engine] || []).some((p) => key.startsWith(p))) state = 'ok';
+    else state = KNOWN_PREFIXES[engine] ? 'unknown' : 'ok';
 
-    apiKeyIndicator.className = `val-indicator ${ok ? 'valid' : 'invalid'}`;
-    apiKeyIndicator.textContent = t(`settings.keyFormat.${group}.${ok ? 'ok' : 'bad'}`);
+    const group = KNOWN_PREFIXES[engine] ? engine : 'generic';
+    apiKeyIndicator.className = `val-indicator ${{ ok: 'valid', bad: 'invalid', unknown: 'neutral' }[state]}`;
+    apiKeyIndicator.textContent = state === 'unknown'
+      ? t('settings.keyFormat.unknown')
+      : t(`settings.keyFormat.${state === 'bad' ? 'generic' : group}.${state}`);
   }
 
   inputApiKey.addEventListener('input', () => { validateApiKey(); resetApiStatus(); });

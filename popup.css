@@ -1326,3 +1326,7 @@ body.theme-form {
 }
 
 .modal-btns .btn { font-size: 11.5px; padding: 7px 10px; }
+
+.val-indicator.neutral {
+  color: var(--text-muted);
+}
