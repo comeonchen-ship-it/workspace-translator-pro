@@ -205,5 +205,7 @@
   "scope.slides.label": "Zu übersetzende Folien",
   "scope.slides.placeholder": "z. B. 3-10, 12 (leer = alle)",
   "scope.slides.invalid": "Bitte Zahlen und Bereiche wie 3-10, 12 verwenden.",
-  "scope.sheet.currentOnly": "Nur das aktuelle Tabellenblatt übersetzen"
+  "scope.sheet.currentOnly": "Nur das aktuelle Tabellenblatt übersetzen",
+  "multi.summary": "Zusätzlich übersetzen in…",
+  "progress.langDone": "Sprache {done}/{total} fertig – starte die nächste…"
 }

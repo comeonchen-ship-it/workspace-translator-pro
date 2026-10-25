@@ -205,5 +205,7 @@
   "scope.slides.label": "Diapositivas a traducir",
   "scope.slides.placeholder": "p. ej. 3-10, 12 (vacío = todas)",
   "scope.slides.invalid": "Usa números y rangos como 3-10, 12.",
-  "scope.sheet.currentOnly": "Traducir solo la hoja actual"
+  "scope.sheet.currentOnly": "Traducir solo la hoja actual",
+  "multi.summary": "Traducir también a…",
+  "progress.langDone": "Idioma {done}/{total} terminado; empezando el siguiente…"
 }

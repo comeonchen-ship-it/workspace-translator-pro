@@ -205,5 +205,7 @@
   "scope.slides.label": "Trang chiếu cần dịch",
   "scope.slides.placeholder": "VD: 3-10, 12 (để trống = tất cả)",
   "scope.slides.invalid": "Hãy nhập số và khoảng như 3-10, 12.",
-  "scope.sheet.currentOnly": "Chỉ dịch trang tính đang mở"
+  "scope.sheet.currentOnly": "Chỉ dịch trang tính đang mở",
+  "multi.summary": "Dịch thêm sang…",
+  "progress.langDone": "Xong ngôn ngữ {done}/{total} — đang dịch ngôn ngữ tiếp theo…"
 }

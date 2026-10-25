@@ -84,6 +84,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     slideRange.value = '';
     slideRangeError.classList.add('hidden');
     sheetCurrentOnly.checked = false;
+    document.querySelectorAll('#extra-langs-grid input').forEach((b) => { b.checked = false; });
+    document.getElementById('extra-langs-box').open = false;
+    updateExtraLangsCount();
   }
 
   slideRange.addEventListener('input', () => {
@@ -138,12 +141,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     free: ''
   };
 
+  function getExtraLangs() {
+    return [...document.querySelectorAll('#extra-langs-grid input:checked')]
+      .map((b) => b.value)
+      .filter((code) => code !== selectLang.value);
+  }
+
+  function updateExtraLangsCount() {
+    const n = getExtraLangs().length;
+    document.getElementById('extra-langs-count').textContent = n ? `(+${n})` : '';
+  }
+
   // ── Language pickers ──────────────────────────────────────────────────────
   // Both lists come from i18n/languages.js. Adding a language must never require
   // touching this file — see docs/06 §10.9.
   const selectUiLang = document.getElementById('select-ui-lang');
 
   function populateLanguagePickers() {
+    // Extra-language checkboxes: keep the user's ticks across a UI-language switch.
+    const extraGrid = document.getElementById('extra-langs-grid');
+    const ticked = new Set(getExtraLangs());
+    extraGrid.innerHTML = '';
+    for (const lang of TARGET_LANGUAGES) {
+      const label = document.createElement('label');
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.value = lang.code;
+      box.checked = ticked.has(lang.code);
+      box.addEventListener('change', updateExtraLangsCount);
+      label.append(box, document.createTextNode(targetLabel(lang)));
+      extraGrid.appendChild(label);
+    }
+    updateExtraLangsCount();
+
     selectLang.innerHTML = '';
     for (const lang of TARGET_LANGUAGES) {
       const opt = document.createElement('option');
@@ -547,6 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (inputCustomUrl) inputCustomUrl.addEventListener('input', resetApiStatus);
 
   selectLang.addEventListener('change', (e) => {
+    updateExtraLangsCount();
     const langVal = e.target.value;
     console.log('[WorkspaceTranslator] Target language dropdown changed to:', langVal, 'for ID:', currentPresentationId);
     if (currentPresentationId) {
@@ -1174,7 +1205,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               modelName: items.modelName || DEFAULT_MODELS[translationEngine],
               customUrl: items.customUrl,
               prefs: buildPrefsForJob(items.translationPrefs),
-              scope
+              scope,
+              extraLangs: getExtraLangs()
             }
           });
         } catch (err) {
@@ -1446,6 +1478,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     completionTitle.textContent = title;
     completionSub.textContent = sub || '';
     completionStats.textContent = summaryText(summary);
+    // Multi-language run: one link per produced copy.
+    const resultsList = document.getElementById('completion-results');
+    resultsList.innerHTML = '';
+    for (const r of summary?.results || []) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      const lang = TARGET_LANGUAGES.find((l) => l.code === r.lang);
+      const langName = lang ? targetLabel(lang) : r.lang; // already localized
+      a.textContent = '↗ ' + langName;
+      a.addEventListener('click', () => chrome.tabs.create({ url: r.url }));
+      li.appendChild(a);
+      resultsList.appendChild(li);
+    }
     completionUrl = url;
     completionDismissKey = dismissKey;
     completionActions.classList.toggle('hidden', !url);

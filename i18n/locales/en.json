@@ -205,5 +205,7 @@
   "scope.slides.label": "Slides to translate",
   "scope.slides.placeholder": "e.g. 3-10, 12 (blank = all)",
   "scope.slides.invalid": "Use numbers and ranges like 3-10, 12.",
-  "scope.sheet.currentOnly": "Only translate the sheet tab I'm on"
+  "scope.sheet.currentOnly": "Only translate the sheet tab I'm on",
+  "multi.summary": "Also translate into…",
+  "progress.langDone": "Language {done}/{total} finished — starting the next one…"
 }

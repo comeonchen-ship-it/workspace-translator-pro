@@ -205,5 +205,7 @@
   "scope.slides.label": "翻訳するスライド",
   "scope.slides.placeholder": "例：3-10, 12（空欄 = すべて）",
   "scope.slides.invalid": "3-10, 12 のように番号と範囲で入力してください。",
-  "scope.sheet.currentOnly": "今開いているシートだけ翻訳する"
+  "scope.sheet.currentOnly": "今開いているシートだけ翻訳する",
+  "multi.summary": "他の言語にも同時に翻訳…",
+  "progress.langDone": "{done}/{total} 言語目が完了、次の言語を開始…"
 }

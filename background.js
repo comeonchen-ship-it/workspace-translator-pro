@@ -328,11 +328,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * panel keeps showing the completion card. If the panel is not watching this job
  * (closed, or on another file), a system notification announces it instead.
  */
-async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summary) {
+async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summary, multi = null) {
   const { autoOpenResult = true } = await chrome.storage.local.get('autoOpenResult');
   // Lets the panel show "translated from …" when it lands on the copy.
   await chrome.storage.local.set({ [`completedInfo_${copyId}`]: { sourceTitle, summary, at: Date.now() } });
-  chrome.tabs.create({ url: editUrl, active: autoOpenResult });
+  // In a multi-language run only the last copy may take focus or notify;
+  // earlier copies open quietly behind it.
+  const isLast = !multi || multi.index === multi.total - 1;
+  chrome.tabs.create({ url: editUrl, active: autoOpenResult && isLast });
+  if (!isLast) return;
 
   const panelWatching = activePort && activeViewPresentationId === presentationId;
   if (!panelWatching || !autoOpenResult) {
@@ -451,7 +455,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
       const summary = summarize({ columnsFitted: config.columnsFitted || 0 });
       sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -463,7 +467,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await saveToHistory(copyId, translatedName, 'form', editUrl);
       const summary = summarize();
       sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -558,7 +562,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await logDebug('No translatable texts found. Finalizing copying process.', presentationId);
       const summary = summarize({ segments: 0 });
       sendProgress('done', 100, { key: 'progress.noTranslatableText' }, null, editUrl, summary);
-      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
+      await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
       return;
     }
     
@@ -691,7 +695,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
     const summary = summarize({ segments: uniqueTextsArray.length, overflowFixed });
     sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
-    await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
+    await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary, config.multi);
     
   } catch (err) {
     await logDebug(`Error occurred during translation workflow: ${err.message}`, presentationId);
@@ -856,7 +860,7 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
     }
   };
 
-  runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress)
+  runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress)
     .then(() => {
       onTranslationFinished(presentationId, portMessageSender);
     })
@@ -865,6 +869,38 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
       sendProgress('error', 0, null, err.message);
       onTranslationFinished(presentationId, portMessageSender);
     });
+}
+
+/**
+ * Runs the workflow once per target language (primary first), each producing its
+ * own copy. Progress is folded into one bar; only the last language reports
+ * 'done' (with every result link), earlier ones report "language i/n finished".
+ * Stops at the first error or cancel.
+ */
+async function runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
+  const langs = [targetLang, ...(config.extraLangs || []).filter((l) => l && l !== targetLang)];
+  const total = langs.length;
+  const results = [];
+  for (let i = 0; i < total; i++) {
+    const lang = langs[i];
+    const isLast = i === total - 1;
+    let failed = false;
+    const wrapped = async (step, pct, status, error = null, finalUrl = null, summary = null) => {
+      if (error) failed = true;
+      const overall = Math.round((i * 100 + pct) / total);
+      if (step === 'done') {
+        results.push({ lang, url: finalUrl });
+        if (!isLast) {
+          return sendProgress('translate', overall, { key: 'progress.langDone', params: { done: i + 1, total } });
+        }
+        return sendProgress('done', 100, status, null, finalUrl, total > 1 ? { ...summary, results } : summary);
+      }
+      return sendProgress(step, total > 1 ? overall : pct, status, error, finalUrl, summary);
+    };
+    const runConfig = { ...config, multi: { index: i, total } };
+    await runTranslationWorkflow(presentationId, presentationTitle, fileType, lang, runConfig, wrapped);
+    if (failed) break;
+  }
 }
 
 /**

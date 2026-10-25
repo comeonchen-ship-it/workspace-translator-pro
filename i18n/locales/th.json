@@ -205,5 +205,7 @@
   "scope.slides.label": "สไลด์ที่จะแปล",
   "scope.slides.placeholder": "เช่น 3-10, 12 (เว้นว่าง = ทั้งหมด)",
   "scope.slides.invalid": "ใช้ตัวเลขและช่วง เช่น 3-10, 12",
-  "scope.sheet.currentOnly": "แปลเฉพาะชีตที่เปิดอยู่"
+  "scope.sheet.currentOnly": "แปลเฉพาะชีตที่เปิดอยู่",
+  "multi.summary": "แปลเป็นภาษาอื่นพร้อมกัน…",
+  "progress.langDone": "เสร็จภาษาที่ {done}/{total} แล้ว กำลังเริ่มภาษาถัดไป…"
 }

@@ -78,6 +78,13 @@
         </div>
       </div>
 
+      <!-- Extra target languages: one copy per language in a single run.
+           Checkboxes are generated from TARGET_LANGUAGES by popup.js. -->
+      <details class="extra-langs" id="extra-langs-box">
+        <summary><span data-i18n="multi.summary">Also translate into…</span> <span id="extra-langs-count"></span></summary>
+        <div class="extra-langs-grid" id="extra-langs-grid"></div>
+      </details>
+
       <!-- Optional scope: a slide range for Slides, the current tab for Sheets.
            Shown per file type by popup.js updateScopeControls(). -->
       <div class="control-group hidden" id="scope-slides">
@@ -118,6 +125,7 @@
         </div>
         <div class="completion-sub" id="completion-sub"></div>
         <div class="completion-stats" id="completion-stats"></div>
+        <ul class="completion-results" id="completion-results"></ul>
         <div class="completion-actions" id="completion-actions">
           <button class="btn btn-primary btn-sm" id="btn-open-result" data-i18n="done.open">Open translated file</button>
           <button class="btn btn-secondary btn-sm" id="btn-translate-again" data-i18n="done.again">Translate to another language</button>
@@ -328,9 +336,10 @@
       <div class="settings-scroll-container">
         <p class="setup-intro" data-i18n="setup.intro">Get a free Gemini key for natural, high-quality translations. No credit card, about 1 minute.</p>
 
-        <!-- Illustrative comparison so users see why the key is worth it -->
+        <!-- Illustrative comparison so users see why the key is worth it. The
+             source sentence is deliberately English in every UI language. -->
         <div class="setup-compare">
-          <div class="setup-compare-src"><span class="setup-compare-label" data-i18n="setup.compare.source">Original</span><span>Let's touch base next week and circle back on the Q3 roadmap.</span></div>
+          <div class="setup-compare-src"><span class="setup-compare-label" data-i18n="setup.compare.source">Original</span><span data-i18n-ignore>Let's touch base next week and circle back on the Q3 roadmap.</span></div>
           <div class="setup-compare-row bad"><span class="setup-compare-label" data-i18n="setup.compare.free">Free translation</span><span data-i18n="setup.compare.freeText"></span></div>
           <div class="setup-compare-row good"><span class="setup-compare-label" data-i18n="setup.compare.gemini">Gemini</span><span data-i18n="setup.compare.geminiText"></span></div>
           <div class="setup-compare-note" data-i18n="setup.compare.note">Illustrative example.</div>
