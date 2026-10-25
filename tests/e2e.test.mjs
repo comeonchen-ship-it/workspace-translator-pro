@@ -250,3 +250,18 @@ test('copy is named from the Drive file name, not a URL-like tab title (.xlsx)',
   assert.equal(state.step, 'done', state.error);
   assert.equal(api.copyNames.at(-1), '[Translated - 繁體中文] Taiwan_Mobile_GWS_Rebalanced_WBS');
 });
+
+test('cached translations from before the casing fix are corrected too (DECK retest)', async () => {
+  const { prefsFingerprint, normalizePrefs } = await import('../lib/prefs.js');
+  const prefs = { glossary: [{ src: 'DECK', dst: '' }] };
+  api.files.p12 = { slides: [slide('s1', [['a', 'Technical pitch deck\n']])] };
+  // A cache entry written by the old build, with the wrong casing.
+  const key = `translationCache_gemini_th_${prefsFingerprint(normalizePrefs(prefs))}`;
+  fake.store[key] = { 'Technical pitch deck': 'เทคนิค DECK' };
+  const callsBefore = api.llm.calls.length;
+  const state = await run('p12', 'presentation', { targetLang: 'th', config: { prefs } });
+  assert.equal(state.step, 'done', state.error);
+  const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
+  assert.deepEqual(written, ['เทคนิค deck']);
+  assert.ok(api.llm.calls.length >= callsBefore);
+});

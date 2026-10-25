@@ -112,7 +112,8 @@ export async function translateTexts(texts, targetLang, config) {
   for (const text of texts) {
     const trimmed = text.trim();
     if (cache[trimmed] !== undefined) {
-      translationsMap.set(text, cache[trimmed]);
+      // Same post-processing as fresh results — cached entries may predate it.
+      translationsMap.set(text, restoreKeepCasing(text, cache[trimmed], config.activePrefs?.glossary));
     } else {
       uncachedTexts.push(text);
     }
