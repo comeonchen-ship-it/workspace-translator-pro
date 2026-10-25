@@ -1417,7 +1417,7 @@ body.theme-form {
   border-radius: 8px;
   padding: 8px;
 }
-.field-hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+.field-hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; white-space: pre-line; }
 .prefs-free-note { font-size: 11px; color: var(--text-warning, #fdcb6e); margin-bottom: 8px; }
 .prefs-free-note.hidden { display: none; }
 #prefs-card.disabled .form-group { opacity: 0.45; pointer-events: none; }
