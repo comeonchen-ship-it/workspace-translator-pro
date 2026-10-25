@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "VD: 3-10, 12 (để trống = tất cả)",
   "scope.slides.invalid": "Hãy nhập số và khoảng như 3-10, 12.",
   "scope.sheet.currentOnly": "Chỉ dịch trang tính đang mở",
-  "multi.summary": "＋ Dịch thêm sang ngôn ngữ khác",
+  "multi.summary": "Dịch thêm sang ngôn ngữ khác",
   "progress.langDone": "Xong ngôn ngữ {done}/{total} — đang dịch ngôn ngữ tiếp theo…",
   "prefs.keep.label": "Giữ nguyên ngôn ngữ gốc (chỉ cần tích, AI tự nhận biết)",
   "prefs.keep.people": "Tên người",

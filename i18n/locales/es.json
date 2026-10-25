@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "p. ej. 3-10, 12 (vacío = todas)",
   "scope.slides.invalid": "Usa números y rangos como 3-10, 12.",
   "scope.sheet.currentOnly": "Traducir solo la hoja actual",
-  "multi.summary": "＋ Traducir también a otros idiomas",
+  "multi.summary": "Traducir también a otros idiomas",
   "progress.langDone": "Idioma {done}/{total} terminado; empezando el siguiente…",
   "prefs.keep.label": "Mantener en el idioma original (marca y la IA los reconoce)",
   "prefs.keep.people": "Nombres de personas",

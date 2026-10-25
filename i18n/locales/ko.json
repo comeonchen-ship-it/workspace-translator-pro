@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "예: 3-10, 12 (비우면 전체)",
   "scope.slides.invalid": "3-10, 12처럼 숫자와 범위로 입력하세요.",
   "scope.sheet.currentOnly": "현재 보고 있는 시트만 번역",
-  "multi.summary": "＋ 다른 언어로도 함께 번역",
+  "multi.summary": "다른 언어로도 함께 번역",
   "progress.langDone": "{done}/{total}번째 언어 완료, 다음 언어 시작…",
   "prefs.keep.label": "원문 그대로 두기(체크만 하면 AI가 자동 인식)",
   "prefs.keep.people": "사람 이름",

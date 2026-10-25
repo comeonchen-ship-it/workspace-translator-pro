@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "เช่น 3-10, 12 (เว้นว่าง = ทั้งหมด)",
   "scope.slides.invalid": "ใช้ตัวเลขและช่วง เช่น 3-10, 12",
   "scope.sheet.currentOnly": "แปลเฉพาะชีตที่เปิดอยู่",
-  "multi.summary": "＋ แปลเป็นภาษาอื่นพร้อมกัน",
+  "multi.summary": "แปลเป็นภาษาอื่นพร้อมกัน",
   "progress.langDone": "เสร็จภาษาที่ {done}/{total} แล้ว กำลังเริ่มภาษาถัดไป…",
   "prefs.keep.label": "คงภาษาเดิมไว้ (แค่ติ๊ก AI จะจดจำเอง)",
   "prefs.keep.people": "ชื่อคน",

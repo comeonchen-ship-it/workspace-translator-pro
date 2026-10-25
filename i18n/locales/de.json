@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "z. B. 3-10, 12 (leer = alle)",
   "scope.slides.invalid": "Bitte Zahlen und Bereiche wie 3-10, 12 verwenden.",
   "scope.sheet.currentOnly": "Nur das aktuelle Tabellenblatt übersetzen",
-  "multi.summary": "＋ Zusätzlich in weitere Sprachen übersetzen",
+  "multi.summary": "Zusätzlich in weitere Sprachen übersetzen",
   "progress.langDone": "Sprache {done}/{total} fertig – starte die nächste…",
   "prefs.keep.label": "In der Originalsprache lassen (einfach anhaken – die KI erkennt sie)",
   "prefs.keep.people": "Personennamen",

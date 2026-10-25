@@ -29,7 +29,7 @@ export const LANGUAGES = [
   { code: 'es',    endonym: 'Español',    english: 'Spanish',             dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.4,  fontStack: 'latin'  },
   { code: 'fr',    endonym: 'Français',   english: 'French',              dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.4,  fontStack: 'latin'  },
   { code: 'de',    endonym: 'Deutsch',    english: 'German',              dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.4,  fontStack: 'latin'  },
-  { code: 'vi',    endonym: 'Tiếng Việt', english: 'Vietnamese',          dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.5,  fontStack: 'latin'  },
+  { code: 'vi',    endonym: 'Tiếng Việt', english: 'Vietnamese',          dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.5,  fontStack: 'vi'     },
   { code: 'th',    endonym: 'ไทย',        english: 'Thai',                dir: 'ltr', fallback: 'en', ui: true , target: true, lineHeight: 1.65, fontStack: 'thai'   },
 ];
 

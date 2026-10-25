@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "ex. 3-10, 12 (vide = toutes)",
   "scope.slides.invalid": "Utilisez des numéros et plages, ex. 3-10, 12.",
   "scope.sheet.currentOnly": "Traduire uniquement l'onglet affiché",
-  "multi.summary": "＋ Traduire aussi dans d'autres langues",
+  "multi.summary": "Traduire aussi dans d'autres langues",
   "progress.langDone": "Langue {done}/{total} terminée — passage à la suivante…",
   "prefs.keep.label": "Garder dans la langue d'origine (cochez, l'IA les reconnaît)",
   "prefs.keep.people": "Noms de personnes",

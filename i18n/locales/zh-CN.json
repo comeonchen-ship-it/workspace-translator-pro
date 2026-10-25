@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "例如 3-10, 12（留空 = 全部）",
   "scope.slides.invalid": "请输入数字或范围，例如 3-10, 12。",
   "scope.sheet.currentOnly": "只翻译当前所在的工作表",
-  "multi.summary": "＋ 同时翻译成其他语言",
+  "multi.summary": "同时翻译成其他语言",
   "progress.langDone": "第 {done}/{total} 种语言完成，接着翻译下一种…",
   "prefs.keep.label": "保持原文（勾选即可，AI 会自动识别）",
   "prefs.keep.people": "人名",

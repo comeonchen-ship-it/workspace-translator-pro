@@ -202,7 +202,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (const lang of TARGET_LANGUAGES) {
       const opt = document.createElement('option');
       opt.value = lang.code;
-      opt.textContent = targetLabel(lang);
+      opt.textContent = lang.endonym; // native name, same as the chips
+      opt.title = lang.english;
       selectLang.appendChild(opt);
     }
     if (selectUiLang) {

@@ -203,7 +203,7 @@
   "scope.slides.placeholder": "e.g. 3-10, 12 (blank = all)",
   "scope.slides.invalid": "Use numbers and ranges like 3-10, 12.",
   "scope.sheet.currentOnly": "Only translate the sheet tab I'm on",
-  "multi.summary": "＋ Also translate into other languages",
+  "multi.summary": "Also translate into other languages",
   "progress.langDone": "Language {done}/{total} finished — starting the next one…",
   "prefs.keep.label": "Keep in the original language (just tick — the AI recognises them)",
   "prefs.keep.people": "People's names",

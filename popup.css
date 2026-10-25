@@ -29,6 +29,8 @@
   --font-jp:     'Outfit', -apple-system, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   --font-kr:     'Outfit', -apple-system, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-thai:   'Outfit', -apple-system, "Noto Sans Thai", "Thonburi", "Leelawadee UI", sans-serif;
+  /* Outfit has no Vietnamese glyphs; mixing fonts breaks stacked diacritics. */
+  --font-vi:     -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Roboto, sans-serif;
 }
 
 /* i18n.js stamps data-font-stack on <html> from the language registry. */
@@ -37,6 +39,7 @@ html[data-font-stack="cjk-sc"] body { font-family: var(--font-cjk-sc); }
 html[data-font-stack="jp"]     body { font-family: var(--font-jp); }
 html[data-font-stack="kr"]     body { font-family: var(--font-kr); }
 html[data-font-stack="thai"]   body { font-family: var(--font-thai); }
+html[data-font-stack="vi"]     body { font-family: var(--font-vi); }
 
 * {
   box-sizing: border-box;
@@ -667,9 +670,9 @@ select option {
 }
 
 .setting-group-card h4 {
-  font-size: 12px;
-  font-weight: 600;
-  color: #a29bfe;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
   margin-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   padding-bottom: 6px;
@@ -1182,8 +1185,8 @@ body.theme-form {
 .status-dot.status-unverified { background: var(--text-muted); opacity: 0.7; }
 
 .status-dot.status-active {
-  background: var(--accent);
-  box-shadow: 0 0 7px rgba(0, 206, 201, 0.7);
+  background: #2ecc71;
+  box-shadow: 0 0 7px rgba(46, 204, 113, 0.7);
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
@@ -1437,7 +1440,7 @@ body.theme-form {
   border-radius: 8px;
   padding: 8px;
 }
-.field-hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; white-space: pre-line; }
+.field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; white-space: pre-line; }
 .prefs-free-note { font-size: 11px; color: var(--text-warning, #fdcb6e); margin-bottom: 8px; }
 .prefs-free-note.hidden { display: none; }
 #prefs-card.disabled .form-group { opacity: 0.45; pointer-events: none; }
@@ -1573,3 +1576,54 @@ body.theme-form {
 .unsaved-note { font-size: 11px; color: var(--accent); text-align: center; padding: 6px 0 0; }
 .unsaved-note.hidden { display: none; }
 .btn-primary.needs-save { box-shadow: 0 0 0 2px var(--accent), 0 4px 15px var(--primary-glow); }
+
+/* ── Visual polish ─────────────────────────────────────────────────────── */
+/* Chips: native language names need a system font (Outfit lacks Vietnamese
+   etc.), constant weight so selecting doesn't shift the layout, and a drawn
+   check so it looks identical whatever the script. */
+.chip, .lang-chip {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans KR", "Noto Sans Thai", sans-serif;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip[aria-pressed="true"], .lang-chip[aria-pressed="true"] { font-weight: 500; }
+.chip[aria-pressed="true"]::before, .lang-chip[aria-pressed="true"]::before {
+  content: '';
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(-45deg);
+}
+
+/* Placeholders must read as hints, not as values already typed. */
+input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
+
+/* Both expanders on the main panel look and behave the same. */
+.extra-langs summary, .doc-glossary summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 0;
+}
+.extra-langs summary::-webkit-details-marker, .doc-glossary summary::-webkit-details-marker { display: none; }
+.extra-langs summary::before, .doc-glossary summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.extra-langs[open] summary::before, .doc-glossary[open] summary::before { transform: rotate(45deg); }
+.extra-langs summary:hover, .doc-glossary summary:hover { color: var(--text-main); }
+.extra-langs-picked { color: var(--accent); font-weight: 600; }
