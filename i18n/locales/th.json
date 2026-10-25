@@ -233,11 +233,18 @@
   "done.partialTitle": "⚠ บางภาษาเสร็จแล้ว",
   "error.sheetNotFound": "ไม่พบชีตที่คุณเปิดอยู่ในสำเนา\nยกเลิกการเลือก “แปลเฉพาะชีตที่เปิดอยู่” เพื่อแปลทั้งไฟล์ หรือโหลดสเปรดชีตใหม่แล้วลองอีกครั้ง",
   "prefs.names.label": "ชื่อเฉพาะ (AI จดจำให้อัตโนมัติ)",
-  "prefs.mode.translate": "แปลตามปกติ",
+  "prefs.mode.translate": "แปล",
   "prefs.mode.keep": "คงต้นฉบับ",
-  "prefs.mode.annotate": "แปล (ต้นฉบับ)",
+  "prefs.mode.annotate": "แปล＋ต้นฉบับ",
   "prefs.mode.translate.hint": "ใช้ชื่อแปลที่ใช้กันทั่วไป เช่น Tokyo → โตเกียว",
   "prefs.mode.keep.hint": "ไม่แปลหรือถอดเสียง เช่น Apple Inc. คงเดิม",
   "prefs.mode.annotate.hint": "แปลและใส่ต้นฉบับในวงเล็บ",
-  "prefs.preview.annotateCategories": "{list}: แปลและใส่ต้นฉบับ"
+  "prefs.preview.annotateCategories": "{list}: แปลและใส่ต้นฉบับ",
+  "prefs.example.people": "มัสก์",
+  "prefs.example.brands": "แอปเปิล",
+  "prefs.example.places": "ลอนดอน",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "Musk",
+  "prefs.example.brands.src": "Apple",
+  "prefs.example.places.src": "London"
 }

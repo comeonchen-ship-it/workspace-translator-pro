@@ -235,9 +235,16 @@
   "prefs.names.label": "Noms propres (reconnus automatiquement par l'IA)",
   "prefs.mode.translate": "Traduire",
   "prefs.mode.keep": "Garder",
-  "prefs.mode.annotate": "Trad. (orig.)",
+  "prefs.mode.annotate": "Les deux",
   "prefs.mode.translate.hint": "Utiliser la forme traduite usuelle, ex. London → Londres",
   "prefs.mode.keep.hint": "Jamais traduit ni translittéré, ex. Apple Inc. reste Apple Inc.",
   "prefs.mode.annotate.hint": "Traduire et ajouter l'original entre parenthèses",
-  "prefs.preview.annotateCategories": "{list} : traduction + original entre parenthèses"
+  "prefs.preview.annotateCategories": "{list} : traduction + original entre parenthèses",
+  "prefs.example.people": "Confucius",
+  "prefs.example.brands": "Nintendo",
+  "prefs.example.places": "Tokyo",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "孔子",
+  "prefs.example.brands.src": "任天堂",
+  "prefs.example.places.src": "東京"
 }

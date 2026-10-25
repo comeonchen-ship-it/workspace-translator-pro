@@ -80,7 +80,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.type = 'button';
         btn.setAttribute('role', 'radio');
         btn.setAttribute('aria-checked', String(nameModes[cat] === mode));
-        btn.textContent = t(`prefs.mode.${mode}`);
+        // Label plus a concrete example of the result (e.g. 倫敦 / London / 倫敦（London）).
+        const label = document.createElement('span');
+        label.className = 'seg-label';
+        label.textContent = t(`prefs.mode.${mode}`);
+        const example = document.createElement('span');
+        example.className = 'seg-example';
+        // Example pair per locale: Asian UIs show Musk → 馬斯克, Latin-script UIs
+        // show 東京 → Tokyo, so the example is always readable.
+        const src = t(`prefs.example.${cat}.src`);
+        const dst = t(`prefs.example.${cat}`);
+        example.textContent = mode === 'keep' ? src : mode === 'translate' ? dst : t('prefs.example.annotate', { dst, src });
+        btn.append(label, example);
         btn.title = t(`prefs.mode.${mode}.hint`);
         btn.addEventListener('click', () => {
           nameModes[cat] = mode;

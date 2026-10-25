@@ -235,9 +235,16 @@
   "prefs.names.label": "Nombres propios (la IA los reconoce)",
   "prefs.mode.translate": "Traducir",
   "prefs.mode.keep": "Mantener",
-  "prefs.mode.annotate": "Trad. (orig.)",
+  "prefs.mode.annotate": "Ambos",
   "prefs.mode.translate.hint": "Usar la forma traducida habitual, p. ej. Tokyo → Tokio",
   "prefs.mode.keep.hint": "Nunca traducir ni transliterar, p. ej. Apple Inc. se mantiene",
   "prefs.mode.annotate.hint": "Traducir y añadir el original entre paréntesis",
-  "prefs.preview.annotateCategories": "{list}: traducción + original entre paréntesis"
+  "prefs.preview.annotateCategories": "{list}: traducción + original entre paréntesis",
+  "prefs.example.people": "Confucio",
+  "prefs.example.brands": "Nintendo",
+  "prefs.example.places": "Tokio",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "孔子",
+  "prefs.example.brands.src": "任天堂",
+  "prefs.example.places.src": "東京"
 }

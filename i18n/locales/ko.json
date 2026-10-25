@@ -233,11 +233,18 @@
   "done.partialTitle": "⚠ 일부 언어는 완료됨",
   "error.sheetNotFound": "사본에서 현재 시트를 찾지 못했습니다.\n‘현재 보고 있는 시트만 번역’을 해제해 전체를 번역하거나, 새로고침 후 다시 시도하세요.",
   "prefs.names.label": "고유명사(AI가 자동으로 인식)",
-  "prefs.mode.translate": "관례대로 번역",
+  "prefs.mode.translate": "번역",
   "prefs.mode.keep": "원문 유지",
-  "prefs.mode.annotate": "번역(원문)",
+  "prefs.mode.annotate": "번역＋원문",
   "prefs.mode.translate.hint": "통용되는 번역이 있으면 번역 (예: Tokyo → 도쿄)",
   "prefs.mode.keep.hint": "번역·음역하지 않음 (예: Apple Inc. 그대로)",
   "prefs.mode.annotate.hint": "번역하고 원문 병기 (예: Apple Inc. → 애플(Apple Inc.))",
-  "prefs.preview.annotateCategories": "{list}은(는) 번역 후 원문 병기"
+  "prefs.preview.annotateCategories": "{list}은(는) 번역 후 원문 병기",
+  "prefs.example.people": "머스크",
+  "prefs.example.brands": "애플",
+  "prefs.example.places": "런던",
+  "prefs.example.annotate": "{dst}({src})",
+  "prefs.example.people.src": "Musk",
+  "prefs.example.brands.src": "Apple",
+  "prefs.example.places.src": "London"
 }

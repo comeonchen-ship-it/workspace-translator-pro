@@ -235,9 +235,16 @@
   "prefs.names.label": "Eigennamen (die KI erkennt sie automatisch)",
   "prefs.mode.translate": "Übersetzen",
   "prefs.mode.keep": "Beibehalten",
-  "prefs.mode.annotate": "Mit Original",
+  "prefs.mode.annotate": "Beides",
   "prefs.mode.translate.hint": "Übliche übersetzte Form verwenden, z. B. Tokyo → Tokio",
   "prefs.mode.keep.hint": "Nie übersetzen oder transkribieren, z. B. Apple Inc. bleibt Apple Inc.",
   "prefs.mode.annotate.hint": "Übersetzen und Original in Klammern ergänzen",
-  "prefs.preview.annotateCategories": "{list}: Übersetzung + Original in Klammern"
+  "prefs.preview.annotateCategories": "{list}: Übersetzung + Original in Klammern",
+  "prefs.example.people": "Konfuzius",
+  "prefs.example.brands": "Nintendo",
+  "prefs.example.places": "Tokio",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "孔子",
+  "prefs.example.brands.src": "任天堂",
+  "prefs.example.places.src": "東京"
 }

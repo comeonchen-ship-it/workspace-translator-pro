@@ -235,9 +235,16 @@
   "prefs.names.label": "Names (the AI recognises them automatically)",
   "prefs.mode.translate": "Translate",
   "prefs.mode.keep": "Keep original",
-  "prefs.mode.annotate": "Add original",
+  "prefs.mode.annotate": "Both",
   "prefs.mode.translate.hint": "Use the usual translated form when one exists, e.g. Tokyo → 東京",
   "prefs.mode.keep.hint": "Never translate or transliterate, e.g. Apple Inc. stays Apple Inc.",
   "prefs.mode.annotate.hint": "Translate and add the original in brackets, e.g. Apple Inc. → 蘋果公司（Apple Inc.）",
-  "prefs.preview.annotateCategories": "Translate {list} and add the original in brackets"
+  "prefs.preview.annotateCategories": "Translate {list} and add the original in brackets",
+  "prefs.example.people": "Confucius",
+  "prefs.example.brands": "Nintendo",
+  "prefs.example.places": "Tokyo",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "孔子",
+  "prefs.example.brands.src": "任天堂",
+  "prefs.example.places.src": "東京"
 }

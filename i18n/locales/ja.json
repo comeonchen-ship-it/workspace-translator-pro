@@ -235,9 +235,16 @@
   "prefs.names.label": "固有名詞（AI が自動で判別）",
   "prefs.mode.translate": "訳す",
   "prefs.mode.keep": "原文のまま",
-  "prefs.mode.annotate": "訳語（原文）",
+  "prefs.mode.annotate": "訳＋原文",
   "prefs.mode.translate.hint": "一般的な訳があれば訳す（例：Tokyo → 東京）",
   "prefs.mode.keep.hint": "翻訳・音訳しない（例：Apple Inc. はそのまま）",
   "prefs.mode.annotate.hint": "訳して原文を併記（例：Apple Inc. → アップル社（Apple Inc.））",
-  "prefs.preview.annotateCategories": "{list}は訳語に原文を併記"
+  "prefs.preview.annotateCategories": "{list}は訳語に原文を併記",
+  "prefs.example.people": "マスク",
+  "prefs.example.brands": "アップル",
+  "prefs.example.places": "ロンドン",
+  "prefs.example.annotate": "{dst}（{src}）",
+  "prefs.example.people.src": "Musk",
+  "prefs.example.brands.src": "Apple",
+  "prefs.example.places.src": "London"
 }

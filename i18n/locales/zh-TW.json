@@ -233,11 +233,18 @@
   "done.partialTitle": "⚠ 部分語言已完成",
   "error.sheetNotFound": "在副本中找不到你目前所在的工作表。\n請取消勾選「只翻譯目前所在的工作表」改為翻譯整份，或重新整理試算表後再試一次。",
   "prefs.names.label": "專有名詞（AI 會自動辨識）",
-  "prefs.mode.translate": "依慣例翻譯",
+  "prefs.mode.translate": "翻譯",
   "prefs.mode.keep": "保持原文",
-  "prefs.mode.annotate": "譯文（原文）",
+  "prefs.mode.annotate": "翻譯＋原文",
   "prefs.mode.translate.hint": "有通用譯名就翻，例如 Tokyo → 東京",
   "prefs.mode.keep.hint": "一律不翻，例如 Apple Inc. 維持 Apple Inc.",
   "prefs.mode.annotate.hint": "翻譯並附原文，例如 Apple Inc. → 蘋果公司（Apple Inc.）",
-  "prefs.preview.annotateCategories": "{list}翻譯後附上原文"
+  "prefs.preview.annotateCategories": "{list}翻譯後附上原文",
+  "prefs.example.people": "馬斯克",
+  "prefs.example.brands": "蘋果",
+  "prefs.example.places": "倫敦",
+  "prefs.example.annotate": "{dst}（{src}）",
+  "prefs.example.people.src": "Musk",
+  "prefs.example.brands.src": "Apple",
+  "prefs.example.places.src": "London"
 }

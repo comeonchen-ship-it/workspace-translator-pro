@@ -233,11 +233,18 @@
   "done.partialTitle": "⚠ 部分语言已完成",
   "error.sheetNotFound": "在副本中找不到你当前所在的工作表。\n请取消勾选「只翻译当前所在的工作表」改为翻译整份，或刷新表格后再试一次。",
   "prefs.names.label": "专有名词（AI 会自动识别）",
-  "prefs.mode.translate": "按惯例翻译",
+  "prefs.mode.translate": "翻译",
   "prefs.mode.keep": "保持原文",
-  "prefs.mode.annotate": "译文（原文）",
+  "prefs.mode.annotate": "翻译＋原文",
   "prefs.mode.translate.hint": "有通用译名就翻，例如 Tokyo → 东京",
   "prefs.mode.keep.hint": "一律不翻，例如 Apple Inc. 保持 Apple Inc.",
   "prefs.mode.annotate.hint": "翻译并附原文，例如 Apple Inc. → 苹果公司（Apple Inc.）",
-  "prefs.preview.annotateCategories": "{list}翻译后附上原文"
+  "prefs.preview.annotateCategories": "{list}翻译后附上原文",
+  "prefs.example.people": "马斯克",
+  "prefs.example.brands": "苹果",
+  "prefs.example.places": "伦敦",
+  "prefs.example.annotate": "{dst}（{src}）",
+  "prefs.example.people.src": "Musk",
+  "prefs.example.brands.src": "Apple",
+  "prefs.example.places.src": "London"
 }

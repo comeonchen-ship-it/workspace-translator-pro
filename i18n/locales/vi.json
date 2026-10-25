@@ -235,9 +235,16 @@
   "prefs.names.label": "Danh từ riêng (AI tự nhận biết)",
   "prefs.mode.translate": "Dịch",
   "prefs.mode.keep": "Giữ nguyên",
-  "prefs.mode.annotate": "Dịch (gốc)",
+  "prefs.mode.annotate": "Dịch＋gốc",
   "prefs.mode.translate.hint": "Dùng tên dịch thông dụng nếu có, VD: London → Luân Đôn",
   "prefs.mode.keep.hint": "Không dịch, không phiên âm, VD: Apple Inc. giữ nguyên",
   "prefs.mode.annotate.hint": "Dịch và ghi kèm bản gốc trong ngoặc",
-  "prefs.preview.annotateCategories": "{list}: dịch kèm bản gốc"
+  "prefs.preview.annotateCategories": "{list}: dịch kèm bản gốc",
+  "prefs.example.people": "Khổng Tử",
+  "prefs.example.brands": "Nintendo",
+  "prefs.example.places": "Tokyo",
+  "prefs.example.annotate": "{dst} ({src})",
+  "prefs.example.people.src": "孔子",
+  "prefs.example.brands.src": "任天堂",
+  "prefs.example.places.src": "東京"
 }
