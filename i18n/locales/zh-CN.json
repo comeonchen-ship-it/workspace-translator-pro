@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API 密钥无效",
   "modal.apiKeyInvalid.msg": "您的 API 密钥被标记为无效，或模型名称不正确。请到设置修正问题后，再次运行「测试连接」。",
   "modal.goSettings": "⚙️ 前往设置",
-  "modal.dismiss": "取消"
+  "modal.dismiss": "取消",
+  "settings.test.permissionDenied": "❌ 未授权连接到此端点。请再点一次「测试连接」并选择「允许」。",
+  "error.modelNotFound": "设置中的 {engine} 模型已停用或名称拼错（404）。\n请打开设置（⚙️）改成当前可用的模型名称（可参考官方模型列表），再点「测试连接」。",
+  "error.noCopyPermission": "Google 云端硬盘不允许你复制这个文件。\n你可能只有查看／评论权限，或所有者关闭了复制功能。请向所有者申请编辑权限，或先用「文件 → 创建副本」，再翻译你的副本。",
+  "error.signIn": "Google 登录已过期或未完成。\n请再点一次「翻译并创建副本」，并在弹出的 Google 登录窗口完成登录。",
+  "error.network": "无法连接到服务器，可能已离线或连接被阻止。\n请检查网络连接（或 VPN／防火墙）后再试一次。"
 }

@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "Clé API non valide",
   "modal.apiKeyInvalid.msg": "Votre clé API est marquée comme non valide ou le nom du modèle est incorrect. Allez dans les Paramètres, corrigez le problème, puis relancez « Tester la connexion ».",
   "modal.goSettings": "⚙️ Aller aux Paramètres",
-  "modal.dismiss": "Annuler"
+  "modal.dismiss": "Annuler",
+  "settings.test.permissionDenied": "❌ L'accès à ce point de terminaison n'a pas été autorisé. Cliquez à nouveau sur « Tester la connexion » et choisissez Autoriser.",
+  "error.modelNotFound": "Le modèle {engine} indiqué dans les paramètres n'existe plus ou est mal orthographié (404).\nOuvrez les paramètres (⚙️), saisissez un nom de modèle actuel, puis cliquez sur « Tester la connexion ».",
+  "error.noCopyPermission": "Google Drive n'autorise pas la copie de ce fichier.\nVous n'avez peut-être qu'un accès en lecture/commentaire, ou le propriétaire a désactivé la copie. Demandez un accès en modification, ou faites Fichier → Créer une copie puis traduisez la copie.",
+  "error.signIn": "Votre connexion Google a expiré ou n'a pas abouti.\nCliquez à nouveau sur « Traduire et copier » et terminez la connexion Google.",
+  "error.network": "Impossible de joindre le serveur — vous semblez hors ligne ou la connexion est bloquée.\nVérifiez votre connexion (ou VPN/pare-feu), puis réessayez."
 }

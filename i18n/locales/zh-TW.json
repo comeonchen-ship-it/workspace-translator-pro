@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API 金鑰無效",
   "modal.apiKeyInvalid.msg": "這組金鑰被標記為無效，或模型名稱不正確。請到設定修正後，再執行一次「測試連線」。",
   "modal.goSettings": "⚙️ 前往設定",
-  "modal.dismiss": "取消"
+  "modal.dismiss": "取消",
+  "settings.test.permissionDenied": "❌ 未授權連線到此端點。請再按一次「測試連線」並選擇「允許」。",
+  "error.modelNotFound": "設定中的 {engine} 模型已停用或名稱拼錯（404）。\n請打開設定（⚙️）改成目前可用的模型名稱（可參考原廠模型列表），再按「測試連線」。",
+  "error.noCopyPermission": "Google 雲端硬碟不允許你複製這個檔案。\n你可能只有檢視／留言權限，或擁有者關閉了複製功能。請向擁有者要求編輯權限，或先用「檔案 → 建立副本」，再翻譯你的副本。",
+  "error.signIn": "Google 登入已過期或未完成。\n請再按一次「建立翻譯複本」，並在跳出的 Google 登入視窗完成登入。",
+  "error.network": "無法連到伺服器，可能已離線或連線被阻擋。\n請檢查網路連線（或 VPN／防火牆）後再試一次。"
 }

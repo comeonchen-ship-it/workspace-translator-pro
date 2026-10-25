@@ -1053,8 +1053,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         : t('error.429.generic', { engine: engine.toUpperCase() });
     }
 
+    // Drive refused to copy: the user can only view/comment, or the owner disabled copying.
+    if (err.includes("Drive copy API error") && (err.includes("403") || err.includes("cannotCopyFile") || err.includes("insufficientFilePermissions"))) {
+      return t('error.noCopyPermission');
+    }
+
+    // The configured model was retired or misspelled.
+    if (/API Error \(404\)/.test(err) || err.includes("model_not_found")) {
+      return t('error.modelNotFound', { engine: engine.toUpperCase() });
+    }
+
+    // Google sign-in expired and could not be refreshed silently.
+    if (/(Drive|Slides|Docs|Sheets|Forms) \w+ API error \(401\)/.test(err) || err.includes("OAuth") || err.includes("Access token")) {
+      return t('error.signIn');
+    }
+
+    // Offline / DNS / blocked request.
+    if (err.includes("Failed to fetch") || err.includes("NetworkError") || err.includes("ERR_INTERNET")) {
+      return t('error.network');
+    }
+
     // 403 Forbidden / Invalid API Key / API Not Enabled
-    if (err.includes("403") || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
+    if (err.includes("403") || /API Error \(401\)/.test(err) || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
       return t('error.403');
     }
 

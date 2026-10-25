@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API 키가 무효합니다",
   "modal.apiKeyInvalid.msg": "API 키가 무효로 표시되었거나 모델 이름이 올바르지 않습니다. 설정에서 문제를 해결한 후 '연결 테스트'를 다시 실행해 주세요.",
   "modal.goSettings": "⚙️ 설정으로 이동",
-  "modal.dismiss": "취소"
+  "modal.dismiss": "취소",
+  "settings.test.permissionDenied": "❌ 이 엔드포인트 접근 권한이 없습니다. '연결 테스트'를 다시 눌러 '허용'을 선택하세요.",
+  "error.modelNotFound": "설정의 {engine} 모델이 종료되었거나 이름이 잘못되었습니다(404).\n설정(⚙️)에서 현재 사용 가능한 모델 이름을 입력한 뒤 '연결 테스트'를 누르세요.",
+  "error.noCopyPermission": "Google 드라이브에서 이 파일을 복사할 수 없습니다.\n보기/댓글 권한만 있거나 소유자가 복사를 막았을 수 있습니다. 편집 권한을 요청하거나 '파일 → 사본 만들기' 후 사본을 번역하세요.",
+  "error.signIn": "Google 로그인이 만료되었거나 완료되지 않았습니다.\n'번역 후 사본 만들기'를 다시 누르고 Google 로그인 창을 완료하세요.",
+  "error.network": "서버에 연결할 수 없습니다. 오프라인이거나 연결이 차단되었습니다.\n인터넷 연결(VPN/방화벽)을 확인한 뒤 다시 시도하세요."
 }

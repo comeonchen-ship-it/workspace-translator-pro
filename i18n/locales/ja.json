@@ -139,7 +139,7 @@
   "settings.keyFormat.claude.bad": "⚠ 形式が一致しません：Claude キーは通常 sk-ant- で始まります",
   "settings.keyFormat.generic.ok": "✓ API キーは有効に見えます",
   "settings.keyFormat.generic.bad": "⚠ API キーが極端に短いです",
-  "settings.keyFormat.unknown": "ℹ 認識できないキー形式です。「接続テスト」で確認してください",
+  "settings.keyFormat.unknown": "ℹ 認識できないキー形式です。「接続をテスト」で確認してください",
   "modal.apiKeyRequired.title": "API キーが必要です",
   "modal.apiKeyRequired.msg": "選択した翻訳プロバイダーには API キーが必要です。設定で API キーを入力し、「接続をテスト」をクリックして確認してください。",
   "modal.apiKeyUnverified.title": "API キーが未検証です",
@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API キーが無効です",
   "modal.apiKeyInvalid.msg": "API キーが無効、またはモデル名が正しくありません。設定で問題を修正し、もう一度「接続をテスト」を実行してください。",
   "modal.goSettings": "⚙️ 設定へ移動",
-  "modal.dismiss": "キャンセル"
+  "modal.dismiss": "キャンセル",
+  "settings.test.permissionDenied": "❌ このエンドポイントへのアクセスが許可されていません。もう一度「接続をテスト」を押して「許可」を選んでください。",
+  "error.modelNotFound": "設定の {engine} モデルは廃止されたか、名前が間違っています（404）。\n設定（⚙️）で現在利用できるモデル名を入力し、「接続をテスト」を押してください。",
+  "error.noCopyPermission": "Google ドライブでこのファイルをコピーできませんでした。\n閲覧／コメント権限のみか、オーナーがコピーを無効にしています。編集権限を依頼するか、「ファイル → コピーを作成」してからそのコピーを翻訳してください。",
+  "error.signIn": "Google のログインが期限切れか、完了していません。\nもう一度「翻訳してコピーを作成」を押し、Google のログイン画面を完了してください。",
+  "error.network": "サーバーに接続できません。オフラインか、接続がブロックされています。\nインターネット接続（VPN／ファイアウォール）を確認して再試行してください。"
 }

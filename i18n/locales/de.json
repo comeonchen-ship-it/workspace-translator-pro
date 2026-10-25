@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API-Schlüssel ungültig",
   "modal.apiKeyInvalid.msg": "Ihr API-Schlüssel ist als ungültig markiert oder der Modellname ist falsch. Beheben Sie das Problem in den Einstellungen und führen Sie „Verbindung testen“ erneut aus.",
   "modal.goSettings": "⚙️ Zu den Einstellungen",
-  "modal.dismiss": "Abbrechen"
+  "modal.dismiss": "Abbrechen",
+  "settings.test.permissionDenied": "❌ Zugriff auf diesen Endpunkt wurde nicht erlaubt. Erneut „Verbindung testen“ klicken und „Zulassen“ wählen.",
+  "error.modelNotFound": "Das {engine}-Modell in den Einstellungen existiert nicht mehr oder ist falsch geschrieben (404).\nÖffne die Einstellungen (⚙️), gib einen aktuellen Modellnamen ein und klicke auf „Verbindung testen“.",
+  "error.noCopyPermission": "Google Drive erlaubt das Kopieren dieser Datei nicht.\nMöglicherweise hast du nur Lese-/Kommentarrechte oder der Eigentümer hat das Kopieren deaktiviert. Bitte um Bearbeitungsrechte oder nutze Datei → Kopie erstellen und übersetze die Kopie.",
+  "error.signIn": "Deine Google-Anmeldung ist abgelaufen oder wurde nicht abgeschlossen.\nKlicke erneut auf „Übersetzen & kopieren“ und schließe die Google-Anmeldung ab.",
+  "error.network": "Server nicht erreichbar – du bist offline oder die Verbindung wird blockiert.\nPrüfe deine Internetverbindung (oder VPN/Firewall) und versuche es erneut."
 }

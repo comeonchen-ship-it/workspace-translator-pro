@@ -139,7 +139,7 @@
   "settings.keyFormat.claude.bad": "⚠ Format mismatch: Claude keys typically start with sk-ant-",
   "settings.keyFormat.generic.ok": "✓ API Key looks valid",
   "settings.keyFormat.generic.bad": "⚠ API Key is extremely short",
-  "settings.keyFormat.unknown": "ℹ Unrecognized key format — click \"Test connection\" to verify",
+  "settings.keyFormat.unknown": "ℹ Unrecognized key format — click \"Test Connection\" to verify",
   "modal.apiKeyRequired.title": "API Key Required",
   "modal.apiKeyRequired.msg": "An API key is required for the selected translation provider. Please go to Settings, enter your API key, and click \"Test Connection\" to verify.",
   "modal.apiKeyUnverified.title": "API Key Not Verified",
@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "API Key Invalid",
   "modal.apiKeyInvalid.msg": "Your API key is marked as invalid or the model name is incorrect. Please go to Settings, fix the issue, and run \"Test Connection\" again.",
   "modal.goSettings": "⚙️ Go to Settings",
-  "modal.dismiss": "Cancel"
+  "modal.dismiss": "Cancel",
+  "settings.test.permissionDenied": "❌ Permission to reach this endpoint was not granted. Click \"Test Connection\" again and choose Allow.",
+  "error.modelNotFound": "The {engine} model in Settings no longer exists or is misspelled (404).\nOpen Settings (⚙️), enter a current model name (see the provider's model list), then click \"Test Connection\".",
+  "error.noCopyPermission": "Google Drive would not let you copy this file.\nYou may only have view/comment access, or the owner disabled copying. Ask the owner for edit access, or use File → Make a copy first and translate your copy.",
+  "error.signIn": "Your Google sign-in expired or was not completed.\nClick \"Translate & Copy\" again and finish the Google sign-in window.",
+  "error.network": "Could not reach the server — you appear to be offline or the connection is blocked.\nCheck your internet connection (or VPN/firewall), then try again."
 }

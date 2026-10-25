@@ -147,5 +147,10 @@
   "modal.apiKeyInvalid.title": "Clave de API no válida",
   "modal.apiKeyInvalid.msg": "Tu clave de API está marcada como no válida o el nombre del modelo es incorrecto. Ve a Ajustes, corrige el problema y vuelve a ejecutar «Probar conexión».",
   "modal.goSettings": "⚙️ Ir a Ajustes",
-  "modal.dismiss": "Cancelar"
+  "modal.dismiss": "Cancelar",
+  "settings.test.permissionDenied": "❌ No se concedió acceso a este endpoint. Pulsa de nuevo «Probar conexión» y elige Permitir.",
+  "error.modelNotFound": "El modelo de {engine} de Ajustes ya no existe o está mal escrito (404).\nAbre Ajustes (⚙️), escribe un nombre de modelo actual y pulsa «Probar conexión».",
+  "error.noCopyPermission": "Google Drive no permite copiar este archivo.\nPuede que solo tengas acceso de lectura/comentario o que el propietario haya desactivado la copia. Pide acceso de edición, o usa Archivo → Hacer una copia y traduce tu copia.",
+  "error.signIn": "Tu inicio de sesión de Google caducó o no se completó.\nPulsa de nuevo «Traducir y copiar» y completa el inicio de sesión de Google.",
+  "error.network": "No se pudo conectar con el servidor: parece que no hay conexión o está bloqueada.\nRevisa tu conexión (o VPN/cortafuegos) e inténtalo de nuevo."
 }
