@@ -1,6 +1,6 @@
 import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang } from './i18n/languages.js';
 import {
-  loadLocale, t, tStatus, applyI18n, formatDateTime,
+  loadLocale, t, tStatus, applyI18n, formatShortDateTime,
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
 import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
@@ -265,8 +265,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 1. Check storage for existing settings
-  chrome.storage.local.get([
+  // 1. Check storage for existing settings. Also used to revert unsaved edits.
+  const loadSettingsForm = (onLoaded) => chrome.storage.local.get([
     'translationEngine',
     'apiKey',
     'modelName',
@@ -299,11 +299,51 @@ document.addEventListener('DOMContentLoaded', async () => {
       validateApiKey();
     }, 100);
 
+    markSettingsClean();
+    onLoaded?.(items);
+  });
+
+  loadSettingsForm((items) => {
     // First run: no key yet and the user hasn't chosen the free engine.
     chrome.storage.local.get('setupSkipped', ({ setupSkipped }) => {
       if (!items.apiKey && (items.translationEngine || 'gemini') !== 'free' && !setupSkipped) openSetup();
     });
   });
+
+  // ── Unsaved-changes guard ─────────────────────────────────────────────────
+  // Settings only apply after Save. Show when the form differs from what is
+  // stored, ask before ✕ throws edits away, and make Cancel actually revert.
+  // (Interface language applies immediately and is deliberately not tracked.)
+  const unsavedNote = document.getElementById('unsaved-note');
+  let savedSnapshot = '';
+
+  function settingsSnapshot() {
+    return JSON.stringify([
+      selectEngine.value, inputApiKey.value.trim(), inputModelName.value.trim(), inputCustomUrl.value.trim(),
+      inputAutoOpen?.checked, inputFitText?.checked,
+      prefTone.value, KEEP_CATEGORIES.map((k) => keepBoxes[k].checked),
+      globalTerms.getRows().filter((r) => r.src.trim()), prefCustom.value.trim(),
+    ]);
+  }
+
+  function markSettingsClean() {
+    savedSnapshot = settingsSnapshot();
+    updateUnsavedNote();
+  }
+
+  function hasUnsavedSettings() {
+    return savedSnapshot !== '' && settingsSnapshot() !== savedSnapshot;
+  }
+
+  function updateUnsavedNote() {
+    const dirty = hasUnsavedSettings();
+    unsavedNote.classList.toggle('hidden', !dirty);
+    btnSaveSettings.classList.toggle('needs-save', dirty);
+  }
+
+  settingsPanel.addEventListener('input', updateUnsavedNote);
+  settingsPanel.addEventListener('change', updateUnsavedNote);
+  settingsPanel.addEventListener('click', () => setTimeout(updateUnsavedNote));
 
   // ── First-run setup wizard ────────────────────────────────────────────────
   const setupPanel = document.getElementById('setup-panel');
@@ -660,8 +700,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsPanel.classList.remove('active');
   };
 
-  btnCloseSettings.addEventListener('click', closeSettings);
-  btnCancelSettings.addEventListener('click', closeSettings);
+  // ✕ with unsaved edits asks first; Cancel is an explicit "discard".
+  const discardAndClose = () => loadSettingsForm(() => closeSettings());
+  btnCloseSettings.addEventListener('click', () => {
+    if (hasUnsavedSettings() && !confirm(t('settings.unsaved.confirm'))) return;
+    discardAndClose();
+  });
+  btnCancelSettings.addEventListener('click', discardAndClose);
 
   btnSaveSettings.addEventListener('click', () => {
     const translationEngine = selectEngine.value;
@@ -684,6 +729,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
+      markSettingsClean();
       closeSettings();
     });
   });
@@ -1640,7 +1686,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Formatted in the active UI locale, not the browser's.
-      const dateStr = formatDateTime(item.timestamp);
+      const dateStr = formatShortDateTime(item.timestamp);
 
       card.innerHTML = `
         <div class="history-item-info">

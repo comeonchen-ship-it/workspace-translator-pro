@@ -155,6 +155,31 @@ export function formatDateTime(ms) {
   }
 }
 
+/**
+ * Short, human date for lists: "today 14:05", "yesterday 09:12", otherwise the
+ * date without seconds. "today"/"yesterday" come from Intl.RelativeTimeFormat,
+ * so they are localized without extra message keys.
+ */
+export function formatShortDateTime(ms, now = Date.now()) {
+  const d = new Date(ms);
+  const locale = activeCode;
+  try {
+    const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    const startOf = (x) => new Date(new Date(x).toDateString()).getTime();
+    const days = Math.round((startOf(ms) - startOf(now)) / 86400000);
+    if (days === 0 || days === -1) {
+      const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+      return `${rtf.format(days, 'day')} ${time}`;
+    }
+    const sameYear = d.getFullYear() === new Date(now).getFullYear();
+    return d.toLocaleString(locale, {
+      year: sameYear ? undefined : 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+  } catch {
+    return d.toLocaleString();
+  }
+}
+
 export async function getStoredUiLang() {
   try {
     const { uiLang } = await chrome.storage.local.get('uiLang');

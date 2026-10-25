@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "文件中的词",
   "prefs.terms.colMode": "处理方式",
   "prefs.terms.colDst": "译文",
-  "settings.modelHelp.summary": "模型怎么选？"
+  "settings.modelHelp.summary": "模型怎么选？",
+  "settings.unsaved.note": "● 有未保存的更改，点「保存设置」才会生效",
+  "settings.unsaved.confirm": "有未保存的更改，确定要放弃吗？"
 }

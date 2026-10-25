@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "Word in the file",
   "prefs.terms.colMode": "How",
   "prefs.terms.colDst": "Translation",
-  "settings.modelHelp.summary": "How do I choose a model?"
+  "settings.modelHelp.summary": "How do I choose a model?",
+  "settings.unsaved.note": "● Unsaved changes — click Save to apply",
+  "settings.unsaved.confirm": "You have unsaved changes. Discard them?"
 }

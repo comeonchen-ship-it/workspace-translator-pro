@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "ファイル内の語",
   "prefs.terms.colMode": "扱い",
   "prefs.terms.colDst": "訳語",
-  "settings.modelHelp.summary": "モデルの選び方"
+  "settings.modelHelp.summary": "モデルの選び方",
+  "settings.unsaved.note": "● 未保存の変更があります（保存すると反映されます）",
+  "settings.unsaved.confirm": "未保存の変更があります。破棄しますか？"
 }

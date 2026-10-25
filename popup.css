@@ -1568,3 +1568,8 @@ body.theme-form {
 }
 .link-btn:hover { color: var(--text-main); }
 .btn[hidden] { display: none; }
+
+/* Unsaved settings: a quiet note plus a ring on Save. */
+.unsaved-note { font-size: 11px; color: var(--accent); text-align: center; padding: 6px 0 0; }
+.unsaved-note.hidden { display: none; }
+.btn-primary.needs-save { box-shadow: 0 0 0 2px var(--accent), 0 4px 15px var(--primary-glow); }

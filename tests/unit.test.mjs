@@ -60,3 +60,13 @@ test('classifyApiKey is advisory and future-proof', () => {
   assert.equal(classifyApiKey('custom', 'anything-long-enough'), 'ok');
   assert.equal(classifyApiKey('gemini', 'short'), 'bad');
 });
+
+test('formatShortDateTime: today / yesterday / older without seconds', async () => {
+  globalThis.chrome ??= { storage: { local: { get: async () => ({}) } } };
+  const { formatShortDateTime } = await import('../i18n/i18n.js');
+  const now = new Date(2026, 9, 26, 15, 0).getTime();
+  assert.match(formatShortDateTime(now - 3600e3, now), /^today /);
+  assert.match(formatShortDateTime(now - 86400e3, now), /^yesterday /);
+  const older = formatShortDateTime(now - 5 * 86400e3, now);
+  assert.doesNotMatch(older, /:\d\d:\d\d/); // no seconds
+});

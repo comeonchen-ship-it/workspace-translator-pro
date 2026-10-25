@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "Wort in der Datei",
   "prefs.terms.colMode": "Aktion",
   "prefs.terms.colDst": "Übersetzung",
-  "settings.modelHelp.summary": "Wie wähle ich ein Modell?"
+  "settings.modelHelp.summary": "Wie wähle ich ein Modell?",
+  "settings.unsaved.note": "● Ungespeicherte Änderungen – zum Übernehmen speichern",
+  "settings.unsaved.confirm": "Es gibt ungespeicherte Änderungen. Verwerfen?"
 }

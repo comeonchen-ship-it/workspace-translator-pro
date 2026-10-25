@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "คำในไฟล์",
   "prefs.terms.colMode": "วิธีจัดการ",
   "prefs.terms.colDst": "คำแปล",
-  "settings.modelHelp.summary": "เลือกโมเดลอย่างไร?"
+  "settings.modelHelp.summary": "เลือกโมเดลอย่างไร?",
+  "settings.unsaved.note": "● มีการเปลี่ยนแปลงที่ยังไม่บันทึก กดบันทึกเพื่อใช้งาน",
+  "settings.unsaved.confirm": "มีการเปลี่ยนแปลงที่ยังไม่บันทึก ต้องการทิ้งหรือไม่?"
 }

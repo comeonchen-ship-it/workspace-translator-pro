@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "Từ trong tệp",
   "prefs.terms.colMode": "Cách xử lý",
   "prefs.terms.colDst": "Bản dịch",
-  "settings.modelHelp.summary": "Chọn mô hình thế nào?"
+  "settings.modelHelp.summary": "Chọn mô hình thế nào?",
+  "settings.unsaved.note": "● Có thay đổi chưa lưu — nhấn Lưu để áp dụng",
+  "settings.unsaved.confirm": "Bạn có thay đổi chưa lưu. Bỏ các thay đổi này?"
 }

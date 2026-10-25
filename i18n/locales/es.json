@@ -228,5 +228,7 @@
   "prefs.terms.colSrc": "Palabra del archivo",
   "prefs.terms.colMode": "Acción",
   "prefs.terms.colDst": "Traducción",
-  "settings.modelHelp.summary": "¿Cómo elijo un modelo?"
+  "settings.modelHelp.summary": "¿Cómo elijo un modelo?",
+  "settings.unsaved.note": "● Cambios sin guardar: guarda para aplicarlos",
+  "settings.unsaved.confirm": "Tienes cambios sin guardar. ¿Descartarlos?"
 }
