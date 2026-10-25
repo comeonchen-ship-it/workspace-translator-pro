@@ -139,7 +139,7 @@ test('multi-language: one copy per language, links for each, single focus', asyn
 test('prefs: tone, keep-categories and glossary reach the prompt; cache is separated', async () => {
   api.files.p5 = { slides: [slide('s1', [['a', 'Welcome\n']])] };
   const before = api.llm.calls.length;
-  const prefs = { tone: 'formal', keep: { people: true, brands: false, places: false }, glossary: [{ src: 'Welcome', dst: '歡迎光臨' }], custom: '' };
+  const prefs = { tone: 'formal', names: { people: 'keep', brands: 'translate', places: 'translate' }, glossary: [{ src: 'Welcome', dst: '歡迎光臨' }], custom: '' };
   const state = await run('p5', 'presentation', { config: { prefs } });
   assert.equal(state.step, 'done', state.error);
   const call = api.llm.calls[before];
@@ -264,4 +264,24 @@ test('cached translations from before the casing fix are corrected too (DECK ret
   const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
   assert.deepEqual(written, ['เทคนิค deck']);
   assert.ok(api.llm.calls.length >= callsBefore);
+});
+
+test('annotate mode: original added in brackets, no Google（Google） duplicates', async () => {
+  api.files.p13 = { slides: [slide('s1', [['a', 'Apple Inc. uses Google\n']])] };
+  const before = api.llm.calls.length;
+  api.llm.translate = () => '蘋果公司（Apple Inc.）使用 Google（Google）';
+  const state = await run('p13', 'presentation', { config: { prefs: { names: { people: 'keep', brands: 'annotate', places: 'translate' } } } });
+  api.llm.translate = (t) => `TR(${t})`;
+  assert.equal(state.step, 'done', state.error);
+  assert.match(api.llm.calls[before].system, /蘋果公司（Apple Inc\.）/);
+  const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
+  assert.deepEqual(written, ['蘋果公司（Apple Inc.）使用 Google']);
+});
+
+test('settings saved by ≤ v1.6 (keep: booleans) still work', async () => {
+  api.files.p14 = { slides: [slide('s1', [['a', 'Meet Jerry in Tokyo\n']])] };
+  const before = api.llm.calls.length;
+  const state = await run('p14', 'presentation', { config: { prefs: { keep: { people: true, brands: false, places: true } } } });
+  assert.equal(state.step, 'done', state.error);
+  assert.match(api.llm.calls[before].system, /copy them exactly as written: people's names; place names/);
 });

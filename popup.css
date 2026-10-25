@@ -1637,3 +1637,36 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
    on the left). Painting from the border box removes it. Must come after the
    .btn-* rules: their `background` shorthand resets background-origin. */
 .btn { background-origin: border-box; }
+
+/* ── Name-category modes (segmented control) ───────────────────────────── */
+.name-modes { display: flex; flex-direction: column; gap: 10px; }
+.name-mode-row { display: flex; flex-direction: column; gap: 4px; }
+.name-mode-label { font-size: 12px; color: var(--text-main); }
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 2px;
+  gap: 2px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+}
+.segmented button {
+  font: inherit;
+  font-size: 11px;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.segmented button:hover { color: var(--text-main); }
+.segmented button[aria-checked="true"] {
+  background: var(--accent);
+  color: #0b1020;
+  font-weight: 600;
+}

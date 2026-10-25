@@ -1,5 +1,5 @@
 import { getLanguage } from './i18n/languages.js';
-import { buildPrefsBlock, prefsFingerprint, normalizePrefs, restoreKeepCasing } from './lib/prefs.js';
+import { buildPrefsBlock, prefsFingerprint, normalizePrefs, postprocessTranslation } from './lib/prefs.js';
 
 /**
  * Human-readable target language name for the LLM prompt.
@@ -113,7 +113,7 @@ export async function translateTexts(texts, targetLang, config) {
     const trimmed = text.trim();
     if (cache[trimmed] !== undefined) {
       // Same post-processing as fresh results — cached entries may predate it.
-      translationsMap.set(text, restoreKeepCasing(text, cache[trimmed], config.activePrefs?.glossary));
+      translationsMap.set(text, postprocessTranslation(text, cache[trimmed], config.activePrefs));
     } else {
       uncachedTexts.push(text);
     }
@@ -255,7 +255,7 @@ export async function translateTexts(texts, targetLang, config) {
       for (let i = 0; i < batch.length; i++) {
         const original = batch[i];
         const raw = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
-        const translated = restoreKeepCasing(original, raw, config.activePrefs?.glossary);
+        const translated = postprocessTranslation(original, raw, config.activePrefs);
         translationsMap.set(original, translated);
         if (!config.prefsCustomDropped) cache[original.trim()] = translated;
       }

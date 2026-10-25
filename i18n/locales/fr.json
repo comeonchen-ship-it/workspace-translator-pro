@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "Traduire uniquement l'onglet affiché",
   "multi.summary": "Traduire aussi dans d'autres langues",
   "progress.langDone": "Langue {done}/{total} terminée — passage à la suivante…",
-  "prefs.keep.label": "Garder dans la langue d'origine (cochez, l'IA les reconnaît)",
   "prefs.keep.people": "Noms de personnes",
   "prefs.keep.brands": "Noms d'entreprises, de marques et de produits",
   "prefs.keep.places": "Noms de lieux",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● Modifications non enregistrées — enregistrez pour les appliquer",
   "settings.unsaved.confirm": "Vous avez des modifications non enregistrées. Les abandonner ?",
   "done.partialTitle": "⚠ Certaines langues sont terminées",
-  "error.sheetNotFound": "Impossible de trouver l'onglet affiché dans la copie.\nDécochez « Traduire uniquement l'onglet affiché » pour tout traduire, ou rechargez la feuille et réessayez."
+  "error.sheetNotFound": "Impossible de trouver l'onglet affiché dans la copie.\nDécochez « Traduire uniquement l'onglet affiché » pour tout traduire, ou rechargez la feuille et réessayez.",
+  "prefs.names.label": "Noms propres (reconnus automatiquement par l'IA)",
+  "prefs.mode.translate": "Traduire",
+  "prefs.mode.keep": "Garder",
+  "prefs.mode.annotate": "Trad. (orig.)",
+  "prefs.mode.translate.hint": "Utiliser la forme traduite usuelle, ex. London → Londres",
+  "prefs.mode.keep.hint": "Jamais traduit ni translittéré, ex. Apple Inc. reste Apple Inc.",
+  "prefs.mode.annotate.hint": "Traduire et ajouter l'original entre parenthèses",
+  "prefs.preview.annotateCategories": "{list} : traduction + original entre parenthèses"
 }

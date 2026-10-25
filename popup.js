@@ -4,7 +4,7 @@ import {
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
 import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
-import { mergeGlossaries, rowsToGlossary, glossaryTextToRows, DEFAULT_KEEP, KEEP_CATEGORIES, CUSTOM_MAX_CHARS } from './lib/prefs.js';
+import { mergeGlossaries, rowsToGlossary, glossaryTextToRows, normalizeNames, NAME_CATEGORIES, NAME_MODES, CUSTOM_MAX_CHARS } from './lib/prefs.js';
 import { createTermEditor } from './lib/term-editor.js';
 import { parseSlideRange, sheetGidFromUrl } from './lib/range.js';
 
@@ -68,19 +68,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefsCard = document.getElementById('prefs-card');
   const prefsFreeNote = document.getElementById('prefs-free-note');
   const prefTone = document.getElementById('pref-tone');
-  // Keep-original categories are toggle chips; expose them like checkboxes.
-  const keepBoxes = Object.fromEntries(KEEP_CATEGORIES.map((k) => {
-    const chip = document.getElementById(`keep-${k}`);
-    chip.addEventListener('click', () => {
-      chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
-      chip.dispatchEvent(new Event('change'));
-    });
-    return [k, {
-      get checked() { return chip.getAttribute('aria-pressed') === 'true'; },
-      set checked(v) { chip.setAttribute('aria-pressed', String(!!v)); },
-      addEventListener: (type, fn) => chip.addEventListener(type, fn),
-    }];
-  }));
+  // Name categories: one segmented control (translate / keep / annotate) each.
+  const nameModes = { ...normalizeNames({}) };
+  function renderNameModes() {
+    for (const row of document.querySelectorAll('.name-mode-row')) {
+      const cat = row.dataset.category;
+      const group = row.querySelector('.segmented');
+      group.innerHTML = '';
+      for (const mode of NAME_MODES) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', String(nameModes[cat] === mode));
+        btn.textContent = t(`prefs.mode.${mode}`);
+        btn.title = t(`prefs.mode.${mode}.hint`);
+        btn.addEventListener('click', () => {
+          nameModes[cat] = mode;
+          renderNameModes();
+          updateRulesPreview();
+          updateUnsavedNote();
+        });
+        group.appendChild(btn);
+      }
+    }
+  }
   const rulesPreviewList = document.getElementById('rules-preview-list');
   const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview });
   const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms });
@@ -253,6 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadHistory();
     globalTerms.rerender();
     docTerms.rerender();
+    renderNameModes();
     updateRulesPreview();
   }
 
@@ -299,7 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     prefTone.value = prefs.tone || 'keep';
     // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
     globalTerms.setRows(prefs.terms || glossaryTextToRows(prefs.glossaryText));
-    for (const k of KEEP_CATEGORIES) keepBoxes[k].checked = (prefs.keep || DEFAULT_KEEP)[k];
+    Object.assign(nameModes, normalizeNames(prefs));
+    renderNameModes();
     prefCustom.value = prefs.custom || '';
     updateCustomCount();
     updateRulesPreview();
@@ -339,7 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return JSON.stringify([
       selectEngine.value, inputApiKey.value.trim(), inputModelName.value.trim(), inputCustomUrl.value.trim(),
       inputAutoOpen?.checked, inputFitText?.checked,
-      prefTone.value, KEEP_CATEGORIES.map((k) => keepBoxes[k].checked),
+      prefTone.value, NAME_CATEGORIES.map((k) => nameModes[k]),
       globalTerms.getRows().filter((r) => r.src.trim()), prefCustom.value.trim(),
     ]);
   }
@@ -438,14 +451,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
   prefTone.addEventListener('change', updateRulesPreview);
-  for (const k of KEEP_CATEGORIES) keepBoxes[k].addEventListener('change', updateRulesPreview);
 
   // Plain-language summary of the current preference rules (read-only).
   function updateRulesPreview() {
     const items = [];
     if (prefTone.value !== 'keep') items.push(t('prefs.preview.tone', { tone: t(`prefs.tone.${prefTone.value}`) }));
-    const kept = KEEP_CATEGORIES.filter((k) => keepBoxes[k].checked).map((k) => t(`prefs.keep.${k}`));
-    if (kept.length) items.push(t('prefs.preview.keepCategories', { list: kept.join(t('prefs.preview.listSep')) }));
+    const listOf = (mode) => NAME_CATEGORIES.filter((k) => nameModes[k] === mode).map((k) => t(`prefs.keep.${k}`)).join(t('prefs.preview.listSep'));
+    if (listOf('keep')) items.push(t('prefs.preview.keepCategories', { list: listOf('keep') }));
+    if (listOf('annotate')) items.push(t('prefs.preview.annotateCategories', { list: listOf('annotate') }));
     for (const { src, dst } of rowsToGlossary(globalTerms.getRows())) {
       items.push(dst ? t('prefs.preview.translate', { src, dst }) : t('prefs.preview.keep', { src }));
     }
@@ -741,7 +754,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       fitTextToBoxes: inputFitText ? inputFitText.checked : true,
       translationPrefs: {
         tone: prefTone.value,
-        keep: Object.fromEntries(KEEP_CATEGORIES.map((k) => [k, keepBoxes[k].checked])),
+        names: { ...nameModes },
         terms: globalTerms.getRows().filter((r) => r.src.trim()),
         custom: prefCustom.value.trim().slice(0, CUSTOM_MAX_CHARS),
       }
@@ -1295,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const p = stored || {};
     return {
       tone: p.tone || 'keep',
-      keep: p.keep || DEFAULT_KEEP,
+      names: normalizeNames(p),
       glossary: mergeGlossaries(
         rowsToGlossary(p.terms || glossaryTextToRows(p.glossaryText)),
         rowsToGlossary(docTerms.getRows())

@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "Traducir solo la hoja actual",
   "multi.summary": "Traducir también a otros idiomas",
   "progress.langDone": "Idioma {done}/{total} terminado; empezando el siguiente…",
-  "prefs.keep.label": "Mantener en el idioma original (marca y la IA los reconoce)",
   "prefs.keep.people": "Nombres de personas",
   "prefs.keep.brands": "Nombres de empresas, marcas y productos",
   "prefs.keep.places": "Nombres de lugares",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● Cambios sin guardar: guarda para aplicarlos",
   "settings.unsaved.confirm": "Tienes cambios sin guardar. ¿Descartarlos?",
   "done.partialTitle": "⚠ Algunos idiomas terminaron",
-  "error.sheetNotFound": "No se encontró la hoja actual en la copia.\nDesmarca «Traducir solo la hoja actual» para traducir todo, o recarga la hoja de cálculo e inténtalo de nuevo."
+  "error.sheetNotFound": "No se encontró la hoja actual en la copia.\nDesmarca «Traducir solo la hoja actual» para traducir todo, o recarga la hoja de cálculo e inténtalo de nuevo.",
+  "prefs.names.label": "Nombres propios (la IA los reconoce)",
+  "prefs.mode.translate": "Traducir",
+  "prefs.mode.keep": "Mantener",
+  "prefs.mode.annotate": "Trad. (orig.)",
+  "prefs.mode.translate.hint": "Usar la forma traducida habitual, p. ej. Tokyo → Tokio",
+  "prefs.mode.keep.hint": "Nunca traducir ni transliterar, p. ej. Apple Inc. se mantiene",
+  "prefs.mode.annotate.hint": "Traducir y añadir el original entre paréntesis",
+  "prefs.preview.annotateCategories": "{list}: traducción + original entre paréntesis"
 }

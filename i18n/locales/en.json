@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "Only translate the sheet tab I'm on",
   "multi.summary": "Also translate into other languages",
   "progress.langDone": "Language {done}/{total} finished — starting the next one…",
-  "prefs.keep.label": "Keep in the original language (just tick — the AI recognises them)",
   "prefs.keep.people": "People's names",
   "prefs.keep.brands": "Company, brand and product names",
   "prefs.keep.places": "Place names",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● Unsaved changes — click Save to apply",
   "settings.unsaved.confirm": "You have unsaved changes. Discard them?",
   "done.partialTitle": "⚠ Some languages finished",
-  "error.sheetNotFound": "Couldn't find the sheet tab you're on in the copy.\nUntick \"Only translate the sheet tab I'm on\" to translate the whole file, or reload the spreadsheet and try again."
+  "error.sheetNotFound": "Couldn't find the sheet tab you're on in the copy.\nUntick \"Only translate the sheet tab I'm on\" to translate the whole file, or reload the spreadsheet and try again.",
+  "prefs.names.label": "Names (the AI recognises them automatically)",
+  "prefs.mode.translate": "Translate",
+  "prefs.mode.keep": "Keep original",
+  "prefs.mode.annotate": "Add original",
+  "prefs.mode.translate.hint": "Use the usual translated form when one exists, e.g. Tokyo → 東京",
+  "prefs.mode.keep.hint": "Never translate or transliterate, e.g. Apple Inc. stays Apple Inc.",
+  "prefs.mode.annotate.hint": "Translate and add the original in brackets, e.g. Apple Inc. → 蘋果公司（Apple Inc.）",
+  "prefs.preview.annotateCategories": "Translate {list} and add the original in brackets"
 }

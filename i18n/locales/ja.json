@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "今開いているシートだけ翻訳する",
   "multi.summary": "他の言語にも同時に翻訳",
   "progress.langDone": "{done}/{total} 言語目が完了、次の言語を開始…",
-  "prefs.keep.label": "原文のまま残す（チェックするだけで AI が自動判別）",
   "prefs.keep.people": "人名",
   "prefs.keep.brands": "会社名・ブランド名・製品名",
   "prefs.keep.places": "地名",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● 未保存の変更があります（保存すると反映されます）",
   "settings.unsaved.confirm": "未保存の変更があります。破棄しますか？",
   "done.partialTitle": "⚠ 一部の言語は完了しました",
-  "error.sheetNotFound": "コピー内で現在のシートが見つかりませんでした。\n「今開いているシートだけ翻訳する」のチェックを外してファイル全体を翻訳するか、再読み込みしてから再試行してください。"
+  "error.sheetNotFound": "コピー内で現在のシートが見つかりませんでした。\n「今開いているシートだけ翻訳する」のチェックを外してファイル全体を翻訳するか、再読み込みしてから再試行してください。",
+  "prefs.names.label": "固有名詞（AI が自動で判別）",
+  "prefs.mode.translate": "訳す",
+  "prefs.mode.keep": "原文のまま",
+  "prefs.mode.annotate": "訳語（原文）",
+  "prefs.mode.translate.hint": "一般的な訳があれば訳す（例：Tokyo → 東京）",
+  "prefs.mode.keep.hint": "翻訳・音訳しない（例：Apple Inc. はそのまま）",
+  "prefs.mode.annotate.hint": "訳して原文を併記（例：Apple Inc. → アップル社（Apple Inc.））",
+  "prefs.preview.annotateCategories": "{list}は訳語に原文を併記"
 }

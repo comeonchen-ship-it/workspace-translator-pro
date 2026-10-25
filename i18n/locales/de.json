@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "Nur das aktuelle Tabellenblatt übersetzen",
   "multi.summary": "Zusätzlich in weitere Sprachen übersetzen",
   "progress.langDone": "Sprache {done}/{total} fertig – starte die nächste…",
-  "prefs.keep.label": "In der Originalsprache lassen (einfach anhaken – die KI erkennt sie)",
   "prefs.keep.people": "Personennamen",
   "prefs.keep.brands": "Firmen-, Marken- und Produktnamen",
   "prefs.keep.places": "Ortsnamen",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● Ungespeicherte Änderungen – zum Übernehmen speichern",
   "settings.unsaved.confirm": "Es gibt ungespeicherte Änderungen. Verwerfen?",
   "done.partialTitle": "⚠ Einige Sprachen sind fertig",
-  "error.sheetNotFound": "Das aktuelle Tabellenblatt wurde in der Kopie nicht gefunden.\nDeaktiviere „Nur das aktuelle Tabellenblatt übersetzen“, um alles zu übersetzen, oder lade die Tabelle neu und versuche es erneut."
+  "error.sheetNotFound": "Das aktuelle Tabellenblatt wurde in der Kopie nicht gefunden.\nDeaktiviere „Nur das aktuelle Tabellenblatt übersetzen“, um alles zu übersetzen, oder lade die Tabelle neu und versuche es erneut.",
+  "prefs.names.label": "Eigennamen (die KI erkennt sie automatisch)",
+  "prefs.mode.translate": "Übersetzen",
+  "prefs.mode.keep": "Beibehalten",
+  "prefs.mode.annotate": "Mit Original",
+  "prefs.mode.translate.hint": "Übliche übersetzte Form verwenden, z. B. Tokyo → Tokio",
+  "prefs.mode.keep.hint": "Nie übersetzen oder transkribieren, z. B. Apple Inc. bleibt Apple Inc.",
+  "prefs.mode.annotate.hint": "Übersetzen und Original in Klammern ergänzen",
+  "prefs.preview.annotateCategories": "{list}: Übersetzung + Original in Klammern"
 }

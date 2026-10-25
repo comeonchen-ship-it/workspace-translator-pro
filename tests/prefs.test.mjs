@@ -15,10 +15,11 @@ test('mergeGlossaries: file entries override global ones', () => {
   assert.deepEqual(merged, [{ src: 'a', dst: '9' }, { src: 'b', dst: '2' }]);
 });
 
-test('default prefs leave the prompt unchanged', () => {
-  assert.equal(buildPrefsBlock({ tone: 'keep', glossary: [], custom: '' }, 'Japanese'), '');
-  assert.equal(buildSystemPrompt('Japanese', null), buildSystemPrompt('Japanese', { tone: 'keep' }));
-  assert.equal(prefsFingerprint(null), '');
+test('all-translate prefs leave the prompt unchanged', () => {
+  const none = { names: { people: 'translate', brands: 'translate', places: 'translate' } };
+  assert.equal(buildPrefsBlock({ tone: 'keep', glossary: [], custom: '', ...none }, 'Japanese'), '');
+  assert.equal(buildSystemPrompt('Japanese', null), buildSystemPrompt('Japanese', { tone: 'keep', ...none }));
+  assert.equal(prefsFingerprint(none), '');
 });
 
 test('prefs block: format rules come last and target language is pinned', () => {
@@ -56,10 +57,14 @@ test('legacy glossary text migrates to rows', () => {
   ]);
 });
 
-test('keep categories add one do-not-translate rule', () => {
-  const block = buildPrefsBlock({ keep: { people: true, brands: true, places: false } }, 'Korean');
-  assert.match(block, /Do not translate these; copy them unchanged: people's names .*; company, brand/);
+test('name modes: keep and annotate rules; translate adds nothing', () => {
+  const block = buildPrefsBlock({ names: { people: 'keep', brands: 'annotate', places: 'translate' } }, 'Traditional Chinese');
+  assert.match(block, /copy them exactly as written: people's names\./);
+  assert.match(block, /For company, brand and product names: translate them as usual/);
+  assert.match(block, /蘋果公司（Apple Inc\.）/);
   assert.doesNotMatch(block, /place names/);
+  const fr = buildPrefsBlock({ names: { people: 'translate', brands: 'annotate', places: 'translate' } }, 'French');
+  assert.match(fr, /蘋果公司 \(Apple Inc\.\)/); // ASCII brackets with a space outside CJK
 });
 
 import { restoreKeepCasing } from '../lib/prefs.js';
@@ -83,4 +88,30 @@ test('keep-as-is terms keep the source casing, not the glossary casing', () => {
 test('prompt tells the model to keep the source capitalization', () => {
   const block = buildPrefsBlock({ glossary: [{ src: 'DECK', dst: '' }] }, 'Thai');
   assert.match(block, /capitalization/i);
+});
+
+import { normalizeNames, dropRedundantAnnotations, postprocessTranslation, DEFAULT_NAMES } from '../lib/prefs.js';
+
+test('normalizeNames: defaults, new modes, and ≤ v1.6 true/false migration', () => {
+  assert.deepEqual(normalizeNames({}), DEFAULT_NAMES);
+  assert.deepEqual(DEFAULT_NAMES, { people: 'keep', brands: 'keep', places: 'translate' });
+  assert.deepEqual(normalizeNames({ keep: { people: false, brands: true, places: true } }), { people: 'translate', brands: 'keep', places: 'keep' });
+  assert.deepEqual(normalizeNames({ names: { people: 'annotate', brands: 'bogus' } }), { people: 'annotate', brands: 'keep', places: 'translate' });
+});
+
+test('dropRedundantAnnotations removes only notes that repeat the preceding text', () => {
+  assert.equal(dropRedundantAnnotations('使用 Google（Google）服務'), '使用 Google服務');
+  assert.equal(dropRedundantAnnotations('Gemini Enterprise (Gemini Enterprise) is'), 'Gemini Enterprise is');
+  assert.equal(dropRedundantAnnotations('蘋果公司（Apple Inc.）'), '蘋果公司（Apple Inc.）');
+  assert.equal(dropRedundantAnnotations('營收（USD）'), '營收（USD）');
+});
+
+test('postprocess only strips duplicates when a category uses annotate', () => {
+  const p = (names) => ({ names, glossary: [] });
+  assert.equal(postprocessTranslation('x', 'Google（Google）', p({ people: 'keep', brands: 'annotate', places: 'translate' })), 'Google');
+  assert.equal(postprocessTranslation('x', 'Google（Google）', p({ people: 'keep', brands: 'keep', places: 'translate' })), 'Google（Google）');
+});
+
+test('default prefs are no longer empty (people + brands kept by default)', () => {
+  assert.notEqual(buildPrefsBlock({}, 'Japanese'), '');
 });

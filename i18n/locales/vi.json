@@ -205,7 +205,6 @@
   "scope.sheet.currentOnly": "Chỉ dịch trang tính đang mở",
   "multi.summary": "Dịch thêm sang ngôn ngữ khác",
   "progress.langDone": "Xong ngôn ngữ {done}/{total} — đang dịch ngôn ngữ tiếp theo…",
-  "prefs.keep.label": "Giữ nguyên ngôn ngữ gốc (chỉ cần tích, AI tự nhận biết)",
   "prefs.keep.people": "Tên người",
   "prefs.keep.brands": "Tên công ty, thương hiệu, sản phẩm",
   "prefs.keep.places": "Địa danh",
@@ -232,5 +231,13 @@
   "settings.unsaved.note": "● Có thay đổi chưa lưu — nhấn Lưu để áp dụng",
   "settings.unsaved.confirm": "Bạn có thay đổi chưa lưu. Bỏ các thay đổi này?",
   "done.partialTitle": "⚠ Một số ngôn ngữ đã xong",
-  "error.sheetNotFound": "Không tìm thấy trang tính bạn đang mở trong bản sao.\nBỏ chọn “Chỉ dịch trang tính đang mở” để dịch toàn bộ, hoặc tải lại bảng tính rồi thử lại."
+  "error.sheetNotFound": "Không tìm thấy trang tính bạn đang mở trong bản sao.\nBỏ chọn “Chỉ dịch trang tính đang mở” để dịch toàn bộ, hoặc tải lại bảng tính rồi thử lại.",
+  "prefs.names.label": "Danh từ riêng (AI tự nhận biết)",
+  "prefs.mode.translate": "Dịch",
+  "prefs.mode.keep": "Giữ nguyên",
+  "prefs.mode.annotate": "Dịch (gốc)",
+  "prefs.mode.translate.hint": "Dùng tên dịch thông dụng nếu có, VD: London → Luân Đôn",
+  "prefs.mode.keep.hint": "Không dịch, không phiên âm, VD: Apple Inc. giữ nguyên",
+  "prefs.mode.annotate.hint": "Dịch và ghi kèm bản gốc trong ngoặc",
+  "prefs.preview.annotateCategories": "{list}: dịch kèm bản gốc"
 }
