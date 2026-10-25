@@ -250,6 +250,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (msg) { msg.textContent = ''; msg.className = 'test-result-msg'; }
   }
 
+  // Custom endpoints are not in host_permissions; each origin is granted on demand
+  // (optional_host_permissions) so the default install needs no all-sites access.
+  function customOriginPattern(url) {
+    try {
+      const u = new URL(url);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+      return `${u.protocol}//${u.host}/*`;
+    } catch (_) { return null; }
+  }
+
+  function requestCustomOriginPermission(url) {
+    const origin = customOriginPattern(url);
+    if (!origin) return Promise.resolve(false);
+    // Must run inside the click's user gesture — call before any other await.
+    return chrome.permissions.request({ origins: [origin] }).catch(() => false);
+  }
+
+  function hasCustomOriginPermission(url) {
+    const origin = customOriginPattern(url);
+    if (!origin) return Promise.resolve(false);
+    return chrome.permissions.contains({ origins: [origin] }).catch(() => false);
+  }
+
   // ── Real API Connection Test ──────────────────────────────────────────────
   async function testApiConnection(engine, apiKey, modelName, customUrl) {
     const controller = new AbortController();
@@ -448,6 +471,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const apiKey = inputApiKey.value.trim();
       const modelName = inputModelName.value.trim();
       const customUrl = inputCustomUrl.value.trim();
+      // Ask for the custom origin first, while the click still counts as a user gesture.
+      const customPermission = engine === 'custom' && customUrl
+        ? requestCustomOriginPermission(customUrl) : null;
       if (!apiKey) {
         testResultMsg.className = 'test-result-msg result-invalid';
         testResultMsg.textContent = t('settings.test.needKey');
@@ -461,6 +487,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (engine === 'custom' && !customUrl) {
         testResultMsg.className = 'test-result-msg result-invalid';
         testResultMsg.textContent = t('settings.test.needUrl');
+        return;
+      }
+      if (customPermission && !(await customPermission)) {
+        testResultMsg.className = 'test-result-msg result-invalid';
+        testResultMsg.textContent = t('settings.test.permissionDenied');
         return;
       }
       // Show loading state. Swap only the label text and spin the existing icon, so
@@ -492,8 +523,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         newStatus = 'unverified';
         testResultMsg.className = 'test-result-msg result-warning';
       }
-      testResultMsg.innerHTML = result.message +
-        (result.suggestion ? `<br><span class="test-suggestion">${result.suggestion}</span>` : '');
+      // API error text is untrusted — build with textContent, never innerHTML.
+      testResultMsg.textContent = result.message;
+      if (result.suggestion) {
+        const sugg = document.createElement('span');
+        sugg.className = 'test-suggestion';
+        sugg.textContent = result.suggestion;
+        testResultMsg.append(document.createElement('br'), sugg);
+      }
 
       chrome.storage.local.set({ apiKeyStatus: newStatus });
       updateStatusBadge(newStatus);
@@ -897,48 +934,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         showApiWarningModal(apiKeyStatus);
         return;
       }
-
-      // Start translation UI state
-      btnTranslate.disabled = true;
-      btnSettings.disabled = true;
-      btnHelp.disabled = true;
-      progressSection.style.display = 'flex';
-      
-      resetProgress();
-
-      const key = `debugLogs_${currentPresentationId}`;
-      chrome.storage.local.set({ [key]: [] }, () => {
-        logConsoleContent.textContent = t('logs.initiating');
-        lastProgressTime = Date.now();
-        
-        // Send start translation message to service worker
-        if (port) {
-          try {
-            port.postMessage({
-              action: 'startTranslation',
-              presentationId: currentPresentationId,
-              presentationTitle: currentPresentationTitle,
-              fileType: currentFileType,
-              targetLang: selectLang.value,
-              tabId: currentTabId,
-              config: {
-                translationEngine,
-                apiKey,
-                modelName: items.modelName || DEFAULT_MODELS[translationEngine],
-                customUrl: items.customUrl
-              }
-            });
-          } catch (err) {
-            console.error('Failed to post startTranslation message:', err);
-            alert(t('alert.commFailed'));
+      if (translationEngine === 'custom') {
+        // Upgrades from <=1.4 had all-sites access; re-run the test to grant this origin.
+        hasCustomOriginPermission(items.customUrl).then((ok) => {
+          if (!ok) {
+            chrome.storage.local.set({ apiKeyStatus: 'unverified' });
+            updateStatusBadge('unverified');
+            showApiWarningModal('unverified');
+          } else {
+            startTranslation(items, translationEngine, apiKey);
           }
-        } else {
-          alert(t('alert.notConnected'));
-          connectToBackground();
-        }
-      });
+        });
+        return;
+      }
+      startTranslation(items, translationEngine, apiKey);
     });
   });
+
+  function startTranslation(items, translationEngine, apiKey) {
+    // Start translation UI state
+    btnTranslate.disabled = true;
+    btnSettings.disabled = true;
+    btnHelp.disabled = true;
+    progressSection.style.display = 'flex';
+    
+    resetProgress();
+
+    const key = `debugLogs_${currentPresentationId}`;
+    chrome.storage.local.set({ [key]: [] }, () => {
+      logConsoleContent.textContent = t('logs.initiating');
+      lastProgressTime = Date.now();
+      
+      // Send start translation message to service worker
+      if (port) {
+        try {
+          port.postMessage({
+            action: 'startTranslation',
+            presentationId: currentPresentationId,
+            presentationTitle: currentPresentationTitle,
+            fileType: currentFileType,
+            targetLang: selectLang.value,
+            tabId: currentTabId,
+            config: {
+              translationEngine,
+              apiKey,
+              modelName: items.modelName || DEFAULT_MODELS[translationEngine],
+              customUrl: items.customUrl
+            }
+          });
+        } catch (err) {
+          console.error('Failed to post startTranslation message:', err);
+          alert(t('alert.commFailed'));
+        }
+      } else {
+        alert(t('alert.notConnected'));
+        connectToBackground();
+      }
+    });
+  }
 
   if (btnCancelTranslation) {
     btnCancelTranslation.addEventListener('click', () => {
@@ -1220,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="history-item-meta">
             <div class="history-item-title" title="${escapeHtml(t('history.openTooltip'))}">${escapeHtml(item.originalTitle)}</div>
-            <div class="history-item-date">${dateStr}</div>
+            <div class="history-item-date">${escapeHtml(dateStr)}</div>
           </div>
         </div>
         <div class="history-item-actions">
