@@ -1630,3 +1630,10 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
 .extra-langs[open] summary::before, .doc-glossary[open] summary::before { transform: rotate(45deg); }
 .extra-langs summary:hover, .doc-glossary summary:hover { color: var(--text-main); }
 .extra-langs-picked { color: var(--accent); font-weight: 600; }
+
+/* Gradient buttons have a 1px transparent border. With the default
+   background-origin (padding-box) the gradient tiles into that border, so the
+   start colour shows as a thin light line on the right edge (and the end colour
+   on the left). Painting from the border box removes it. Must come after the
+   .btn-* rules: their `background` shorthand resets background-origin. */
+.btn { background-origin: border-box; }
