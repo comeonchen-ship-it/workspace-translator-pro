@@ -196,5 +196,8 @@
   "prefs.custom.hint": "어떤 언어로 써도 됩니다. 출력 형식은 바뀌지 않습니다.",
   "prefs.docGlossary.summary": "이 파일 전용 용어집",
   "prefs.docGlossary.hint": "같은 용어는 전체 용어집보다 우선합니다. AI 엔진 전용.",
-  "done.customDropped": "추가 지시사항이 출력 형식을 깨뜨려 생략했습니다"
+  "done.customDropped": "추가 지시사항이 출력 형식을 깨뜨려 생략했습니다",
+  "progress.batches": "번역 중… {done}/{total} 묶음",
+  "progress.batchesEtaMin": "번역 중… {done}/{total} 묶음, 약 {m}분 남음",
+  "progress.batchesEtaSec": "번역 중… {done}/{total} 묶음, 약 {s}초 남음"
 }

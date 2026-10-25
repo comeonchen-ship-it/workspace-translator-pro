@@ -196,5 +196,8 @@
   "prefs.custom.hint": "Jede Sprache ist möglich. Das Ausgabeformat ändert sich nicht.",
   "prefs.docGlossary.summary": "Glossar für diese Datei",
   "prefs.docGlossary.hint": "Hat für denselben Begriff Vorrang vor dem globalen Glossar. Nur KI-Engines.",
-  "done.customDropped": "Zusatzanweisungen übersprungen (sie störten das Format)"
+  "done.customDropped": "Zusatzanweisungen übersprungen (sie störten das Format)",
+  "progress.batches": "Übersetzung… Paket {done}/{total}",
+  "progress.batchesEtaMin": "Übersetzung… Paket {done}/{total}, noch etwa {m} Min.",
+  "progress.batchesEtaSec": "Übersetzung… Paket {done}/{total}, noch etwa {s} s"
 }

@@ -196,5 +196,8 @@
   "prefs.custom.hint": "Viết bằng ngôn ngữ nào cũng được. Không thay đổi định dạng đầu ra.",
   "prefs.docGlossary.summary": "Thuật ngữ riêng cho tệp này",
   "prefs.docGlossary.hint": "Ưu tiên hơn bảng thuật ngữ chung với cùng thuật ngữ. Chỉ công cụ AI.",
-  "done.customDropped": "đã bỏ qua hướng dẫn bổ sung (làm hỏng định dạng)"
+  "done.customDropped": "đã bỏ qua hướng dẫn bổ sung (làm hỏng định dạng)",
+  "progress.batches": "Đang dịch… lô {done}/{total}",
+  "progress.batchesEtaMin": "Đang dịch… lô {done}/{total}, còn khoảng {m} phút",
+  "progress.batchesEtaSec": "Đang dịch… lô {done}/{total}, còn khoảng {s} giây"
 }

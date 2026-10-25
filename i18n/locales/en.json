@@ -196,5 +196,8 @@
   "prefs.custom.hint": "Any language is fine. It cannot change the output format.",
   "prefs.docGlossary.summary": "Glossary for this file",
   "prefs.docGlossary.hint": "Overrides the global glossary for the same term. AI engines only.",
-  "done.customDropped": "custom instructions skipped (they broke the output format)"
+  "done.customDropped": "custom instructions skipped (they broke the output format)",
+  "progress.batches": "Translating… batch {done}/{total}",
+  "progress.batchesEtaMin": "Translating… batch {done}/{total}, about {m} min left",
+  "progress.batchesEtaSec": "Translating… batch {done}/{total}, about {s} s left"
 }

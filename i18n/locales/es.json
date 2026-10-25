@@ -196,5 +196,8 @@
   "prefs.custom.hint": "Puedes escribir en cualquier idioma. No cambia el formato de salida.",
   "prefs.docGlossary.summary": "Glosario de este archivo",
   "prefs.docGlossary.hint": "Tiene prioridad sobre el glosario global para el mismo término. Solo motores de IA.",
-  "done.customDropped": "instrucciones personalizadas omitidas (rompían el formato)"
+  "done.customDropped": "instrucciones personalizadas omitidas (rompían el formato)",
+  "progress.batches": "Traduciendo… lote {done}/{total}",
+  "progress.batchesEtaMin": "Traduciendo… lote {done}/{total}, quedan unos {m} min",
+  "progress.batchesEtaSec": "Traduciendo… lote {done}/{total}, quedan unos {s} s"
 }

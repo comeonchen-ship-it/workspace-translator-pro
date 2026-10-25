@@ -364,6 +364,25 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
   let copyId = null;
   config.presentationId = presentationId;
   const startedAt = Date.now();
+
+  // Per-batch progress with a remaining-time estimate from the average batch
+  // duration so far. The LLM step is the long one, so this is what users wait on.
+  let batchClockStart = null;
+  config.onBatchProgress = (done, total) => {
+    if (done === 0 || batchClockStart === null) {
+      batchClockStart = Date.now();
+      if (done === 0) return;
+    }
+    const perBatch = (Date.now() - batchClockStart) / Math.max(1, done);
+    const etaSec = Math.round((perBatch * (total - done)) / 1000);
+    const pct = 60 + Math.round((20 * done) / total);
+    const status = done >= total || etaSec <= 0
+      ? { key: 'progress.batches', params: { done, total } }
+      : etaSec >= 60
+        ? { key: 'progress.batchesEtaMin', params: { done, total, m: Math.ceil(etaSec / 60) } }
+        : { key: 'progress.batchesEtaSec', params: { done, total, s: etaSec } };
+    sendProgress('translate', pct, status);
+  };
   const summarize = (extra = {}) => ({
     durationMs: Date.now() - startedAt,
     engine: config.translationEngine,

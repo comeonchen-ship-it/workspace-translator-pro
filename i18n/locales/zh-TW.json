@@ -196,5 +196,8 @@
   "prefs.custom.hint": "可用任何語言撰寫，不會改變輸出格式。",
   "prefs.docGlossary.summary": "此檔案專屬術語",
   "prefs.docGlossary.hint": "同一個詞會優先使用這裡的設定。僅限 AI 引擎。",
-  "done.customDropped": "已略過自訂說明（它干擾了翻譯格式）"
+  "done.customDropped": "已略過自訂說明（它干擾了翻譯格式）",
+  "progress.batches": "翻譯中…第 {done}/{total} 批",
+  "progress.batchesEtaMin": "翻譯中…第 {done}/{total} 批，約剩 {m} 分鐘",
+  "progress.batchesEtaSec": "翻譯中…第 {done}/{total} 批，約剩 {s} 秒"
 }

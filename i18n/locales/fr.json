@@ -196,5 +196,8 @@
   "prefs.custom.hint": "Toute langue convient. Le format de sortie ne change pas.",
   "prefs.docGlossary.summary": "Glossaire de ce fichier",
   "prefs.docGlossary.hint": "Prioritaire sur le glossaire global pour le même terme. Moteurs IA uniquement.",
-  "done.customDropped": "instructions personnalisées ignorées (elles cassaient le format)"
+  "done.customDropped": "instructions personnalisées ignorées (elles cassaient le format)",
+  "progress.batches": "Traduction… lot {done}/{total}",
+  "progress.batchesEtaMin": "Traduction… lot {done}/{total}, environ {m} min restantes",
+  "progress.batchesEtaSec": "Traduction… lot {done}/{total}, environ {s} s restantes"
 }

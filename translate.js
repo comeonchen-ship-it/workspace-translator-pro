@@ -204,6 +204,9 @@ export async function translateTexts(texts, targetLang, config) {
       return Promise.resolve([]);
     };
 
+    // done=0 starts the caller's ETA clock just before the first request.
+    if (typeof config.onBatchProgress === 'function') config.onBatchProgress(0, batches.length);
+
     // Process batches SEQUENTIALLY — guarantees only one API request is in-flight
     // at a time, preventing parallel 429 retries from competing for the rate-limiter lock.
     for (let idx = 0; idx < batches.length; idx++) {
@@ -240,6 +243,10 @@ export async function translateTexts(texts, targetLang, config) {
         config.prefsCustomDropped = true;
         batchTranslations = await translateBatch(batch);
         if (!Array.isArray(batchTranslations) || batchTranslations.length !== batch.length) throw err;
+      }
+
+      if (typeof config.onBatchProgress === 'function') {
+        config.onBatchProgress(idx + 1, batches.length);
       }
 
       // Map responses and save to cache

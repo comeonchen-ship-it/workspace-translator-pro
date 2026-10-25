@@ -196,5 +196,8 @@
   "prefs.custom.hint": "どの言語でも書けます。出力形式は変わりません。",
   "prefs.docGlossary.summary": "このファイル専用の用語集",
   "prefs.docGlossary.hint": "同じ用語は全体の用語集より優先されます。AI エンジンのみ。",
-  "done.customDropped": "追加の指示は出力形式を崩したため省略しました"
+  "done.customDropped": "追加の指示は出力形式を崩したため省略しました",
+  "progress.batches": "翻訳中… {done}/{total} バッチ",
+  "progress.batchesEtaMin": "翻訳中… {done}/{total} バッチ、残り約 {m} 分",
+  "progress.batchesEtaSec": "翻訳中… {done}/{total} バッチ、残り約 {s} 秒"
 }
