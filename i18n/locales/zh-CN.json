@@ -199,5 +199,7 @@
   "done.customDropped": "已跳过自定义说明（它干扰了翻译格式）",
   "progress.batches": "翻译中…第 {done}/{total} 批",
   "progress.batchesEtaMin": "翻译中…第 {done}/{total} 批，约剩 {m} 分钟",
-  "progress.batchesEtaSec": "翻译中…第 {done}/{total} 批，约剩 {s} 秒"
+  "progress.batchesEtaSec": "翻译中…第 {done}/{total} 批，约剩 {s} 秒",
+  "settings.fitText": "文字变长时自动调整（演示文稿缩小字号、表格加宽列）",
+  "done.columnsFitted": "{n} 个列／单元格已调整以完整显示"
 }

@@ -199,5 +199,7 @@
   "done.customDropped": "已略過自訂說明（它干擾了翻譯格式）",
   "progress.batches": "翻譯中…第 {done}/{total} 批",
   "progress.batchesEtaMin": "翻譯中…第 {done}/{total} 批，約剩 {m} 分鐘",
-  "progress.batchesEtaSec": "翻譯中…第 {done}/{total} 批，約剩 {s} 秒"
+  "progress.batchesEtaSec": "翻譯中…第 {done}/{total} 批，約剩 {s} 秒",
+  "settings.fitText": "文字變長時自動調整（簡報縮小字級、試算表加寬欄位）",
+  "done.columnsFitted": "{n} 個欄位／儲存格已調整以完整顯示"
 }

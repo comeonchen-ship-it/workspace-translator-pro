@@ -199,5 +199,7 @@
   "done.customDropped": "custom instructions skipped (they broke the output format)",
   "progress.batches": "Translating… batch {done}/{total}",
   "progress.batchesEtaMin": "Translating… batch {done}/{total}, about {m} min left",
-  "progress.batchesEtaSec": "Translating… batch {done}/{total}, about {s} s left"
+  "progress.batchesEtaSec": "Translating… batch {done}/{total}, about {s} s left",
+  "settings.fitText": "Fit longer text (shrink slide fonts, widen sheet columns)",
+  "done.columnsFitted": "{n} columns/cells adjusted to fit"
 }

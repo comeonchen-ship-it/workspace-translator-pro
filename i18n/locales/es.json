@@ -199,5 +199,7 @@
   "done.customDropped": "instrucciones personalizadas omitidas (rompían el formato)",
   "progress.batches": "Traduciendo… lote {done}/{total}",
   "progress.batchesEtaMin": "Traduciendo… lote {done}/{total}, quedan unos {m} min",
-  "progress.batchesEtaSec": "Traduciendo… lote {done}/{total}, quedan unos {s} s"
+  "progress.batchesEtaSec": "Traduciendo… lote {done}/{total}, quedan unos {s} s",
+  "settings.fitText": "Ajustar texto más largo (reducir fuente en diapositivas, ensanchar columnas)",
+  "done.columnsFitted": "{n} columnas/celdas ajustadas"
 }

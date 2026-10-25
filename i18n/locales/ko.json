@@ -199,5 +199,7 @@
   "done.customDropped": "추가 지시사항이 출력 형식을 깨뜨려 생략했습니다",
   "progress.batches": "번역 중… {done}/{total} 묶음",
   "progress.batchesEtaMin": "번역 중… {done}/{total} 묶음, 약 {m}분 남음",
-  "progress.batchesEtaSec": "번역 중… {done}/{total} 묶음, 약 {s}초 남음"
+  "progress.batchesEtaSec": "번역 중… {done}/{total} 묶음, 약 {s}초 남음",
+  "settings.fitText": "길어진 텍스트 자동 맞춤(슬라이드 글꼴 축소, 시트 열 확장)",
+  "done.columnsFitted": "열/셀 {n}개를 맞춤 조정함"
 }

@@ -199,5 +199,7 @@
   "done.customDropped": "đã bỏ qua hướng dẫn bổ sung (làm hỏng định dạng)",
   "progress.batches": "Đang dịch… lô {done}/{total}",
   "progress.batchesEtaMin": "Đang dịch… lô {done}/{total}, còn khoảng {m} phút",
-  "progress.batchesEtaSec": "Đang dịch… lô {done}/{total}, còn khoảng {s} giây"
+  "progress.batchesEtaSec": "Đang dịch… lô {done}/{total}, còn khoảng {s} giây",
+  "settings.fitText": "Tự điều chỉnh khi chữ dài hơn (thu nhỏ chữ trang chiếu, nới rộng cột bảng tính)",
+  "done.columnsFitted": "Đã điều chỉnh {n} cột/ô cho vừa"
 }

@@ -199,5 +199,7 @@
   "done.customDropped": "Zusatzanweisungen übersprungen (sie störten das Format)",
   "progress.batches": "Übersetzung… Paket {done}/{total}",
   "progress.batchesEtaMin": "Übersetzung… Paket {done}/{total}, noch etwa {m} Min.",
-  "progress.batchesEtaSec": "Übersetzung… Paket {done}/{total}, noch etwa {s} s"
+  "progress.batchesEtaSec": "Übersetzung… Paket {done}/{total}, noch etwa {s} s",
+  "settings.fitText": "Längeren Text anpassen (Folienschrift verkleinern, Tabellenspalten verbreitern)",
+  "done.columnsFitted": "{n} Spalten/Zellen angepasst"
 }

@@ -199,5 +199,7 @@
   "done.customDropped": "instructions personnalisées ignorées (elles cassaient le format)",
   "progress.batches": "Traduction… lot {done}/{total}",
   "progress.batchesEtaMin": "Traduction… lot {done}/{total}, environ {m} min restantes",
-  "progress.batchesEtaSec": "Traduction… lot {done}/{total}, environ {s} s restantes"
+  "progress.batchesEtaSec": "Traduction… lot {done}/{total}, environ {s} s restantes",
+  "settings.fitText": "Ajuster le texte plus long (réduire la police des diapos, élargir les colonnes)",
+  "done.columnsFitted": "{n} colonnes/cellules ajustées"
 }

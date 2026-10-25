@@ -7,6 +7,7 @@ import { getTaskState, setTaskState, checkCancelledGlobal } from './lib/task-sta
 import { extractTextFromElements, extractTextFromDocElements } from './lib/text-extract.js';
 import { translateSpreadsheet } from './lib/sheets.js';
 import { translateForm } from './lib/forms.js';
+import { measureShapes, planFontScaling } from './lib/overflow.js';
 import { getLanguage } from './i18n/languages.js';
 
 // Enable opening of Side Panel when clicking the extension action icon
@@ -448,7 +449,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const editUrl = await translateSpreadsheet(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
-      const summary = summarize();
+      const summary = summarize({ columnsFitted: config.columnsFitted || 0 });
       sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
       await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
       return;
@@ -521,6 +522,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       sendProgress('extract', 40, { key: 'progress.extracting.presentation' });
       await logDebug('Fetching copy presentation slide structure...', presentationId);
       const presentation = await getPresentationDetails(copyId, token);
+      config.shapeWidthsBefore = measureShapes(presentation);
       await logDebug(`Successfully fetched presentation. Total slides: ${presentation.slides ? presentation.slides.length : 0}`, presentationId);
       
       // 4. Traverse layout and extract unique translatable texts
@@ -625,6 +627,25 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await logDebug('No translations needed writing back.', presentationId);
     }
 
+    // 7a. Best-effort: shrink fonts in slide text boxes the translation overflowed.
+    let overflowFixed = 0;
+    if (!isDoc && requests.length > 0 && config.shapeWidthsBefore) {
+      const { fitTextToBoxes = true } = await chrome.storage.local.get('fitTextToBoxes');
+      if (fitTextToBoxes) {
+        try {
+          const after = await getPresentationDetails(copyId, token);
+          const plan = planFontScaling(config.shapeWidthsBefore, after);
+          if (plan.requests.length > 0) {
+            await updatePresentation(copyId, plan.requests, token);
+            overflowFixed = plan.shapesAdjusted;
+            await logDebug(`Shrank fonts in ${overflowFixed} text boxes to fit longer translations.`, presentationId);
+          }
+        } catch (fitErr) {
+          await logDebug(`Font fitting skipped (non-fatal): ${fitErr.message}`, presentationId);
+        }
+      }
+    }
+
     // 7b. Best-effort: Tighten table cell padding to preserve layout (runs separately so it never blocks translation)
     if (isDoc) {
       const tables = config.tables;
@@ -664,7 +685,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await logDebug('Translation process finished. Opening new tab.', presentationId);
     await unregisterActiveCopy(presentationId);
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
-    const summary = summarize({ segments: uniqueTextsArray.length });
+    const summary = summarize({ segments: uniqueTextsArray.length, overflowFixed });
     sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
     await deliverResult(presentationId, presentationTitle, copyId, editUrl, summary);
     

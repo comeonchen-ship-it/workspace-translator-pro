@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
   const apiKeyIndicator = document.getElementById('api-key-indicator');
   const inputAutoOpen = document.getElementById('auto-open-result');
+  const inputFitText = document.getElementById('fit-text');
   const completionCard = document.getElementById('completion-card');
   const completionTitle = document.getElementById('completion-title');
   const completionSub = document.getElementById('completion-sub');
@@ -175,8 +176,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     'customUrl',
     'apiKeyStatus',
     'autoOpenResult',
+    'fitTextToBoxes',
     'translationPrefs'
   ], (items) => {
+    if (inputFitText) inputFitText.checked = items.fitTextToBoxes !== false;
     const prefs = items.translationPrefs || {};
     prefTone.value = prefs.tone || 'keep';
     prefGlossary.value = prefs.glossaryText || '';
@@ -550,6 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       modelName,
       customUrl,
       autoOpenResult: inputAutoOpen ? inputAutoOpen.checked : true,
+      fitTextToBoxes: inputFitText ? inputFitText.checked : true,
       translationPrefs: {
         tone: prefTone.value,
         glossaryText: prefGlossary.value,
@@ -1388,6 +1392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (summary.durationMs) parts.push(formatDuration(summary.durationMs));
     if (summary.engine) parts.push(summary.model ? `${summary.engine.toUpperCase()} · ${summary.model}` : summary.engine.toUpperCase());
     if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
+    if (summary.columnsFitted) parts.push(t('done.columnsFitted', { n: summary.columnsFitted }));
     if (summary.customDropped) parts.push(t('done.customDropped'));
     return parts.join(' · ');
   }

@@ -199,5 +199,7 @@
   "done.customDropped": "ข้ามคำแนะนำเพิ่มเติม (ทำให้รูปแบบผิด)",
   "progress.batches": "กำลังแปล… ชุดที่ {done}/{total}",
   "progress.batchesEtaMin": "กำลังแปล… ชุดที่ {done}/{total} เหลืออีกประมาณ {m} นาที",
-  "progress.batchesEtaSec": "กำลังแปล… ชุดที่ {done}/{total} เหลืออีกประมาณ {s} วินาที"
+  "progress.batchesEtaSec": "กำลังแปล… ชุดที่ {done}/{total} เหลืออีกประมาณ {s} วินาที",
+  "settings.fitText": "ปรับข้อความที่ยาวขึ้นอัตโนมัติ (ย่อฟอนต์สไลด์ ขยายคอลัมน์ชีต)",
+  "done.columnsFitted": "ปรับคอลัมน์/เซลล์ {n} รายการให้พอดี"
 }
