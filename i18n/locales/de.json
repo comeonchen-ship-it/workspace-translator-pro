@@ -180,5 +180,21 @@
   "setup.step3.title": "Wir prüfen ihn automatisch",
   "setup.ok": "✅ Schlüssel funktioniert und ist gespeichert. Los geht's!",
   "setup.useFree": "Einfache Gratis-Übersetzung nutzen",
-  "setup.start": "Mit dem Übersetzen beginnen"
+  "setup.start": "Mit dem Übersetzen beginnen",
+  "settings.section.prefs": "Übersetzungseinstellungen",
+  "prefs.freeNote": "Diese Einstellungen erfordern eine KI-Engine (Gemini, OpenAI, Claude oder benutzerdefiniert).",
+  "prefs.tone.label": "Tonfall",
+  "prefs.tone.keep": "Unverändert (wie im Original, Standard)",
+  "prefs.tone.formal": "Formell",
+  "prefs.tone.neutral": "Neutral",
+  "prefs.tone.casual": "Locker",
+  "prefs.glossary.label": "Glossar (alle Dateien)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = Übersicht",
+  "prefs.glossary.hint": "Einer pro Zeile. „Begriff = Übersetzung“ legt die Übersetzung fest; ein Begriff allein bleibt unübersetzt.",
+  "prefs.custom.label": "Zusätzliche Anweisungen",
+  "prefs.custom.placeholder": "z. B. Zielgruppe sind japanische Kunden; kurze Sätze.",
+  "prefs.custom.hint": "Jede Sprache ist möglich. Das Ausgabeformat ändert sich nicht.",
+  "prefs.docGlossary.summary": "Glossar für diese Datei",
+  "prefs.docGlossary.hint": "Hat für denselben Begriff Vorrang vor dem globalen Glossar. Nur KI-Engines.",
+  "done.customDropped": "Zusatzanweisungen übersprungen (sie störten das Format)"
 }

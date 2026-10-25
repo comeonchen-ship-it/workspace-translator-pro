@@ -180,5 +180,21 @@
   "setup.step3.title": "Nous la vérifions automatiquement",
   "setup.ok": "✅ Clé valide et enregistrée. Vous pouvez traduire !",
   "setup.useFree": "Utiliser la traduction gratuite de base",
-  "setup.start": "Commencer à traduire"
+  "setup.start": "Commencer à traduire",
+  "settings.section.prefs": "Préférences de traduction",
+  "prefs.freeNote": "Ces préférences nécessitent un moteur IA (Gemini, OpenAI, Claude ou personnalisé).",
+  "prefs.tone.label": "Ton",
+  "prefs.tone.keep": "Inchangé (comme l'original, par défaut)",
+  "prefs.tone.formal": "Formel",
+  "prefs.tone.neutral": "Neutre",
+  "prefs.tone.casual": "Décontracté",
+  "prefs.glossary.label": "Glossaire (tous les fichiers)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = tableau de bord",
+  "prefs.glossary.hint": "Un par ligne. « terme = traduction » fixe la traduction ; un terme seul n'est pas traduit.",
+  "prefs.custom.label": "Instructions supplémentaires",
+  "prefs.custom.placeholder": "Ex. : le public est une clientèle japonaise ; phrases courtes.",
+  "prefs.custom.hint": "Toute langue convient. Le format de sortie ne change pas.",
+  "prefs.docGlossary.summary": "Glossaire de ce fichier",
+  "prefs.docGlossary.hint": "Prioritaire sur le glossaire global pour le même terme. Moteurs IA uniquement.",
+  "done.customDropped": "instructions personnalisées ignorées (elles cassaient le format)"
 }

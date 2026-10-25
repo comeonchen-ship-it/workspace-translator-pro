@@ -180,5 +180,21 @@
   "setup.step3.title": "自動で確認します",
   "setup.ok": "✅ キーは有効で保存しました。翻訳を始められます！",
   "setup.useFree": "基本の無料翻訳を使う",
-  "setup.start": "翻訳を始める"
+  "setup.start": "翻訳を始める",
+  "settings.section.prefs": "翻訳の設定",
+  "prefs.freeNote": "この設定には AI エンジン（Gemini・OpenAI・Claude・カスタム）が必要です。",
+  "prefs.tone.label": "文体",
+  "prefs.tone.keep": "変更しない（原文どおり・既定）",
+  "prefs.tone.formal": "フォーマル",
+  "prefs.tone.neutral": "ニュートラル",
+  "prefs.tone.casual": "カジュアル",
+  "prefs.glossary.label": "用語集（全ファイル）",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = ダッシュボード",
+  "prefs.glossary.hint": "1 行に 1 つ。「原語 = 訳語」で訳を固定、原語だけなら翻訳しません。",
+  "prefs.custom.label": "追加の指示",
+  "prefs.custom.placeholder": "例：読み手は日本の顧客です。文は短くしてください。",
+  "prefs.custom.hint": "どの言語でも書けます。出力形式は変わりません。",
+  "prefs.docGlossary.summary": "このファイル専用の用語集",
+  "prefs.docGlossary.hint": "同じ用語は全体の用語集より優先されます。AI エンジンのみ。",
+  "done.customDropped": "追加の指示は出力形式を崩したため省略しました"
 }

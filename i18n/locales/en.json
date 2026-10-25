@@ -180,5 +180,21 @@
   "setup.step3.title": "We'll check it automatically",
   "setup.ok": "✅ Key works and is saved. You're ready to translate!",
   "setup.useFree": "Use basic free translation",
-  "setup.start": "Start translating"
+  "setup.start": "Start translating",
+  "settings.section.prefs": "Translation Preferences",
+  "prefs.freeNote": "Preferences need an AI engine (Gemini, OpenAI, Claude, or custom).",
+  "prefs.tone.label": "Tone",
+  "prefs.tone.keep": "Keep as in the original (default)",
+  "prefs.tone.formal": "Formal",
+  "prefs.tone.neutral": "Neutral",
+  "prefs.tone.casual": "Casual",
+  "prefs.glossary.label": "Glossary (all files)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = panel de control",
+  "prefs.glossary.hint": "One per line. “term = translation” fixes a translation; a term on its own stays untranslated.",
+  "prefs.custom.label": "Additional instructions",
+  "prefs.custom.placeholder": "e.g. The audience is Japanese clients; keep sentences short.",
+  "prefs.custom.hint": "Any language is fine. It cannot change the output format.",
+  "prefs.docGlossary.summary": "Glossary for this file",
+  "prefs.docGlossary.hint": "Overrides the global glossary for the same term. AI engines only.",
+  "done.customDropped": "custom instructions skipped (they broke the output format)"
 }

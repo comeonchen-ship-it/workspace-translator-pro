@@ -180,5 +180,21 @@
   "setup.step3.title": "자동으로 확인합니다",
   "setup.ok": "✅ 키가 확인되어 저장되었습니다. 이제 번역할 수 있어요!",
   "setup.useFree": "기본 무료 번역 사용",
-  "setup.start": "번역 시작"
+  "setup.start": "번역 시작",
+  "settings.section.prefs": "번역 환경설정",
+  "prefs.freeNote": "환경설정은 AI 엔진(Gemini, OpenAI, Claude, 사용자 지정)에서만 작동합니다.",
+  "prefs.tone.label": "어조",
+  "prefs.tone.keep": "변경 안 함(원문 그대로, 기본값)",
+  "prefs.tone.formal": "격식체",
+  "prefs.tone.neutral": "중립",
+  "prefs.tone.casual": "구어체",
+  "prefs.glossary.label": "용어집(모든 파일)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = 대시보드",
+  "prefs.glossary.hint": "한 줄에 하나씩. ‘원어 = 번역어’는 번역을 고정하고, 원어만 쓰면 번역하지 않습니다.",
+  "prefs.custom.label": "추가 지시사항",
+  "prefs.custom.placeholder": "예: 독자는 일본 고객입니다. 문장을 짧게 써 주세요.",
+  "prefs.custom.hint": "어떤 언어로 써도 됩니다. 출력 형식은 바뀌지 않습니다.",
+  "prefs.docGlossary.summary": "이 파일 전용 용어집",
+  "prefs.docGlossary.hint": "같은 용어는 전체 용어집보다 우선합니다. AI 엔진 전용.",
+  "done.customDropped": "추가 지시사항이 출력 형식을 깨뜨려 생략했습니다"
 }

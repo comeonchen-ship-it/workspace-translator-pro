@@ -180,5 +180,21 @@
   "setup.step3.title": "ระบบจะตรวจสอบให้อัตโนมัติ",
   "setup.ok": "✅ คีย์ใช้งานได้และบันทึกแล้ว เริ่มแปลได้เลย!",
   "setup.useFree": "ใช้การแปลฟรีพื้นฐาน",
-  "setup.start": "เริ่มแปล"
+  "setup.start": "เริ่มแปล",
+  "settings.section.prefs": "การตั้งค่าการแปล",
+  "prefs.freeNote": "การตั้งค่านี้ต้องใช้เอนจิน AI (Gemini, OpenAI, Claude หรือกำหนดเอง)",
+  "prefs.tone.label": "น้ำเสียง",
+  "prefs.tone.keep": "ไม่เปลี่ยน (ตามต้นฉบับ ค่าเริ่มต้น)",
+  "prefs.tone.formal": "ทางการ",
+  "prefs.tone.neutral": "กลาง ๆ",
+  "prefs.tone.casual": "กันเอง",
+  "prefs.glossary.label": "อภิธานศัพท์ (ทุกไฟล์)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = แดชบอร์ด",
+  "prefs.glossary.hint": "บรรทัดละหนึ่งรายการ “คำ = คำแปล” จะกำหนดคำแปลตายตัว ถ้าเขียนแค่คำจะไม่แปล",
+  "prefs.custom.label": "คำแนะนำเพิ่มเติม",
+  "prefs.custom.placeholder": "เช่น ผู้อ่านคือลูกค้าญี่ปุ่น ขอประโยคสั้น ๆ",
+  "prefs.custom.hint": "เขียนภาษาใดก็ได้ ไม่เปลี่ยนรูปแบบผลลัพธ์",
+  "prefs.docGlossary.summary": "อภิธานศัพท์เฉพาะไฟล์นี้",
+  "prefs.docGlossary.hint": "ใช้แทนอภิธานศัพท์ส่วนกลางเมื่อเป็นคำเดียวกัน เฉพาะเอนจิน AI",
+  "done.customDropped": "ข้ามคำแนะนำเพิ่มเติม (ทำให้รูปแบบผิด)"
 }

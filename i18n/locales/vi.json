@@ -180,5 +180,21 @@
   "setup.step3.title": "Hệ thống sẽ tự kiểm tra",
   "setup.ok": "✅ Khóa hợp lệ và đã lưu. Bạn có thể bắt đầu dịch!",
   "setup.useFree": "Dùng bản dịch miễn phí cơ bản",
-  "setup.start": "Bắt đầu dịch"
+  "setup.start": "Bắt đầu dịch",
+  "settings.section.prefs": "Tùy chọn dịch",
+  "prefs.freeNote": "Tùy chọn này cần công cụ AI (Gemini, OpenAI, Claude hoặc tùy chỉnh).",
+  "prefs.tone.label": "Giọng văn",
+  "prefs.tone.keep": "Giữ nguyên (theo bản gốc, mặc định)",
+  "prefs.tone.formal": "Trang trọng",
+  "prefs.tone.neutral": "Trung tính",
+  "prefs.tone.casual": "Thân mật",
+  "prefs.glossary.label": "Bảng thuật ngữ (mọi tệp)",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = bảng điều khiển",
+  "prefs.glossary.hint": "Mỗi dòng một mục. “thuật ngữ = bản dịch” cố định cách dịch; chỉ ghi thuật ngữ thì giữ nguyên.",
+  "prefs.custom.label": "Hướng dẫn bổ sung",
+  "prefs.custom.placeholder": "VD: Người đọc là khách hàng Nhật; viết câu ngắn.",
+  "prefs.custom.hint": "Viết bằng ngôn ngữ nào cũng được. Không thay đổi định dạng đầu ra.",
+  "prefs.docGlossary.summary": "Thuật ngữ riêng cho tệp này",
+  "prefs.docGlossary.hint": "Ưu tiên hơn bảng thuật ngữ chung với cùng thuật ngữ. Chỉ công cụ AI.",
+  "done.customDropped": "đã bỏ qua hướng dẫn bổ sung (làm hỏng định dạng)"
 }

@@ -78,6 +78,13 @@
         </div>
       </div>
 
+      <!-- Per-file glossary, merged over the global one (saved as you type) -->
+      <details class="doc-glossary" id="doc-glossary-box">
+        <summary data-i18n="prefs.docGlossary.summary">Glossary for this file</summary>
+        <textarea id="doc-glossary" rows="3" spellcheck="false" data-i18n-placeholder="prefs.glossary.placeholder" placeholder="Acme Cloud&#10;dashboard = 儀表板"></textarea>
+        <div class="field-hint" data-i18n="prefs.docGlossary.hint">Overrides the global glossary for the same term. AI engines only.</div>
+      </details>
+
       <!-- Submit / Trigger -->
       <div class="action-trigger">
         <button class="btn btn-primary btn-large" id="btn-translate">
@@ -248,6 +255,37 @@
             <div class="test-result-msg" id="test-result-msg"></div>
           </div>
         </div>
+        <!-- Translation preferences, layered onto the fixed prompt (lib/prefs.js).
+             LLM engines only; disabled for the basic free engine. -->
+        <div class="setting-group-card" id="prefs-card">
+          <h4 data-i18n="settings.section.prefs">Translation Preferences</h4>
+          <div class="prefs-free-note hidden" id="prefs-free-note" data-i18n="prefs.freeNote">Preferences need an AI engine (Gemini, OpenAI, Claude, or custom).</div>
+
+          <div class="form-group">
+            <label for="pref-tone" data-i18n="prefs.tone.label">Tone</label>
+            <div class="select-wrapper">
+              <select id="pref-tone">
+                <option value="keep" data-i18n="prefs.tone.keep">Keep as in the original (default)</option>
+                <option value="formal" data-i18n="prefs.tone.formal">Formal</option>
+                <option value="neutral" data-i18n="prefs.tone.neutral">Neutral</option>
+                <option value="casual" data-i18n="prefs.tone.casual">Casual</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pref-glossary" data-i18n="prefs.glossary.label">Glossary (all files)</label>
+            <textarea id="pref-glossary" rows="4" spellcheck="false" data-i18n-placeholder="prefs.glossary.placeholder" placeholder="Acme Cloud&#10;dashboard = 儀表板"></textarea>
+            <div class="field-hint" data-i18n="prefs.glossary.hint">One per line. "term = translation" fixes a translation; a term alone stays untranslated.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="pref-custom" data-i18n="prefs.custom.label">Additional instructions</label>
+            <textarea id="pref-custom" rows="3" maxlength="500" data-i18n-placeholder="prefs.custom.placeholder" placeholder="e.g. The audience is Japanese clients; keep sentences short."></textarea>
+            <div class="field-hint"><span data-i18n="prefs.custom.hint">Any language is fine. Cannot change the output format.</span> <span id="pref-custom-count">0/500</span></div>
+          </div>
+        </div>
+
         <!-- What happens when a job finishes. Saved with the Save button. -->
         <div class="setting-group-card">
           <h4 data-i18n="settings.section.result">After Translation</h4>

@@ -180,5 +180,21 @@
   "setup.step3.title": "系統會自動檢查",
   "setup.ok": "✅ 金鑰可用並已儲存，可以開始翻譯了！",
   "setup.useFree": "先用基本免費翻譯",
-  "setup.start": "開始翻譯"
+  "setup.start": "開始翻譯",
+  "settings.section.prefs": "翻譯偏好",
+  "prefs.freeNote": "翻譯偏好需要使用 AI 引擎（Gemini、OpenAI、Claude 或自訂）。",
+  "prefs.tone.label": "語氣",
+  "prefs.tone.keep": "不更動（照原始文件，預設）",
+  "prefs.tone.formal": "正式",
+  "prefs.tone.neutral": "中性",
+  "prefs.tone.casual": "口語",
+  "prefs.glossary.label": "術語表（所有檔案）",
+  "prefs.glossary.placeholder": "Acme Cloud\ndashboard = 儀表板",
+  "prefs.glossary.hint": "一行一個。「原文 = 譯文」會固定譯法；只寫原文則保留不翻。",
+  "prefs.custom.label": "自訂說明",
+  "prefs.custom.placeholder": "例如：讀者是日本客戶，句子請簡短。",
+  "prefs.custom.hint": "可用任何語言撰寫，不會改變輸出格式。",
+  "prefs.docGlossary.summary": "此檔案專屬術語",
+  "prefs.docGlossary.hint": "同一個詞會優先使用這裡的設定。僅限 AI 引擎。",
+  "done.customDropped": "已略過自訂說明（它干擾了翻譯格式）"
 }

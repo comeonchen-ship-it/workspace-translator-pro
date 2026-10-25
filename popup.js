@@ -4,6 +4,7 @@ import {
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
 import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
+import { parseGlossary, mergeGlossaries, CUSTOM_MAX_CHARS } from './lib/prefs.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // i18n must be ready before anything renders, otherwise the user sees a flash of
@@ -61,6 +62,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const completionActions = document.getElementById('completion-actions');
   let completionUrl = null;
   let completionDismissKey = null;
+  const prefsCard = document.getElementById('prefs-card');
+  const prefsFreeNote = document.getElementById('prefs-free-note');
+  const prefTone = document.getElementById('pref-tone');
+  const prefGlossary = document.getElementById('pref-glossary');
+  const prefCustom = document.getElementById('pref-custom');
+  const prefCustomCount = document.getElementById('pref-custom-count');
+  const docGlossary = document.getElementById('doc-glossary');
+  const docGlossaryBox = document.getElementById('doc-glossary-box');
   
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
@@ -165,8 +174,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     'modelName',
     'customUrl',
     'apiKeyStatus',
-    'autoOpenResult'
+    'autoOpenResult',
+    'translationPrefs'
   ], (items) => {
+    const prefs = items.translationPrefs || {};
+    prefTone.value = prefs.tone || 'keep';
+    prefGlossary.value = prefs.glossaryText || '';
+    prefCustom.value = prefs.custom || '';
+    updateCustomCount();
     selectEngine.value = items.translationEngine || 'gemini';
     if (inputAutoOpen) inputAutoOpen.checked = items.autoOpenResult !== false;
     inputApiKey.value = items.apiKey || '';
@@ -257,7 +272,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Toggle visible fields based on engine
+  function updateCustomCount() {
+    prefCustomCount.textContent = `${prefCustom.value.length}/${CUSTOM_MAX_CHARS}`;
+  }
+  prefCustom.addEventListener('input', updateCustomCount);
+
   function toggleEngineFields(engine) {
+    // Preferences are prompt instructions — the basic free engine has no prompt.
+    const isFree = engine === 'free';
+    prefsCard.classList.toggle('disabled', isFree);
+    prefsFreeNote.classList.toggle('hidden', !isFree);
+    docGlossaryBox.classList.toggle('hidden', isFree);
     const groupTestApi = document.getElementById('group-test-api');
     if (engine === 'free') {
       groupApiKey.classList.add('hidden');
@@ -524,7 +549,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       apiKey,
       modelName,
       customUrl,
-      autoOpenResult: inputAutoOpen ? inputAutoOpen.checked : true
+      autoOpenResult: inputAutoOpen ? inputAutoOpen.checked : true,
+      translationPrefs: {
+        tone: prefTone.value,
+        glossaryText: prefGlossary.value,
+        custom: prefCustom.value.trim().slice(0, CUSTOM_MAX_CHARS),
+      }
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       closeSettings();
@@ -970,6 +1000,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     logConsoleContent.textContent = t('logs.waiting');
 
+    const docGlossaryKey = `docGlossary_${presentationId}`;
+    chrome.storage.local.get(docGlossaryKey, (data) => {
+      if (currentPresentationId !== presentationId) return;
+      docGlossary.value = data[docGlossaryKey] || '';
+      docGlossaryBox.open = !!docGlossary.value;
+    });
+
     // Landing on a freshly translated copy: say where it came from.
     const infoKey = `completedInfo_${presentationId}`;
     chrome.storage.local.get(infoKey, (data) => {
@@ -1011,7 +1048,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       'apiKey',
       'modelName',
       'customUrl',
-      'apiKeyStatus'
+      'apiKeyStatus',
+      'translationPrefs'
     ], (items) => {
       const translationEngine = items.translationEngine || 'gemini';
       const apiKey = items.apiKey;
@@ -1042,6 +1080,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  docGlossary.addEventListener('input', () => {
+    if (!currentPresentationId) return;
+    const key = `docGlossary_${currentPresentationId}`;
+    if (docGlossary.value.trim()) chrome.storage.local.set({ [key]: docGlossary.value });
+    else chrome.storage.local.remove(key);
+  });
+
+  function buildPrefsForJob(stored) {
+    const p = stored || {};
+    return {
+      tone: p.tone || 'keep',
+      glossary: mergeGlossaries(parseGlossary(p.glossaryText), parseGlossary(docGlossary.value)),
+      custom: p.custom || '',
+    };
+  }
+
   function startTranslation(items, translationEngine, apiKey) {
     hideCompletion();
     // Start translation UI state
@@ -1071,7 +1125,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               translationEngine,
               apiKey,
               modelName: items.modelName || DEFAULT_MODELS[translationEngine],
-              customUrl: items.customUrl
+              customUrl: items.customUrl,
+              prefs: buildPrefsForJob(items.translationPrefs)
             }
           });
         } catch (err) {
@@ -1333,6 +1388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (summary.durationMs) parts.push(formatDuration(summary.durationMs));
     if (summary.engine) parts.push(summary.model ? `${summary.engine.toUpperCase()} · ${summary.model}` : summary.engine.toUpperCase());
     if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
+    if (summary.customDropped) parts.push(t('done.customDropped'));
     return parts.join(' · ');
   }
 
