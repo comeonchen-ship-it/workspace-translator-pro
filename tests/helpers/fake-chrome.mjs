@@ -30,6 +30,8 @@ export function createFakeChrome({ initialStorage = {}, tokens = ['tok-1'] } = {
       lastError: null,
       onConnect: { addListener: (fn) => listeners.connect.push(fn) },
       onMessage: { addListener: (fn) => listeners.message.push(fn) },
+      onInstalled: { addListener: (fn) => (listeners.installed ||= []).push(fn) },
+      getManifest: () => ({ version: '9.9.9' }),
       sendMessage: () => Promise.resolve(),
       getPlatformInfo: (cb) => cb && cb({}),
     },

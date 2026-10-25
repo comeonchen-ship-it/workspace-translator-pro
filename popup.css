@@ -1683,3 +1683,17 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
   white-space: normal; line-height: 1.25; text-align: center; overflow-wrap: anywhere;
 }
 .segmented button { justify-content: flex-start; }
+
+/* "What's new" dot on the help button after an update */
+#btn-help { position: relative; }
+#btn-help.has-news::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff7675;
+  box-shadow: 0 0 0 2px var(--bg-surface, #12131a);
+}

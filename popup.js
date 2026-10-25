@@ -637,8 +637,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const errMsg = body?.error?.message || body?.message || resp.statusText || `HTTP ${resp.status}`;
       const modelLinks = {
         gemini: 'https://ai.google.dev/gemini-api/docs/models',
-        openai: 'https://platform.openai.com/docs/models',
-        claude: 'https://docs.anthropic.com/claude/docs/models-overview',
+        openai: 'https://developers.openai.com/api/docs/models',
+        claude: 'https://platform.claude.com/docs/en/models/overview',
         custom: t('settings.test.suggest.providerDocs')
       };
 
@@ -777,8 +777,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Open Help Guide
+  // "What's new" dot on the help button after an update; the click opens the
+  // guide at the version history and clears the dot.
+  function refreshWhatsNewDot() {
+    chrome.storage.local.get(['whatsNewVersion', 'whatsNewSeen'], ({ whatsNewVersion, whatsNewSeen }) => {
+      btnHelp.classList.toggle('has-news', !!whatsNewVersion && whatsNewVersion !== whatsNewSeen);
+    });
+  }
+  refreshWhatsNewDot();
+
   btnHelp.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'onboarding.html' });
+    const hasNews = btnHelp.classList.contains('has-news');
+    chrome.tabs.create({ url: hasNews ? 'onboarding.html#changelog' : 'onboarding.html' });
+    if (hasNews) {
+      chrome.storage.local.get('whatsNewVersion', ({ whatsNewVersion }) => {
+        chrome.storage.local.set({ whatsNewSeen: whatsNewVersion }, refreshWhatsNewDot);
+      });
+    }
   });
 
   // ── Test Connection Button ────────────────────────────────────────────────

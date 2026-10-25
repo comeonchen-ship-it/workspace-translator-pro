@@ -285,3 +285,13 @@ test('settings saved by ≤ v1.6 (keep: booleans) still work', async () => {
   assert.equal(state.step, 'done', state.error);
   assert.match(api.llm.calls[before].system, /copy them exactly as written: people's names; place names/);
 });
+
+test("update marks what's new; first install opens the guide once", async () => {
+  const before = fake.record.tabsCreated.length;
+  for (const fn of fake.listeners.installed) fn({ reason: 'update' });
+  assert.equal(fake.store.whatsNewVersion, '9.9.9');
+  assert.equal(fake.record.tabsCreated.length, before, 'an update must not open tabs');
+  for (const fn of fake.listeners.installed) fn({ reason: 'install' });
+  assert.equal(fake.store.whatsNewSeen, '9.9.9');
+  assert.equal(fake.record.tabsCreated.at(-1).url, 'onboarding.html');
+});

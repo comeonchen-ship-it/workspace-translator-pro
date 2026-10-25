@@ -542,7 +542,7 @@ If an item is already written in ${targetLangName}, or is a proper noun/code wit
  */
 async function translateGemini(texts, targetLangName, config) {
   const presentationId = config?.presentationId;
-  const model = config.modelName || 'gemini-2.5-flash';
+  const model = config.modelName || 'gemini-3.1-flash-lite'; // same default as the settings panel
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   await logDebug(`Sending request to Gemini API (Model: ${model})...`, presentationId);

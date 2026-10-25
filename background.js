@@ -15,6 +15,18 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error('Failed to set Side Panel behavior:', error));
 
+// After an update, the side panel's help button shows a dot until the user has
+// opened the guide's "What's new" section (see onboarding.js / popup.js).
+// A first install opens the guide once.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  const version = chrome.runtime.getManifest().version;
+  if (reason === 'update') chrome.storage.local.set({ whatsNewVersion: version });
+  if (reason === 'install') {
+    chrome.storage.local.set({ whatsNewVersion: version, whatsNewSeen: version });
+    chrome.tabs.create({ url: 'onboarding.html' });
+  }
+});
+
 // Recover any active or queued translations left over from a previous
 // service-worker lifetime on startup/reload.
 cleanUpStaleStates();

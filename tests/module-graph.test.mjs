@@ -8,7 +8,7 @@ const listener = { addListener: noop };
 globalThis.chrome = {
   sidePanel: { setPanelBehavior: () => Promise.resolve() },
   storage: { local: { get: async () => ({}), set: async () => {}, remove: async () => {} } },
-  runtime: { onConnect: listener, onMessage: listener, getPlatformInfo: noop, sendMessage: () => Promise.resolve() },
+  runtime: { onConnect: listener, onMessage: listener, onInstalled: listener, getManifest: () => ({ version: '0' }), getPlatformInfo: noop, sendMessage: () => Promise.resolve() },
   tabs: { onRemoved: listener, create: noop },
   notifications: { onClicked: listener, create: noop, clear: noop },
   scripting: { executeScript: async () => [{ result: null }] },
