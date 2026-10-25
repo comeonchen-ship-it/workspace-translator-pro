@@ -24,7 +24,7 @@ test('default prefs leave the prompt unchanged', () => {
 test('prefs block: format rules come last and target language is pinned', () => {
   const block = buildPrefsBlock({ tone: 'formal', glossary: [{ src: 'Acme', dst: '' }], custom: '請簡短' }, 'Japanese');
   assert.match(block, /Tone: Use a formal/);
-  assert.match(block, /"Acme" → keep "Acme" untranslated/);
+  assert.match(block, /"Acme" → keep untranslated/);
   assert.match(block, /may be written in any language/);
   assert.ok(block.lastIndexOf('never change the output format') > block.indexOf('請簡短'));
   assert.match(block, /always translate into Japanese/);
@@ -60,4 +60,27 @@ test('keep categories add one do-not-translate rule', () => {
   const block = buildPrefsBlock({ keep: { people: true, brands: true, places: false } }, 'Korean');
   assert.match(block, /Do not translate these; copy them unchanged: people's names .*; company, brand/);
   assert.doesNotMatch(block, /place names/);
+});
+
+import { restoreKeepCasing } from '../lib/prefs.js';
+
+test('keep-as-is terms keep the source casing, not the glossary casing', () => {
+  const g = [{ src: 'DECK', dst: '' }];
+  assert.equal(
+    restoreKeepCasing('Context: Gemini Enterprise app technical pitch deck', 'บริบท: Gemini Enterprise app technical pitch DECK', g),
+    'บริบท: Gemini Enterprise app technical pitch deck');
+  assert.equal(restoreKeepCasing('This deck can be presented', 'DECK นี้สามารถนำเสนอ', g), 'deck นี้สามารถนำเสนอ');
+  // Source really is upper case → untouched
+  assert.equal(restoreKeepCasing('DECK v2', 'DECK เวอร์ชัน 2', g), 'DECK เวอร์ชัน 2');
+  // Whole words only: no change inside other words
+  assert.equal(restoreKeepCasing('the deck', 'DECKING DECK', g), 'DECKING deck');
+  // Term absent from the source → leave the translation alone
+  assert.equal(restoreKeepCasing('hello', 'DECK', g), 'DECK');
+  // Translate-as rules are not touched
+  assert.equal(restoreKeepCasing('ai', 'AI', [{ src: 'AI', dst: '人工智慧' }]), 'AI');
+});
+
+test('prompt tells the model to keep the source capitalization', () => {
+  const block = buildPrefsBlock({ glossary: [{ src: 'DECK', dst: '' }] }, 'Thai');
+  assert.match(block, /capitalization/i);
 });

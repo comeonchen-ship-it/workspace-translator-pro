@@ -217,3 +217,14 @@ test('sheets: a vanished gid is an error, never a whole-workbook translation', a
   const state = await run('x3', 'spreadsheet', { config: { scope: { sheetGid: 999, currentSheetOnly: true } } });
   assert.match(state.error, /Sheet tab not found/);
 });
+
+test('keep-as-is term written in caps keeps the document casing (DECK bug)', async () => {
+  api.files.p11 = { slides: [slide('s1', [['a', 'Technical pitch deck\n']])] };
+  // Simulate the model copying the glossary casing.
+  api.llm.translate = (t) => t.replace(/deck/gi, 'DECK').replace('Technical pitch', 'เทคนิค');
+  const state = await run('p11', 'presentation', { config: { prefs: { glossary: [{ src: 'DECK', dst: '' }] } } });
+  api.llm.translate = (t) => `TR(${t})`;
+  assert.equal(state.step, 'done', state.error);
+  const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
+  assert.deepEqual(written, ['เทคนิค deck']);
+});
