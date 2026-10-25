@@ -12,6 +12,9 @@
  */
 import { fallbackChain, getLanguage, ROOT_LOCALE } from './languages.js';
 
+// Demo mode (lib/demo-mode.js) supplies sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
+
 const fileCache = new Map();
 
 /** Dictionaries in lookup order: [active, ...fallbacks, root]. */

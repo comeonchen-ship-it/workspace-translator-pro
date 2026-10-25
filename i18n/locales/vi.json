@@ -350,5 +350,19 @@
   "guide.cl.140.1": "Giao diện có sẵn bằng 10 ngôn ngữ.",
   "guide.cl.140.2": "Bản dịch tự nhiên hơn và tự động thử lại khi dịch vụ Google gặp sự cố tạm thời.",
   "guide.cl.130.date": "Tháng 6 năm 2026",
-  "guide.cl.130.1": "Giữ nguyên liên kết và định dạng văn bản trong bảng tính; hình ảnh trong Forms được sao chép chính xác."
+  "guide.cl.130.1": "Giữ nguyên liên kết và định dạng văn bản trong bảng tính; hình ảnh trong Forms được sao chép chính xác.",
+  "guide.ov.h": "Cách hoạt động",
+  "guide.ov.1.h": "Lấy khóa miễn phí",
+  "guide.ov.1.p": "Chỉ một lần, khoảng 1 phút",
+  "guide.ov.2.h": "Chọn ngôn ngữ",
+  "guide.ov.2.p": "Một hoặc nhiều cùng lúc",
+  "guide.ov.3.h": "Nhấn dịch",
+  "guide.ov.3.p": "Có thể đóng bảng bên",
+  "guide.ov.4.h": "Nhận bản sao",
+  "guide.ov.4.p": "Cùng thư mục Drive, bản gốc giữ nguyên",
+  "guide.shot.caption": "Màn hình ví dụ · khung đỏ là chỗ cần nhấn",
+  "guide.after.h": "Sau khi dịch xong",
+  "guide.group.steps": "Từng bước",
+  "guide.group.reference": "Tham khảo",
+  "guide.stepLabel": "Bước {n}"
 }

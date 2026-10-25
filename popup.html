@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="popup.css">
   <!-- type="module" so popup.js can import the i18n layer. Module scripts are
        deferred by default, so the DOMContentLoaded listener inside still fires. -->
+  <!-- Inert unless opened as popup.html?demo=… (user guide illustrations, store images) -->
+  <script src="lib/demo-mode.js"></script>
   <script src="popup.js" type="module"></script>
 </head>
 <body>

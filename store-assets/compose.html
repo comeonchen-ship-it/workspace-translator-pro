@@ -73,7 +73,7 @@ const shot = new URLSearchParams(location.search).get('shot') || '1';
 const panel = (state, extra = '') => `
   <div class="sidepanel" ${extra}>
     <div class="sidepanel-bar"><img src="../icons/icon48.png" alt="">Workspace Translator Pro</div>
-    <iframe src="../_store_panel.html?state=${state}&ui=en"></iframe>
+    <iframe src="../popup.html?demo=${state}&ui=en"></iframe>
   </div>`;
 const eyebrow = `<div class="eyebrow"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>`;
 const shots = {
@@ -91,7 +91,7 @@ const shots = {
         <h1>Free Gemini key,<br><em>set up in a minute</em></h1>
         <p class="sub">No credit card. Paste the key — it is checked and saved automatically.</p>
         <ul class="points"><li>Natural, fluent AI translation</li><li>Also works with OpenAI, Claude or any OpenAI-compatible endpoint</li><li>Basic free mode available without a key</li></ul>
-      </div>${panel('setup')}</div>`,
+      </div>${panel('setup-done')}</div>`,
   3: `<div class="canvas"><div class="copy">${eyebrow}
         <h1>Your names, terms <em>&amp; tone</em></h1>
         <p class="sub">Tell the AI how to handle names once — it recognises them by itself.</p>
@@ -111,7 +111,7 @@ const shots = {
         <h1>Translate Google <em>Slides, Docs, Sheets &amp; Forms</em></h1>
         <p class="sub">AI translation into 10 languages. Layout kept, original untouched.</p></div>
         <div class="stack">
-          ${panel('setup', 'style="left:20px;top:40px;transform:rotate(-4deg)"')}
+          ${panel('setup-done', 'style="left:20px;top:40px;transform:rotate(-4deg)"')}
           ${panel('done', 'style="left:390px;top:20px;transform:rotate(3deg);z-index:2"')}
         </div></div>`,
   tile: `<div class="canvas tile"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>

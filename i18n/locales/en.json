@@ -350,5 +350,19 @@
   "guide.cl.140.1": "The interface is available in 10 languages.",
   "guide.cl.140.2": "More natural translations, and automatic retries when Google services have a temporary problem.",
   "guide.cl.130.date": "June 2026",
-  "guide.cl.130.1": "Spreadsheet links and text formatting are kept; images in Forms are copied correctly."
+  "guide.cl.130.1": "Spreadsheet links and text formatting are kept; images in Forms are copied correctly.",
+  "guide.ov.h": "How it works",
+  "guide.ov.1.h": "Get a free key",
+  "guide.ov.1.p": "Once, about 1 minute",
+  "guide.ov.2.h": "Choose a language",
+  "guide.ov.2.p": "One or several at once",
+  "guide.ov.3.h": "Click translate",
+  "guide.ov.3.p": "The panel can be closed",
+  "guide.ov.4.h": "Get your copy",
+  "guide.ov.4.p": "Same Drive folder, original untouched",
+  "guide.shot.caption": "Example screen · the red outline marks where to click",
+  "guide.after.h": "After translation",
+  "guide.group.steps": "Step by step",
+  "guide.group.reference": "Reference",
+  "guide.stepLabel": "Step {n}"
 }

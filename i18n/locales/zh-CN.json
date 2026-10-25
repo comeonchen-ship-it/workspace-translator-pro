@@ -350,5 +350,19 @@
   "guide.cl.140.1": "界面支持 10 种语言。",
   "guide.cl.140.2": "翻译更加自然；Google 服务出现临时问题时会自动重试。",
   "guide.cl.130.date": "2026年6月",
-  "guide.cl.130.1": "保留表格中的链接和文本格式；表单中的图片可正确复制。"
+  "guide.cl.130.1": "保留表格中的链接和文本格式；表单中的图片可正确复制。",
+  "guide.ov.h": "使用流程一览",
+  "guide.ov.1.h": "获取免费密钥",
+  "guide.ov.1.p": "只需一次，约 1 分钟",
+  "guide.ov.2.h": "选择语言",
+  "guide.ov.2.p": "一种或同时多种",
+  "guide.ov.3.h": "点击翻译",
+  "guide.ov.3.p": "过程中可关闭侧边栏",
+  "guide.ov.4.h": "获得翻译副本",
+  "guide.ov.4.p": "同一个云端文件夹，原文件不变",
+  "guide.shot.caption": "示意画面・红框标示要点击的地方",
+  "guide.after.h": "翻译完成后",
+  "guide.group.steps": "操作步骤",
+  "guide.group.reference": "参考资料",
+  "guide.stepLabel": "步骤 {n}"
 }

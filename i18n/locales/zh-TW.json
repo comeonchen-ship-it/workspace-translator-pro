@@ -350,5 +350,19 @@
   "guide.cl.140.1": "介面支援 10 種語言。",
   "guide.cl.140.2": "翻譯更自然；Google 服務暫時出問題時會自動重試。",
   "guide.cl.130.date": "2026 年 6 月",
-  "guide.cl.130.1": "保留試算表的連結與文字格式；表單中的圖片能正確複製。"
+  "guide.cl.130.1": "保留試算表的連結與文字格式；表單中的圖片能正確複製。",
+  "guide.ov.h": "使用流程一覽",
+  "guide.ov.1.h": "取得免費金鑰",
+  "guide.ov.1.p": "只需一次，約 1 分鐘",
+  "guide.ov.2.h": "選擇語言",
+  "guide.ov.2.p": "一種或同時多種",
+  "guide.ov.3.h": "按下翻譯",
+  "guide.ov.3.p": "過程中可關閉側邊欄",
+  "guide.ov.4.h": "取得翻譯副本",
+  "guide.ov.4.p": "同一個雲端資料夾，原檔不變",
+  "guide.shot.caption": "示意畫面・紅框標示要按的地方",
+  "guide.after.h": "翻譯完成後",
+  "guide.group.steps": "操作步驟",
+  "guide.group.reference": "參考資料",
+  "guide.stepLabel": "步驟 {n}"
 }

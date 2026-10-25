@@ -4,6 +4,9 @@
 import { TARGET_LANGUAGES, UI_LANGUAGES, uiLabel, resolveUiLang } from './i18n/languages.js';
 import { loadLocale, t, getStoredUiLang, setStoredUiLang } from './i18n/i18n.js';
 
+// Preview tooling may supply sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
+
 // Placeholder → side-panel message key. Values are rendered as highlighted UI labels.
 const UI_LABELS = {
   quickSetup: 'setup.title',
@@ -57,7 +60,8 @@ function render() {
   for (const el of document.querySelectorAll('[data-i18n-guide]')) {
     // Guide strings are our own (locale files); only the UI labels are inserted,
     // and those are escaped above.
-    const html = escapeHtml(t(el.dataset.i18nGuide)).replace(/\{(\w+)\}/g, (m, name) => params[name] ?? m);
+    const local = el.dataset.n ? { n: el.dataset.n } : {};
+    const html = escapeHtml(t(el.dataset.i18nGuide)).replace(/\{(\w+)\}/g, (m, name) => local[name] ?? params[name] ?? m);
     if (el.tagName === 'TITLE') document.title = t(el.dataset.i18nGuide);
     else el.innerHTML = html;
   }
@@ -75,6 +79,28 @@ function render() {
       li.append(en);
     }
     list.appendChild(li);
+  }
+}
+
+// Live illustrations: the real side panel in demo mode (lib/demo-mode.js), in the
+// guide's language, with the button to click outlined. Not interactive.
+function renderShots(code) {
+  for (const fig of document.querySelectorAll('figure.stage')) {
+    const src = `popup.html?demo=${fig.dataset.demo}&ui=${encodeURIComponent(code)}&hl=1`;
+    let frame = fig.querySelector('iframe');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.loading = 'lazy';
+      frame.tabIndex = -1;
+      frame.setAttribute('aria-hidden', 'true');
+      const box = document.createElement('div');
+      box.className = 'stage-frame';
+      box.append(frame);
+      const cap = document.createElement('figcaption');
+      cap.dataset.i18nGuide = 'guide.shot.caption';
+      fig.append(box, cap);
+    }
+    if (frame.getAttribute('src') !== src) frame.src = src;
   }
 }
 
@@ -105,9 +131,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   picker.addEventListener('change', async () => {
     await setStoredUiLang(picker.value);
     await loadLocale(picker.value);
+    renderShots(picker.value);
     render();
   });
 
+  renderShots(code);
   render();
   highlightToc();
   window.addEventListener('scroll', highlightToc, { passive: true });

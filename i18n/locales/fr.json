@@ -350,5 +350,19 @@
   "guide.cl.140.1": "L'interface est disponible en 10 langues.",
   "guide.cl.140.2": "Traductions plus naturelles et nouvelles tentatives automatiques quand les services Google rencontrent un problème temporaire.",
   "guide.cl.130.date": "Juin 2026",
-  "guide.cl.130.1": "Les liens et la mise en forme du texte des feuilles de calcul sont conservés ; les images des formulaires sont copiées correctement."
+  "guide.cl.130.1": "Les liens et la mise en forme du texte des feuilles de calcul sont conservés ; les images des formulaires sont copiées correctement.",
+  "guide.ov.h": "Comment ça marche",
+  "guide.ov.1.h": "Clé gratuite",
+  "guide.ov.1.p": "Une seule fois, ~1 minute",
+  "guide.ov.2.h": "Choisir la langue",
+  "guide.ov.2.p": "Une ou plusieurs",
+  "guide.ov.3.h": "Lancer la traduction",
+  "guide.ov.3.p": "Le panneau peut être fermé",
+  "guide.ov.4.h": "Votre copie est prête",
+  "guide.ov.4.p": "Même dossier Drive, original intact",
+  "guide.shot.caption": "Exemple d'écran · le cadre rouge indique où cliquer",
+  "guide.after.h": "Après la traduction",
+  "guide.group.steps": "Pas à pas",
+  "guide.group.reference": "Référence",
+  "guide.stepLabel": "Étape {n}"
 }

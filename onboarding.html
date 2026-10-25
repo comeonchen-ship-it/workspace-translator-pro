@@ -4,212 +4,217 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-i18n-guide="guide.docTitle"></title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="onboarding.css">
   <!-- Every text node carries a data-i18n-guide key and is rendered by onboarding.js
        through the shared i18n layer. {placeholders} in those strings are filled
        with the extension's real UI labels, so quoted button names always match
-       the side panel in every language. -->
+       the side panel in every language. Figures are the live side panel in demo
+       mode (lib/demo-mode.js), in the guide's language. -->
   <script src="onboarding.js" type="module"></script>
 </head>
 <body>
-  <div class="glass-bg"></div>
-  <div class="page">
-    <header class="topbar">
-      <div class="brand">
-        <img src="icons/icon128.png" alt="" class="brand-logo">
-        <div>
-          <div class="brand-name" data-i18n-ignore>Workspace Translator Pro</div>
-          <div class="brand-sub" data-i18n-guide="guide.title"></div>
-        </div>
-      </div>
-      <div class="topbar-right">
-        <span class="version-badge" id="guide-version"></span>
-        <label class="lang-picker">
-          <span data-i18n-guide="guide.uiLang"></span>
-          <select id="guide-lang"></select>
-        </label>
-      </div>
-    </header>
-
-    <p class="intro" data-i18n-guide="guide.subtitle"></p>
-
-    <div class="layout">
-      <nav class="toc" id="toc">
+  <!-- Translucent top bar, sticky -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a class="nav-brand" href="#top">
+        <img src="icons/icon48.png" alt="">
+        <span data-i18n-ignore>Workspace Translator Pro</span>
+      </a>
+      <nav class="nav-links" id="toc">
         <a href="#start" data-i18n-guide="guide.nav.start"></a>
         <a href="#translate" data-i18n-guide="guide.nav.translate"></a>
         <a href="#prefs" data-i18n-guide="guide.nav.prefs"></a>
         <a href="#engines" data-i18n-guide="guide.nav.engines"></a>
-        <a href="#languages" data-i18n-guide="guide.nav.languages"></a>
         <a href="#faq" data-i18n-guide="guide.nav.faq"></a>
         <a href="#changelog" data-i18n-guide="guide.nav.changelog"></a>
       </nav>
-
-      <main class="content">
-        <!-- ── Get started ─────────────────────────────────────────── -->
-        <section id="start" class="card">
-          <h2 data-i18n-guide="guide.start.h"></h2>
-          <p class="lead" data-i18n-guide="guide.start.lead"></p>
-          <ol class="steps">
-            <li><h3 data-i18n-guide="guide.start.s1.h"></h3><p data-i18n-guide="guide.start.s1.p"></p></li>
-            <li>
-              <h3 data-i18n-guide="guide.start.s2.h"></h3><p data-i18n-guide="guide.start.s2.p"></p>
-              <a class="btn-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-ignore>aistudio.google.com/apikey ↗</a>
-            </li>
-            <li><h3 data-i18n-guide="guide.start.s3.h"></h3><p data-i18n-guide="guide.start.s3.p"></p></li>
-          </ol>
-          <p class="note" data-i18n-guide="guide.start.free"></p>
-          <div class="callout">
-            <h3 data-i18n-guide="guide.start.auth.h"></h3>
-            <p data-i18n-guide="guide.start.auth.p"></p>
-          </div>
-        </section>
-
-        <!-- ── Translate a file ────────────────────────────────────── -->
-        <section id="translate" class="card">
-          <h2 data-i18n-guide="guide.tr.h"></h2>
-          <p class="lead" data-i18n-guide="guide.tr.lead"></p>
-          <ol class="steps compact">
-            <li data-i18n-guide="guide.tr.s1"></li>
-            <li data-i18n-guide="guide.tr.s2"></li>
-            <li data-i18n-guide="guide.tr.s3"></li>
-            <li data-i18n-guide="guide.tr.s4"></li>
-            <li data-i18n-guide="guide.tr.s5"></li>
-            <li data-i18n-guide="guide.tr.s6"></li>
-          </ol>
-          <p data-i18n-guide="guide.tr.bg"></p>
-          <p data-i18n-guide="guide.tr.done"></p>
-          <p data-i18n-guide="guide.tr.where"></p>
-          <p class="note" data-i18n-guide="guide.tr.fit"></p>
-        </section>
-
-        <!-- ── Translation preferences ─────────────────────────────── -->
-        <section id="prefs" class="card">
-          <h2 data-i18n-guide="guide.pr.h"></h2>
-          <p class="lead" data-i18n-guide="guide.pr.lead"></p>
-          <ul class="defs">
-            <li data-i18n-guide="guide.pr.tone"></li>
-            <li data-i18n-guide="guide.pr.names"></li>
-            <li data-i18n-guide="guide.pr.terms"></li>
-            <li data-i18n-guide="guide.pr.custom"></li>
-            <li data-i18n-guide="guide.pr.preview"></li>
-          </ul>
-        </section>
-
-        <!-- ── AI engines & keys ───────────────────────────────────── -->
-        <section id="engines" class="card">
-          <h2 data-i18n-guide="guide.en.h"></h2>
-          <p class="lead" data-i18n-guide="guide.en.lead"></p>
-          <div class="engine-grid">
-            <div class="engine recommended">
-              <div class="engine-head"><span class="engine-dot gemini">G</span><h3 data-i18n-guide="guide.en.gemini.h"></h3></div>
-              <p data-i18n-guide="guide.en.gemini.p"></p>
-              <div class="links">
-                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
-                <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
-                <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a>
-              </div>
-            </div>
-            <div class="engine">
-              <div class="engine-head"><span class="engine-dot openai">O</span><h3 data-i18n-guide="guide.en.openai.h"></h3></div>
-              <p data-i18n-guide="guide.en.openai.p"></p>
-              <div class="links">
-                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
-                <a href="https://developers.openai.com/api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
-              </div>
-            </div>
-            <div class="engine">
-              <div class="engine-head"><span class="engine-dot claude">C</span><h3 data-i18n-guide="guide.en.claude.h"></h3></div>
-              <p data-i18n-guide="guide.en.claude.p"></p>
-              <div class="links">
-                <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
-                <a href="https://platform.claude.com/docs/en/models/overview" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
-              </div>
-            </div>
-            <div class="engine">
-              <div class="engine-head"><span class="engine-dot custom">⚙</span><h3 data-i18n-guide="guide.en.custom.h"></h3></div>
-              <p data-i18n-guide="guide.en.custom.p"></p>
-            </div>
-            <div class="engine">
-              <div class="engine-head"><span class="engine-dot free">⇄</span><h3 data-i18n-guide="guide.en.free.h"></h3></div>
-              <p data-i18n-guide="guide.en.free.p"></p>
-            </div>
-          </div>
-          <p class="note" data-i18n-guide="guide.en.model"></p>
-          <p class="note" data-i18n-guide="guide.en.privacy"></p>
-        </section>
-
-        <!-- ── Languages & files ───────────────────────────────────── -->
-        <section id="languages" class="card">
-          <h2 data-i18n-guide="guide.la.h"></h2>
-          <p data-i18n-guide="guide.la.targets"></p>
-          <!-- Generated from i18n/languages.js TARGET_LANGUAGES -->
-          <ul class="lang-list" id="lang-list"></ul>
-          <p class="note" data-i18n-guide="guide.la.ui"></p>
-          <h3 data-i18n-guide="guide.la.files.h"></h3>
-          <p data-i18n-guide="guide.la.files.p"></p>
-          <h3 data-i18n-guide="guide.la.kept.h"></h3>
-          <p data-i18n-guide="guide.la.kept.p"></p>
-        </section>
-
-        <!-- ── Troubleshooting ─────────────────────────────────────── -->
-        <section id="faq" class="card">
-          <h2 data-i18n-guide="guide.faq.h"></h2>
-          <p class="lead" data-i18n-guide="guide.faq.lead"></p>
-          <dl class="faq">
-            <dt data-i18n-guide="guide.faq.quota.q"></dt>
-            <dd>
-              <span data-i18n-guide="guide.faq.quota.a"></span>
-              <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a>
-            </dd>
-            <dt data-i18n-guide="guide.faq.model.q"></dt><dd data-i18n-guide="guide.faq.model.a"></dd>
-            <dt data-i18n-guide="guide.faq.copy.q"></dt><dd data-i18n-guide="guide.faq.copy.a"></dd>
-            <dt data-i18n-guide="guide.faq.signin.q"></dt><dd data-i18n-guide="guide.faq.signin.a"></dd>
-            <dt data-i18n-guide="guide.faq.sheet.q"></dt><dd data-i18n-guide="guide.faq.sheet.a"></dd>
-            <dt data-i18n-guide="guide.faq.word.q"></dt><dd data-i18n-guide="guide.faq.word.a"></dd>
-            <dt data-i18n-guide="guide.faq.privacy.q"></dt>
-            <dd>
-              <span data-i18n-guide="guide.faq.privacy.a"></span>
-              <a href="privacy-policy.html" target="_blank" rel="noopener" data-i18n-guide="guide.faq.privacy.link"></a>
-            </dd>
-          </dl>
-        </section>
-
-        <!-- ── What's new ──────────────────────────────────────────── -->
-        <section id="changelog" class="card">
-          <h2 data-i18n-guide="guide.cl.h"></h2>
-          <p class="lead" data-i18n-guide="guide.cl.lead"></p>
-          <div class="release current">
-            <div class="release-head"><span class="ver">v1.6.0</span><span class="tag" data-i18n-guide="guide.cl.current"></span><span class="date" data-i18n-guide="guide.cl.160.date"></span></div>
-            <ul>
-              <li data-i18n-guide="guide.cl.160.1"></li><li data-i18n-guide="guide.cl.160.2"></li><li data-i18n-guide="guide.cl.160.3"></li>
-              <li data-i18n-guide="guide.cl.160.4"></li><li data-i18n-guide="guide.cl.160.5"></li><li data-i18n-guide="guide.cl.160.6"></li>
-              <li data-i18n-guide="guide.cl.160.7"></li>
-            </ul>
-          </div>
-          <div class="release">
-            <div class="release-head"><span class="ver">v1.5.0</span><span class="date" data-i18n-guide="guide.cl.150.date"></span></div>
-            <ul><li data-i18n-guide="guide.cl.150.1"></li><li data-i18n-guide="guide.cl.150.2"></li></ul>
-          </div>
-          <div class="release">
-            <div class="release-head"><span class="ver">v1.4.1</span><span class="date" data-i18n-guide="guide.cl.141.date"></span></div>
-            <ul><li data-i18n-guide="guide.cl.141.1"></li></ul>
-          </div>
-          <div class="release">
-            <div class="release-head"><span class="ver">v1.4.0</span><span class="date" data-i18n-guide="guide.cl.140.date"></span></div>
-            <ul><li data-i18n-guide="guide.cl.140.1"></li><li data-i18n-guide="guide.cl.140.2"></li></ul>
-          </div>
-          <div class="release">
-            <div class="release-head"><span class="ver">v1.3.0</span><span class="date" data-i18n-guide="guide.cl.130.date"></span></div>
-            <ul><li data-i18n-guide="guide.cl.130.1"></li></ul>
-          </div>
-        </section>
-
-        <div class="footer-actions">
-          <button class="btn-close" id="btn-done" data-i18n-guide="guide.close"></button>
-        </div>
-      </main>
+      <label class="nav-lang">
+        <span class="sr-only" data-i18n-guide="guide.uiLang"></span>
+        <select id="guide-lang"></select>
+      </label>
     </div>
-  </div>
+  </header>
+
+  <main id="top">
+    <!-- ── Hero ───────────────────────────────────────────────────────── -->
+    <section class="hero">
+      <img class="hero-icon" src="icons/icon128.png" alt="">
+      <p class="eyebrow"><span data-i18n-guide="guide.title"></span> · <span id="guide-version"></span></p>
+      <h1 data-i18n-ignore>Workspace Translator Pro</h1>
+      <p class="hero-sub" data-i18n-guide="guide.subtitle"></p>
+    </section>
+
+    <!-- ── At a glance ────────────────────────────────────────────────── -->
+    <section class="glance" aria-labelledby="ov-h">
+      <h2 id="ov-h" class="section-label" data-i18n-guide="guide.ov.h"></h2>
+      <ol class="glance-steps">
+        <li><span class="glance-num">1</span><b data-i18n-guide="guide.ov.1.h"></b><span data-i18n-guide="guide.ov.1.p"></span></li>
+        <li><span class="glance-num">2</span><b data-i18n-guide="guide.ov.2.h"></b><span data-i18n-guide="guide.ov.2.p"></span></li>
+        <li><span class="glance-num">3</span><b data-i18n-guide="guide.ov.3.h"></b><span data-i18n-guide="guide.ov.3.p"></span></li>
+        <li><span class="glance-num">4</span><b data-i18n-guide="guide.ov.4.h"></b><span data-i18n-guide="guide.ov.4.p"></span></li>
+      </ol>
+    </section>
+
+    <!-- ── Step sections: identical rhythm — label, headline, copy, stage ── -->
+    <section id="start" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="1"></p>
+      <h2 data-i18n-guide="guide.nav.start"></h2>
+      <p class="lead" data-i18n-guide="guide.start.lead"></p>
+      <ol class="numbered">
+        <li><b data-i18n-guide="guide.start.s1.h"></b> <span data-i18n-guide="guide.start.s1.p"></span></li>
+        <li><b data-i18n-guide="guide.start.s2.h"></b> <span data-i18n-guide="guide.start.s2.p"></span>
+          <a class="text-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-ignore>aistudio.google.com/apikey ›</a></li>
+        <li><b data-i18n-guide="guide.start.s3.h"></b> <span data-i18n-guide="guide.start.s3.p"></span></li>
+      </ol>
+      <figure class="stage" data-demo="setup"></figure>
+      <p class="aside" data-i18n-guide="guide.start.free"></p>
+      <p class="aside"><b data-i18n-guide="guide.start.auth.h"></b> <span data-i18n-guide="guide.start.auth.p"></span></p>
+    </section>
+
+    <section id="translate" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="2"></p>
+      <h2 data-i18n-guide="guide.tr.h"></h2>
+      <p class="lead" data-i18n-guide="guide.tr.lead"></p>
+      <ol class="numbered">
+        <li data-i18n-guide="guide.tr.s1"></li>
+        <li data-i18n-guide="guide.tr.s2"></li>
+        <li data-i18n-guide="guide.tr.s3"></li>
+        <li data-i18n-guide="guide.tr.s4"></li>
+        <li data-i18n-guide="guide.tr.s5"></li>
+        <li data-i18n-guide="guide.tr.s6"></li>
+      </ol>
+      <figure class="stage" data-demo="main"></figure>
+      <p class="aside" data-i18n-guide="guide.tr.bg"></p>
+    </section>
+
+    <section id="after" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="3"></p>
+      <h2 data-i18n-guide="guide.after.h"></h2>
+      <p class="lead" data-i18n-guide="guide.tr.done"></p>
+      <figure class="stage" data-demo="done"></figure>
+      <p class="aside" data-i18n-guide="guide.tr.where"></p>
+      <p class="aside" data-i18n-guide="guide.tr.fit"></p>
+    </section>
+
+    <section id="prefs" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="4"></p>
+      <h2 data-i18n-guide="guide.pr.h"></h2>
+      <p class="lead" data-i18n-guide="guide.pr.lead"></p>
+      <ul class="plain">
+        <li data-i18n-guide="guide.pr.names"></li>
+        <li data-i18n-guide="guide.pr.terms"></li>
+        <li data-i18n-guide="guide.pr.tone"></li>
+        <li data-i18n-guide="guide.pr.custom"></li>
+        <li data-i18n-guide="guide.pr.preview"></li>
+      </ul>
+      <figure class="stage" data-demo="prefs"></figure>
+    </section>
+
+    <section id="engines" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="5"></p>
+      <h2 data-i18n-guide="guide.en.h"></h2>
+      <p class="lead" data-i18n-guide="guide.en.lead"></p>
+      <figure class="stage" data-demo="engine"></figure>
+      <div class="engines">
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.gemini.h"></h3>
+          <p data-i18n-guide="guide.en.gemini.p"></p>
+          <p class="links">
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+            <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.openai.h"></h3>
+          <p data-i18n-guide="guide.en.openai.p"></p>
+          <p class="links">
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://developers.openai.com/api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.claude.h"></h3>
+          <p data-i18n-guide="guide.en.claude.p"></p>
+          <p class="links">
+            <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://platform.claude.com/docs/en/models/overview" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.custom.h"></h3>
+          <p data-i18n-guide="guide.en.custom.p"></p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.free.h"></h3>
+          <p data-i18n-guide="guide.en.free.p"></p>
+        </div>
+      </div>
+      <p class="aside" data-i18n-guide="guide.en.model"></p>
+      <p class="aside" data-i18n-guide="guide.en.privacy"></p>
+    </section>
+
+    <!-- ── Reference ──────────────────────────────────────────────────── -->
+    <section id="languages" class="ref">
+      <h2 data-i18n-guide="guide.la.h"></h2>
+      <p class="lead" data-i18n-guide="guide.la.targets"></p>
+      <!-- Generated from i18n/languages.js TARGET_LANGUAGES -->
+      <ul class="lang-list" id="lang-list"></ul>
+      <p class="aside" data-i18n-guide="guide.la.ui"></p>
+      <div class="two-col">
+        <div><h3 data-i18n-guide="guide.la.files.h"></h3><p data-i18n-guide="guide.la.files.p"></p></div>
+        <div><h3 data-i18n-guide="guide.la.kept.h"></h3><p data-i18n-guide="guide.la.kept.p"></p></div>
+      </div>
+    </section>
+
+    <section id="faq" class="ref">
+      <h2 data-i18n-guide="guide.faq.h"></h2>
+      <p class="lead" data-i18n-guide="guide.faq.lead"></p>
+      <dl class="faq">
+        <div><dt data-i18n-guide="guide.faq.quota.q"></dt>
+          <dd><span data-i18n-guide="guide.faq.quota.a"></span> <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a></dd></div>
+        <div><dt data-i18n-guide="guide.faq.model.q"></dt><dd data-i18n-guide="guide.faq.model.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.copy.q"></dt><dd data-i18n-guide="guide.faq.copy.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.signin.q"></dt><dd data-i18n-guide="guide.faq.signin.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.sheet.q"></dt><dd data-i18n-guide="guide.faq.sheet.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.word.q"></dt><dd data-i18n-guide="guide.faq.word.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.privacy.q"></dt>
+          <dd><span data-i18n-guide="guide.faq.privacy.a"></span> <a href="privacy-policy.html" target="_blank" rel="noopener" data-i18n-guide="guide.faq.privacy.link"></a></dd></div>
+      </dl>
+    </section>
+
+    <section id="changelog" class="ref">
+      <h2 data-i18n-guide="guide.cl.h"></h2>
+      <p class="lead" data-i18n-guide="guide.cl.lead"></p>
+      <div class="release current">
+        <div class="release-head"><span class="ver">1.6.0</span><span class="tag" data-i18n-guide="guide.cl.current"></span><span class="date" data-i18n-guide="guide.cl.160.date"></span></div>
+        <ul>
+          <li data-i18n-guide="guide.cl.160.1"></li><li data-i18n-guide="guide.cl.160.2"></li><li data-i18n-guide="guide.cl.160.3"></li>
+          <li data-i18n-guide="guide.cl.160.4"></li><li data-i18n-guide="guide.cl.160.5"></li><li data-i18n-guide="guide.cl.160.6"></li>
+          <li data-i18n-guide="guide.cl.160.7"></li>
+        </ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.5.0</span><span class="date" data-i18n-guide="guide.cl.150.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.150.1"></li><li data-i18n-guide="guide.cl.150.2"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.4.1</span><span class="date" data-i18n-guide="guide.cl.141.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.141.1"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.4.0</span><span class="date" data-i18n-guide="guide.cl.140.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.140.1"></li><li data-i18n-guide="guide.cl.140.2"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.3.0</span><span class="date" data-i18n-guide="guide.cl.130.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.130.1"></li></ul>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <button class="btn-close" id="btn-done" data-i18n-guide="guide.close"></button>
+    </footer>
+  </main>
 </body>
 </html>

@@ -20,6 +20,9 @@
  *   lineHeight  Base line-height. Thai needs extra room for its stacked marks.
  *   fontStack   Key into the --font-* custom properties in popup.css.
  */
+
+// Demo mode (lib/demo-mode.js) supplies sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
 export const LANGUAGES = [
   { code: 'en',    endonym: 'English',    english: 'English',             dir: 'ltr', fallback: null, ui: true,  target: true, lineHeight: 1.4,  fontStack: 'latin'  },
   { code: 'zh-TW', endonym: '繁體中文',    english: 'Traditional Chinese', dir: 'ltr', fallback: 'en', ui: true,  target: true, lineHeight: 1.5,  fontStack: 'cjk-tc' },

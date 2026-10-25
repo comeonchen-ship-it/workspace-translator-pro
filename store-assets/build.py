@@ -23,16 +23,6 @@ SHOTS = [
     ('marquee', 1400, 560, 'marquee-1400x560.png'),
     ('tile', 440, 280, 'small-tile-440x280.png'),
 ]
-PANEL = os.path.join(ROOT, '_store_panel.html')
-
-
-def write_panel_page():
-    # The real side panel with the screenshot stub injected before popup.js.
-    html = open(os.path.join(ROOT, 'popup.html'), encoding='utf-8').read()
-    tag = '<script src="popup.js" type="module"></script>'
-    assert tag in html, 'popup.html changed: update build.py'
-    html = html.replace(tag, '<script src="store-assets/panel-stub.js"></script>\n' + tag)
-    open(PANEL, 'w', encoding='utf-8').write(html)
 
 
 def serve():
@@ -63,7 +53,6 @@ def render(shot, w, h, name):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    write_panel_page()
     httpd = serve()
     try:
         time.sleep(0.3)
@@ -73,7 +62,6 @@ def main():
                 render(shot, w, h, name)
     finally:
         httpd.shutdown()
-        os.remove(PANEL)
 
 
 if __name__ == '__main__':

@@ -350,5 +350,19 @@
   "guide.cl.140.1": "Die Oberfläche ist in 10 Sprachen verfügbar.",
   "guide.cl.140.2": "Natürlichere Übersetzungen und automatische Wiederholungen, wenn Google-Dienste ein vorübergehendes Problem haben.",
   "guide.cl.130.date": "Juni 2026",
-  "guide.cl.130.1": "Links und Textformatierung in Tabellen bleiben erhalten; Bilder in Formularen werden korrekt kopiert."
+  "guide.cl.130.1": "Links und Textformatierung in Tabellen bleiben erhalten; Bilder in Formularen werden korrekt kopiert.",
+  "guide.ov.h": "So funktioniert's",
+  "guide.ov.1.h": "Gratis-Schlüssel holen",
+  "guide.ov.1.p": "Einmalig, ca. 1 Minute",
+  "guide.ov.2.h": "Sprache wählen",
+  "guide.ov.2.p": "Eine oder mehrere",
+  "guide.ov.3.h": "Übersetzen klicken",
+  "guide.ov.3.p": "Seitenleiste darf zu",
+  "guide.ov.4.h": "Kopie fertig",
+  "guide.ov.4.p": "Gleicher Drive-Ordner, Original unverändert",
+  "guide.shot.caption": "Beispielansicht · der rote Rahmen zeigt, wo du klickst",
+  "guide.after.h": "Nach der Übersetzung",
+  "guide.group.steps": "Schritt für Schritt",
+  "guide.group.reference": "Nachschlagen",
+  "guide.stepLabel": "Schritt {n}"
 }

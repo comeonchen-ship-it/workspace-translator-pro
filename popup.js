@@ -8,6 +8,9 @@ import { mergeGlossaries, rowsToGlossary, glossaryTextToRows, normalizeNames, NA
 import { createTermEditor } from './lib/term-editor.js';
 import { parseSlideRange, sheetGidFromUrl } from './lib/range.js';
 
+// Demo mode (lib/demo-mode.js) supplies sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
+
 document.addEventListener('DOMContentLoaded', async () => {
   // i18n must be ready before anything renders, otherwise the user sees a flash of
   // English. Everything below this point may call t().
@@ -1679,7 +1682,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const li = document.createElement('li');
       const a = document.createElement('a');
       const lang = TARGET_LANGUAGES.find((l) => l.code === r.lang);
-      const langName = lang ? targetLabel(lang) : r.lang; // already localized
+      const langName = lang ? lang.endonym : r.lang; // native name, as on the chips
       a.textContent = '↗ ' + langName;
       a.addEventListener('click', () => chrome.tabs.create({ url: r.url }));
       li.appendChild(a);
