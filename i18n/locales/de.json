@@ -210,7 +210,7 @@
   "prefs.keep.brands": "Firmen-, Marken- und Produktnamen",
   "prefs.keep.places": "Ortsnamen",
   "prefs.terms.label": "Bestimmte Begriffe (alle Dateien)",
-  "prefs.terms.srcPlaceholder": "Wort in der Datei, z. B. AI",
+  "prefs.terms.srcPlaceholder": "z. B. AI",
   "prefs.terms.dstPlaceholder": "z. B. KI",
   "prefs.terms.mode.translate": "übersetzen mit",
   "prefs.terms.mode.keep": "unverändert lassen",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "„{src}“ unverändert lassen",
   "prefs.preview.custom": "Deine Zusatzanweisungen befolgen",
   "prefs.preview.none": "Natürlich übersetzen, ohne besondere Regeln",
-  "multi.picked": ": {list}"
+  "multi.picked": " ({n} ausgewählt)",
+  "prefs.terms.colSrc": "Wort in der Datei",
+  "prefs.terms.colMode": "Aktion",
+  "prefs.terms.colDst": "Übersetzung"
 }

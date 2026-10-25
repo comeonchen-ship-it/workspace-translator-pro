@@ -210,7 +210,7 @@
   "prefs.keep.brands": "公司、品牌、产品名称",
   "prefs.keep.places": "地名",
   "prefs.terms.label": "指定词语（所有文件）",
-  "prefs.terms.srcPlaceholder": "文件里的词，例：AI",
+  "prefs.terms.srcPlaceholder": "例：AI",
   "prefs.terms.dstPlaceholder": "例：人工智能",
   "prefs.terms.mode.translate": "译成",
   "prefs.terms.mode.keep": "保持原文",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "“{src}”保持原文",
   "prefs.preview.custom": "遵守你的自定义说明",
   "prefs.preview.none": "自然翻译，没有特别规则",
-  "multi.picked": "：{list}"
+  "multi.picked": "（已选 {n} 种）",
+  "prefs.terms.colSrc": "文件中的词",
+  "prefs.terms.colMode": "处理方式",
+  "prefs.terms.colDst": "译文"
 }

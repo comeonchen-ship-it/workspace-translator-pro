@@ -210,7 +210,7 @@
   "prefs.keep.brands": "会社名・ブランド名・製品名",
   "prefs.keep.places": "地名",
   "prefs.terms.label": "指定する語句（全ファイル）",
-  "prefs.terms.srcPlaceholder": "ファイル内の語、例：AI",
+  "prefs.terms.srcPlaceholder": "例：AI",
   "prefs.terms.dstPlaceholder": "例：人工知能",
   "prefs.terms.mode.translate": "の訳は",
   "prefs.terms.mode.keep": "原文のまま",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "「{src}」は原文のまま",
   "prefs.preview.custom": "追加の指示に従う",
   "prefs.preview.none": "特別なルールなしで自然に翻訳",
-  "multi.picked": "：{list}"
+  "multi.picked": "（{n} 言語を選択中）",
+  "prefs.terms.colSrc": "ファイル内の語",
+  "prefs.terms.colMode": "扱い",
+  "prefs.terms.colDst": "訳語"
 }

@@ -240,7 +240,11 @@ body {
   gap: 16px;
   z-index: 5;
   overflow-y: auto;
-  padding-inline-end: 4px;
+  /* Symmetric inner space with the scrollbar gutter reserved on both edges, so
+     the left/right margins match whether or not the panel scrolls, and the
+     primary button's glow is not clipped into a hard edge on the right. */
+  padding-inline: 12px;
+  scrollbar-gutter: stable both-edges;
 }
 
 .active-panel::-webkit-scrollbar {
@@ -1476,22 +1480,24 @@ body.theme-form {
 
 /* ── Term editor & rules preview ───────────────────────────────────────── */
 .term-editor { display: flex; flex-direction: column; gap: 6px; }
-.term-row {
+.term-head, .term-row {
   display: grid;
-  grid-template-columns: 1fr auto 1fr 24px;
+  grid-template-columns: minmax(0, 0.85fr) 78px minmax(0, 1.15fr) 16px;
   gap: 4px;
   align-items: center;
 }
 .term-row input, .term-row select {
   min-width: 0;
   font-size: 12px;
-  padding: 6px 8px;
+  padding: 6px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-main);
 }
 .term-row input[hidden] { display: block; visibility: hidden; }
+.term-head { font-size: 10px; color: var(--text-muted); padding: 0 2px; }
+.term-head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .term-del {
   background: none; border: none; color: var(--text-muted);
   cursor: pointer; font-size: 13px; padding: 0;

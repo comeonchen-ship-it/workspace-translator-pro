@@ -210,7 +210,7 @@
   "prefs.keep.brands": "Noms d'entreprises, de marques et de produits",
   "prefs.keep.places": "Noms de lieux",
   "prefs.terms.label": "Termes précis (tous les fichiers)",
-  "prefs.terms.srcPlaceholder": "Mot du fichier, ex. AI",
+  "prefs.terms.srcPlaceholder": "ex. AI",
   "prefs.terms.dstPlaceholder": "ex. IA",
   "prefs.terms.mode.translate": "traduire par",
   "prefs.terms.mode.keep": "garder tel quel",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "Garder « {src} » tel quel",
   "prefs.preview.custom": "Suivre vos instructions supplémentaires",
   "prefs.preview.none": "Traduire naturellement, sans règle particulière",
-  "multi.picked": " : {list}"
+  "multi.picked": " ({n} sélectionnée(s))",
+  "prefs.terms.colSrc": "Mot du fichier",
+  "prefs.terms.colMode": "Action",
+  "prefs.terms.colDst": "Traduction"
 }

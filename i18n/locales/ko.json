@@ -210,7 +210,7 @@
   "prefs.keep.brands": "회사·브랜드·제품 이름",
   "prefs.keep.places": "지명",
   "prefs.terms.label": "지정 용어(모든 파일)",
-  "prefs.terms.srcPlaceholder": "파일 속 단어, 예: AI",
+  "prefs.terms.srcPlaceholder": "예: AI",
   "prefs.terms.dstPlaceholder": "예: 인공지능",
   "prefs.terms.mode.translate": "번역:",
   "prefs.terms.mode.keep": "원문 유지",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "‘{src}’은(는) 원문 유지",
   "prefs.preview.custom": "추가 지시사항 따르기",
   "prefs.preview.none": "특별한 규칙 없이 자연스럽게 번역",
-  "multi.picked": ": {list}"
+  "multi.picked": " ({n}개 선택됨)",
+  "prefs.terms.colSrc": "파일 속 단어",
+  "prefs.terms.colMode": "처리",
+  "prefs.terms.colDst": "번역어"
 }

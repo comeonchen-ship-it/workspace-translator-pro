@@ -210,7 +210,7 @@
   "prefs.keep.brands": "Nombres de empresas, marcas y productos",
   "prefs.keep.places": "Nombres de lugares",
   "prefs.terms.label": "Términos concretos (todos los archivos)",
-  "prefs.terms.srcPlaceholder": "Palabra del archivo, p. ej. AI",
+  "prefs.terms.srcPlaceholder": "p. ej. AI",
   "prefs.terms.dstPlaceholder": "p. ej. IA",
   "prefs.terms.mode.translate": "traducir como",
   "prefs.terms.mode.keep": "dejar igual",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "Dejar «{src}» sin traducir",
   "prefs.preview.custom": "Seguir tus instrucciones adicionales",
   "prefs.preview.none": "Traducir con naturalidad, sin reglas especiales",
-  "multi.picked": ": {list}"
+  "multi.picked": " ({n} seleccionados)",
+  "prefs.terms.colSrc": "Palabra del archivo",
+  "prefs.terms.colMode": "Acción",
+  "prefs.terms.colDst": "Traducción"
 }

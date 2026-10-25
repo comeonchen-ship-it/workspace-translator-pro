@@ -210,7 +210,7 @@
   "prefs.keep.brands": "Tên công ty, thương hiệu, sản phẩm",
   "prefs.keep.places": "Địa danh",
   "prefs.terms.label": "Từ ngữ chỉ định (mọi tệp)",
-  "prefs.terms.srcPlaceholder": "Từ trong tệp, VD: AI",
+  "prefs.terms.srcPlaceholder": "VD: AI",
   "prefs.terms.dstPlaceholder": "VD: trí tuệ nhân tạo",
   "prefs.terms.mode.translate": "dịch thành",
   "prefs.terms.mode.keep": "giữ nguyên",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "Giữ nguyên “{src}”",
   "prefs.preview.custom": "Làm theo hướng dẫn bổ sung của bạn",
   "prefs.preview.none": "Dịch tự nhiên, không có quy tắc đặc biệt",
-  "multi.picked": ": {list}"
+  "multi.picked": " (đã chọn {n})",
+  "prefs.terms.colSrc": "Từ trong tệp",
+  "prefs.terms.colMode": "Cách xử lý",
+  "prefs.terms.colDst": "Bản dịch"
 }

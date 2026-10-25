@@ -210,7 +210,7 @@
   "prefs.keep.brands": "Company, brand and product names",
   "prefs.keep.places": "Place names",
   "prefs.terms.label": "Specific terms (all files)",
-  "prefs.terms.srcPlaceholder": "Word in file, e.g. AI",
+  "prefs.terms.srcPlaceholder": "e.g. AI",
   "prefs.terms.dstPlaceholder": "e.g. IA",
   "prefs.terms.mode.translate": "translate as",
   "prefs.terms.mode.keep": "keep original",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "Keep “{src}” as is",
   "prefs.preview.custom": "Follow your additional instructions",
   "prefs.preview.none": "Translate naturally with no special rules",
-  "multi.picked": ": {list}"
+  "multi.picked": " ({n} selected)",
+  "prefs.terms.colSrc": "Word in the file",
+  "prefs.terms.colMode": "How",
+  "prefs.terms.colDst": "Translation"
 }

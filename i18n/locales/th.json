@@ -210,7 +210,7 @@
   "prefs.keep.brands": "ชื่อบริษัท แบรนด์ และสินค้า",
   "prefs.keep.places": "ชื่อสถานที่",
   "prefs.terms.label": "คำที่กำหนดเอง (ทุกไฟล์)",
-  "prefs.terms.srcPlaceholder": "คำในไฟล์ เช่น AI",
+  "prefs.terms.srcPlaceholder": "เช่น AI",
   "prefs.terms.dstPlaceholder": "เช่น ปัญญาประดิษฐ์",
   "prefs.terms.mode.translate": "แปลเป็น",
   "prefs.terms.mode.keep": "คงเดิม",
@@ -224,5 +224,8 @@
   "prefs.preview.keep": "คง “{src}” ไว้ตามเดิม",
   "prefs.preview.custom": "ทำตามคำแนะนำเพิ่มเติมของคุณ",
   "prefs.preview.none": "แปลอย่างเป็นธรรมชาติ ไม่มีกฎพิเศษ",
-  "multi.picked": ": {list}"
+  "multi.picked": " (เลือกแล้ว {n})",
+  "prefs.terms.colSrc": "คำในไฟล์",
+  "prefs.terms.colMode": "วิธีจัดการ",
+  "prefs.terms.colDst": "คำแปล"
 }

@@ -155,10 +155,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (const chip of document.querySelectorAll('#extra-langs-grid .lang-chip')) {
       chip.hidden = chip.dataset.code === selectLang.value;
     }
-    const names = getExtraLangs().map((code) => TARGET_LANGUAGES.find((l) => l.code === code)?.endonym || code);
-    document.getElementById('extra-langs-count').textContent = names.length
-      ? t('multi.picked', { list: names.join(t('prefs.preview.listSep')) })
-      : '';
+    // A count stays readable at any width; the chips below show which ones.
+    const n = getExtraLangs().length;
+    document.getElementById('extra-langs-count').textContent = n ? t('multi.picked', { n }) : '';
   }
 
   // ── Language pickers ──────────────────────────────────────────────────────
