@@ -232,5 +232,5 @@
   "settings.unsaved.note": "● Modifications non enregistrées — enregistrez pour les appliquer",
   "settings.unsaved.confirm": "Vous avez des modifications non enregistrées. Les abandonner ?",
   "done.partialTitle": "⚠ Certaines langues sont terminées",
-  "error.sheetNotFound": "L'onglet affiché n'existe plus.\nRechargez la feuille de calcul, ouvrez l'onglet voulu et réessayez."
+  "error.sheetNotFound": "Impossible de trouver l'onglet affiché dans la copie.\nDécochez « Traduire uniquement l'onglet affiché » pour tout traduire, ou rechargez la feuille et réessayez."
 }

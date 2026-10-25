@@ -232,5 +232,5 @@
   "settings.unsaved.note": "● Cambios sin guardar: guarda para aplicarlos",
   "settings.unsaved.confirm": "Tienes cambios sin guardar. ¿Descartarlos?",
   "done.partialTitle": "⚠ Algunos idiomas terminaron",
-  "error.sheetNotFound": "La hoja en la que estabas ya no existe.\nRecarga la hoja de cálculo, abre la pestaña deseada e inténtalo de nuevo."
+  "error.sheetNotFound": "No se encontró la hoja actual en la copia.\nDesmarca «Traducir solo la hoja actual» para traducir todo, o recarga la hoja de cálculo e inténtalo de nuevo."
 }

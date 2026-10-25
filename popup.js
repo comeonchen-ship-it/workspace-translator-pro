@@ -110,6 +110,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     slideRangeError.classList.toggle('hidden', ok);
   });
 
+  /**
+   * Name of the sheet tab the user is on, read from the Sheets page. Needed for
+   * .xlsx files: the translated copy is converted to Google Sheets with new sheet
+   * ids, so only the name identifies the tab. null if it cannot be read.
+   */
+  async function readActiveSheetTitle() {
+    try {
+      const [res] = await chrome.scripting.executeScript({
+        target: { tabId: currentTabId },
+        func: () => document.querySelector('.docs-sheet-active-tab .docs-sheet-tab-name')?.textContent?.trim() || null,
+      });
+      return res?.result || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /** Reads the scope controls; returns null when the slide range is malformed. */
   async function buildScopeForJob() {
     if (currentFileType === 'presentation') {
@@ -125,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Read the live URL: switching sheet tabs only changes the #gid fragment.
       const tab = await chrome.tabs.get(currentTabId).catch(() => null);
       const gid = sheetGidFromUrl(tab?.url);
-      return { sheetGid: gid, currentSheetOnly: true };
+      return { sheetGid: gid, sheetTitle: await readActiveSheetTitle(), currentSheetOnly: true };
     }
     return {};
   }
@@ -1487,8 +1504,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       progressStatus.style.color = '#ff7675';
       progressStatus.style.whiteSpace = 'pre-line';
       
-      // Reset progress bar displays to 0% to prevent stuck visual indicators
-      progressPct.textContent = '0%';
+      // Reset the bar; hide the percentage so it can't run into the message text.
+      progressPct.textContent = '';
       progressBarFill.style.width = '0%';
       
       btnTranslate.disabled = false;

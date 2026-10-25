@@ -232,5 +232,5 @@
   "settings.unsaved.note": "● 저장하지 않은 변경 사항이 있습니다(저장해야 적용)",
   "settings.unsaved.confirm": "저장하지 않은 변경 사항이 있습니다. 버릴까요?",
   "done.partialTitle": "⚠ 일부 언어는 완료됨",
-  "error.sheetNotFound": "보고 있던 시트가 더 이상 없습니다.\n스프레드시트를 새로고침하고 번역할 시트를 연 뒤 다시 시도하세요."
+  "error.sheetNotFound": "사본에서 현재 시트를 찾지 못했습니다.\n‘현재 보고 있는 시트만 번역’을 해제해 전체를 번역하거나, 새로고침 후 다시 시도하세요."
 }

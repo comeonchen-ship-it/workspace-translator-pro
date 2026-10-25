@@ -228,3 +228,14 @@ test('keep-as-is term written in caps keeps the document casing (DECK bug)', asy
   const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
   assert.deepEqual(written, ['เทคนิค deck']);
 });
+
+test('sheets: current sheet is found by name when the copy has new IDs (converted .xlsx)', async () => {
+  const sheet = (sheetId, title, text) => ({ properties: { title, sheetId, gridProperties: { columnCount: 1 } },
+    data: [{ rowData: [{ values: [{ userEnteredValue: { stringValue: text } }] }] }] });
+  // gid 1234 is the id in the .xlsx view; the converted copy re-numbers its sheets.
+  api.files.x4 = { sheets: [sheet(11, 'Executive Summary', 'Delivery roadmap'), sheet(12, 'Phase 1 WBS', 'Task list')] };
+  const before = api.llm.calls.length;
+  const state = await run('x4', 'spreadsheet', { config: { scope: { sheetGid: 1234, sheetTitle: 'Executive Summary', currentSheetOnly: true } } });
+  assert.equal(state.step, 'done', state.error);
+  assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts).sort(), ['Delivery roadmap', 'Executive Summary']);
+});

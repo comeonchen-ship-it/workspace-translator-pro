@@ -232,5 +232,5 @@
   "settings.unsaved.note": "● Ungespeicherte Änderungen – zum Übernehmen speichern",
   "settings.unsaved.confirm": "Es gibt ungespeicherte Änderungen. Verwerfen?",
   "done.partialTitle": "⚠ Einige Sprachen sind fertig",
-  "error.sheetNotFound": "Das geöffnete Tabellenblatt existiert nicht mehr.\nLade die Tabelle neu, öffne das gewünschte Blatt und versuche es erneut."
+  "error.sheetNotFound": "Das aktuelle Tabellenblatt wurde in der Kopie nicht gefunden.\nDeaktiviere „Nur das aktuelle Tabellenblatt übersetzen“, um alles zu übersetzen, oder lade die Tabelle neu und versuche es erneut."
 }

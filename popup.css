@@ -471,9 +471,12 @@ select option {
 .progress-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 8px;
 }
+.progress-header .progress-status { flex: 1; min-width: 0; }
+.progress-header .progress-pct { flex-shrink: 0; }
 
 .progress-status {
   font-size: 11px;

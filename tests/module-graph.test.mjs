@@ -11,6 +11,7 @@ globalThis.chrome = {
   runtime: { onConnect: listener, onMessage: listener, getPlatformInfo: noop, sendMessage: () => Promise.resolve() },
   tabs: { onRemoved: listener, create: noop },
   notifications: { onClicked: listener, create: noop, clear: noop },
+  scripting: { executeScript: async () => [{ result: null }] },
   identity: { getRedirectURL: () => 'https://example.chromiumapp.org/' },
 };
 

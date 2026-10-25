@@ -232,5 +232,5 @@
   "settings.unsaved.note": "● Có thay đổi chưa lưu — nhấn Lưu để áp dụng",
   "settings.unsaved.confirm": "Bạn có thay đổi chưa lưu. Bỏ các thay đổi này?",
   "done.partialTitle": "⚠ Một số ngôn ngữ đã xong",
-  "error.sheetNotFound": "Trang tính bạn đang mở không còn tồn tại.\nTải lại bảng tính, mở trang tính cần dịch rồi thử lại."
+  "error.sheetNotFound": "Không tìm thấy trang tính bạn đang mở trong bản sao.\nBỏ chọn “Chỉ dịch trang tính đang mở” để dịch toàn bộ, hoặc tải lại bảng tính rồi thử lại."
 }
