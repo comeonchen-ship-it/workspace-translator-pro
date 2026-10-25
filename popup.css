@@ -198,6 +198,8 @@ body {
    stops matching and the inline display is restored. */
 .app-container:has(.settings-panel.active) .warning-panel,
 .app-container:has(.settings-panel.active) .active-panel,
+.app-container:has(.setup-panel.active) .warning-panel,
+.app-container:has(.setup-panel.active) .active-panel,
 .app-container:has(.history-panel.active) .warning-panel,
 .app-container:has(.history-panel.active) .active-panel {
   display: none !important;
@@ -1380,3 +1382,23 @@ body.theme-form {
   cursor: pointer;
 }
 .checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* ── First-run setup ───────────────────────────────────────────────────── */
+.setup-panel { display: none; z-index: 20; flex-direction: column; }
+.setup-panel.active { display: flex; animation: slideIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+.setup-intro { font-size: 13px; line-height: 1.5; margin: 0 0 12px; color: var(--text-main); }
+.setup-compare {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 10px; padding: 10px; margin-bottom: 14px; font-size: 12px;
+}
+.setup-compare > div { display: flex; flex-direction: column; gap: 2px; }
+.setup-compare-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+.setup-compare-row.bad span:last-child { color: #ff9f9e; }
+.setup-compare-row.good span:last-child { color: var(--accent); }
+.setup-compare-note { font-size: 10px; color: var(--text-muted); }
+.setup-steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 14px; }
+.setup-step { font-size: 12px; }
+.setup-step-title { font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+.setup-step-desc { color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
+.setup-step input { width: 100%; box-sizing: border-box; }

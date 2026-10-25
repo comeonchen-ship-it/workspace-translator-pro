@@ -180,6 +180,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       validateApiKey();
     }, 100);
+
+    // First run: no key yet and the user hasn't chosen the free engine.
+    chrome.storage.local.get('setupSkipped', ({ setupSkipped }) => {
+      if (!items.apiKey && (items.translationEngine || 'gemini') !== 'free' && !setupSkipped) openSetup();
+    });
+  });
+
+  // ── First-run setup wizard ────────────────────────────────────────────────
+  const setupPanel = document.getElementById('setup-panel');
+  const setupKey = document.getElementById('setup-key');
+  const setupResult = document.getElementById('setup-result');
+  const btnSetupDone = document.getElementById('btn-setup-done');
+  let setupTestSeq = 0;
+
+  function openSetup() {
+    settingsPanel.classList.remove('active');
+    historyPanel.classList.remove('active');
+    setupPanel.classList.add('active');
+  }
+
+  function closeSetup() {
+    setupPanel.classList.remove('active');
+  }
+
+  document.getElementById('btn-setup-getkey').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://aistudio.google.com/apikey' });
+    setupKey.focus();
+  });
+
+  // Test as soon as something key-shaped is pasted/typed — no extra button.
+  async function runSetupTest() {
+    const key = setupKey.value.trim();
+    btnSetupDone.disabled = true;
+    setupResult.className = 'test-result-msg';
+    if (key.length < 20) {
+      setupResult.textContent = '';
+      return;
+    }
+    const seq = ++setupTestSeq;
+    setupResult.textContent = t('settings.testConnection.busy');
+    const result = await testApiConnection('gemini', key, DEFAULT_MODELS.gemini, '');
+    if (seq !== setupTestSeq) return; // a newer paste superseded this test
+    if (result.success === true) {
+      setupResult.className = 'test-result-msg result-active';
+      setupResult.textContent = t('setup.ok');
+      await chrome.storage.local.set({
+        translationEngine: 'gemini',
+        apiKey: key,
+        modelName: DEFAULT_MODELS.gemini,
+        apiKeyStatus: 'active',
+      });
+      selectEngine.value = 'gemini';
+      inputApiKey.value = key;
+      inputModelName.value = DEFAULT_MODELS.gemini;
+      toggleEngineFields('gemini');
+      updateStatusBadge('active');
+      btnSetupDone.disabled = false;
+    } else {
+      setupResult.className = 'test-result-msg result-invalid';
+      setupResult.textContent = result.message;
+    }
+  }
+  setupKey.addEventListener('input', runSetupTest);
+
+  btnSetupDone.addEventListener('click', closeSetup);
+  document.getElementById('btn-close-setup').addEventListener('click', () => {
+    chrome.storage.local.set({ setupSkipped: true });
+    closeSetup();
+  });
+  document.getElementById('btn-setup-free').addEventListener('click', async () => {
+    await chrome.storage.local.set({ translationEngine: 'free', setupSkipped: true });
+    selectEngine.value = 'free';
+    toggleEngineFields('free');
+    closeSetup();
   });
 
   // Toggle visible fields based on engine
@@ -944,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const apiKeyStatus = items.apiKeyStatus || 'unverified';
 
       if (translationEngine !== 'free' && !apiKey) {
-        showApiWarningModal('missing');
+        openSetup();
         return;
       }
       if (translationEngine !== 'free' && apiKeyStatus !== 'active') {

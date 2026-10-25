@@ -264,6 +264,46 @@
       </div>
     </div>
 
+    <!-- First-run setup: get a free Gemini key in ~1 minute. Shown by popup.js
+         when no API key is configured and the user has not skipped it. -->
+    <div class="panel setup-panel" id="setup-panel">
+      <div class="settings-header-bar">
+        <h3 data-i18n="setup.title">Quick setup</h3>
+        <button class="close-btn" id="btn-close-setup" data-i18n-title="settings.close">&times;</button>
+      </div>
+      <div class="settings-scroll-container">
+        <p class="setup-intro" data-i18n="setup.intro">Get a free Gemini key for natural, high-quality translations. No credit card, about 1 minute.</p>
+
+        <!-- Illustrative comparison so users see why the key is worth it -->
+        <div class="setup-compare">
+          <div class="setup-compare-src"><span class="setup-compare-label" data-i18n="setup.compare.source">Original</span><span>Let's touch base next week and circle back on the Q3 roadmap.</span></div>
+          <div class="setup-compare-row bad"><span class="setup-compare-label" data-i18n="setup.compare.free">Free translation</span><span data-i18n="setup.compare.freeText"></span></div>
+          <div class="setup-compare-row good"><span class="setup-compare-label" data-i18n="setup.compare.gemini">Gemini</span><span data-i18n="setup.compare.geminiText"></span></div>
+          <div class="setup-compare-note" data-i18n="setup.compare.note">Illustrative example.</div>
+        </div>
+
+        <ol class="setup-steps">
+          <li class="setup-step" id="setup-step-1">
+            <div class="setup-step-title" data-i18n="setup.step1.title">Create a free key</div>
+            <div class="setup-step-desc" data-i18n="setup.step1.desc">Sign in with Google, then click “Create API key” and copy it.</div>
+            <button class="btn btn-primary btn-sm" id="btn-setup-getkey" data-i18n="setup.step1.btn">Open Google AI Studio ↗</button>
+          </li>
+          <li class="setup-step" id="setup-step-2">
+            <div class="setup-step-title" data-i18n="setup.step2.title">Paste your key here</div>
+            <input type="password" id="setup-key" autocomplete="off" data-i18n-placeholder="setup.step2.placeholder" placeholder="Paste API key">
+          </li>
+          <li class="setup-step" id="setup-step-3">
+            <div class="setup-step-title" data-i18n="setup.step3.title">We'll check it automatically</div>
+            <div class="test-result-msg" id="setup-result"></div>
+          </li>
+        </ol>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="btn-setup-free" data-i18n="setup.useFree">Use basic free translation</button>
+        <button class="btn btn-primary" id="btn-setup-done" disabled data-i18n="setup.start">Start translating</button>
+      </div>
+    </div>
+
     <!-- Translation History View (Hidden by Default) -->
     <div class="panel history-panel" id="history-panel">
       <div class="settings-header-bar">
