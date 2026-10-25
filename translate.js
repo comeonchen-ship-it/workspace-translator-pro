@@ -520,7 +520,7 @@ If an item is already written in ${targetLangName}, or is a proper noun/code wit
 async function translateGemini(texts, targetLangName, config) {
   const presentationId = config?.presentationId;
   const model = config.modelName || 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   await logDebug(`Sending request to Gemini API (Model: ${model})...`, presentationId);
 
@@ -548,7 +548,7 @@ async function translateGemini(texts, targetLangName, config) {
 
   const response = await fetchWithRetryAndTimeout(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.apiKey },
     body: JSON.stringify(payload)
   }, 60000, 5, presentationId, true, config.cooldownMs);
 
