@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "翻訳中… {done}/{total} バッチ、残り約 {m} 分",
   "progress.batchesEtaSec": "翻訳中… {done}/{total} バッチ、残り約 {s} 秒",
   "settings.fitText": "長くなった文字を自動調整（スライドは文字を縮小、シートは列を拡張）",
-  "done.columnsFitted": "{n} 個の列／セルを調整しました"
+  "done.columnsFitted": "{n} 個の列／セルを調整しました",
+  "scope.slides.label": "翻訳するスライド",
+  "scope.slides.placeholder": "例：3-10, 12（空欄 = すべて）",
+  "scope.slides.invalid": "3-10, 12 のように番号と範囲で入力してください。",
+  "scope.sheet.currentOnly": "今開いているシートだけ翻訳する"
 }

@@ -529,7 +529,11 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const pageTextMap = new Map(); // pageId -> Set of original texts on this page
       const shapeIdsWithText = new Set();
       await logDebug('Traversing elements and extracting translatable text runs...', presentationId);
-      for (const slide of presentation.slides) {
+      // Optional slide range (1-based) from the panel; untouched slides keep their text.
+      const wanted = config.scope?.slides?.length ? new Set(config.scope.slides) : null;
+      const slidesInScope = (presentation.slides || []).filter((_, i) => !wanted || wanted.has(i + 1));
+      if (wanted) await logDebug(`Slide range applied: ${slidesInScope.length}/${presentation.slides.length} slides.`, presentationId);
+      for (const slide of slidesInScope) {
         const slideId = slide.objectId;
         extractTextFromElements(slide.pageElements, pageTextMap, slideId, uniqueTexts, shapeIdsWithText);
         

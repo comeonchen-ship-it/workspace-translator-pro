@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "Übersetzung… Paket {done}/{total}, noch etwa {m} Min.",
   "progress.batchesEtaSec": "Übersetzung… Paket {done}/{total}, noch etwa {s} s",
   "settings.fitText": "Längeren Text anpassen (Folienschrift verkleinern, Tabellenspalten verbreitern)",
-  "done.columnsFitted": "{n} Spalten/Zellen angepasst"
+  "done.columnsFitted": "{n} Spalten/Zellen angepasst",
+  "scope.slides.label": "Zu übersetzende Folien",
+  "scope.slides.placeholder": "z. B. 3-10, 12 (leer = alle)",
+  "scope.slides.invalid": "Bitte Zahlen und Bereiche wie 3-10, 12 verwenden.",
+  "scope.sheet.currentOnly": "Nur das aktuelle Tabellenblatt übersetzen"
 }

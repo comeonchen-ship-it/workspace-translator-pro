@@ -1424,3 +1424,8 @@ body.theme-form {
 .doc-glossary { font-size: 12px; color: var(--text-muted); }
 .doc-glossary summary { cursor: pointer; padding: 4px 0; }
 .doc-glossary textarea { margin-top: 6px; }
+
+/* ── Translation scope ─────────────────────────────────────────────────── */
+#scope-slides.hidden, #scope-sheet.hidden, .doc-glossary.hidden { display: none; }
+.scope-error { color: #ff7675; }
+.scope-error.hidden { display: none; }

@@ -5,6 +5,7 @@ import {
 } from './i18n/i18n.js';
 import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
 import { parseGlossary, mergeGlossaries, CUSTOM_MAX_CHARS } from './lib/prefs.js';
+import { parseSlideRange, sheetGidFromUrl } from './lib/range.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // i18n must be ready before anything renders, otherwise the user sees a flash of
@@ -71,6 +72,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefCustomCount = document.getElementById('pref-custom-count');
   const docGlossary = document.getElementById('doc-glossary');
   const docGlossaryBox = document.getElementById('doc-glossary-box');
+  const scopeSlides = document.getElementById('scope-slides');
+  const slideRange = document.getElementById('slide-range');
+  const slideRangeError = document.getElementById('slide-range-error');
+  const scopeSheet = document.getElementById('scope-sheet');
+  const sheetCurrentOnly = document.getElementById('sheet-current-only');
+
+  function updateScopeControls() {
+    scopeSlides.classList.toggle('hidden', currentFileType !== 'presentation');
+    scopeSheet.classList.toggle('hidden', currentFileType !== 'spreadsheet');
+    slideRange.value = '';
+    slideRangeError.classList.add('hidden');
+    sheetCurrentOnly.checked = false;
+  }
+
+  slideRange.addEventListener('input', () => {
+    let ok = true;
+    try { parseSlideRange(slideRange.value); } catch (_) { ok = false; }
+    slideRangeError.classList.toggle('hidden', ok);
+  });
+
+  /** Reads the scope controls; returns null when the slide range is malformed. */
+  async function buildScopeForJob() {
+    if (currentFileType === 'presentation') {
+      try {
+        const set = parseSlideRange(slideRange.value);
+        return set ? { slides: [...set] } : {};
+      } catch (_) {
+        slideRangeError.classList.remove('hidden');
+        return null;
+      }
+    }
+    if (currentFileType === 'spreadsheet' && sheetCurrentOnly.checked) {
+      // Read the live URL: switching sheet tabs only changes the #gid fragment.
+      const tab = await chrome.tabs.get(currentTabId).catch(() => null);
+      const gid = sheetGidFromUrl(tab?.url);
+      return { sheetGid: gid ?? 0 };
+    }
+    return {};
+  }
   
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
@@ -999,6 +1039,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnHelp.disabled = false;
     progressSection.style.display = 'none';
     hideCompletion();
+    updateScopeControls();
     
     resetProgress();
     
@@ -1100,7 +1141,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
 
-  function startTranslation(items, translationEngine, apiKey) {
+  async function startTranslation(items, translationEngine, apiKey) {
+    const scope = await buildScopeForJob();
+    if (!scope) return;
     hideCompletion();
     // Start translation UI state
     btnTranslate.disabled = true;
@@ -1130,7 +1173,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               apiKey,
               modelName: items.modelName || DEFAULT_MODELS[translationEngine],
               customUrl: items.customUrl,
-              prefs: buildPrefsForJob(items.translationPrefs)
+              prefs: buildPrefsForJob(items.translationPrefs),
+              scope
             }
           });
         } catch (err) {

@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "번역 중… {done}/{total} 묶음, 약 {m}분 남음",
   "progress.batchesEtaSec": "번역 중… {done}/{total} 묶음, 약 {s}초 남음",
   "settings.fitText": "길어진 텍스트 자동 맞춤(슬라이드 글꼴 축소, 시트 열 확장)",
-  "done.columnsFitted": "열/셀 {n}개를 맞춤 조정함"
+  "done.columnsFitted": "열/셀 {n}개를 맞춤 조정함",
+  "scope.slides.label": "번역할 슬라이드",
+  "scope.slides.placeholder": "예: 3-10, 12 (비우면 전체)",
+  "scope.slides.invalid": "3-10, 12처럼 숫자와 범위로 입력하세요.",
+  "scope.sheet.currentOnly": "현재 보고 있는 시트만 번역"
 }

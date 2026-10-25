@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "翻譯中…第 {done}/{total} 批，約剩 {m} 分鐘",
   "progress.batchesEtaSec": "翻譯中…第 {done}/{total} 批，約剩 {s} 秒",
   "settings.fitText": "文字變長時自動調整（簡報縮小字級、試算表加寬欄位）",
-  "done.columnsFitted": "{n} 個欄位／儲存格已調整以完整顯示"
+  "done.columnsFitted": "{n} 個欄位／儲存格已調整以完整顯示",
+  "scope.slides.label": "要翻譯的投影片",
+  "scope.slides.placeholder": "例如 3-10, 12（留空 = 全部）",
+  "scope.slides.invalid": "請輸入數字或範圍，例如 3-10, 12。",
+  "scope.sheet.currentOnly": "只翻譯目前所在的工作表"
 }

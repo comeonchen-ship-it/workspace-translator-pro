@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "Đang dịch… lô {done}/{total}, còn khoảng {m} phút",
   "progress.batchesEtaSec": "Đang dịch… lô {done}/{total}, còn khoảng {s} giây",
   "settings.fitText": "Tự điều chỉnh khi chữ dài hơn (thu nhỏ chữ trang chiếu, nới rộng cột bảng tính)",
-  "done.columnsFitted": "Đã điều chỉnh {n} cột/ô cho vừa"
+  "done.columnsFitted": "Đã điều chỉnh {n} cột/ô cho vừa",
+  "scope.slides.label": "Trang chiếu cần dịch",
+  "scope.slides.placeholder": "VD: 3-10, 12 (để trống = tất cả)",
+  "scope.slides.invalid": "Hãy nhập số và khoảng như 3-10, 12.",
+  "scope.sheet.currentOnly": "Chỉ dịch trang tính đang mở"
 }

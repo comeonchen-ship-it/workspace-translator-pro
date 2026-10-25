@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "Translating… batch {done}/{total}, about {m} min left",
   "progress.batchesEtaSec": "Translating… batch {done}/{total}, about {s} s left",
   "settings.fitText": "Fit longer text (shrink slide fonts, widen sheet columns)",
-  "done.columnsFitted": "{n} columns/cells adjusted to fit"
+  "done.columnsFitted": "{n} columns/cells adjusted to fit",
+  "scope.slides.label": "Slides to translate",
+  "scope.slides.placeholder": "e.g. 3-10, 12 (blank = all)",
+  "scope.slides.invalid": "Use numbers and ranges like 3-10, 12.",
+  "scope.sheet.currentOnly": "Only translate the sheet tab I'm on"
 }

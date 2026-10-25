@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "Traduction… lot {done}/{total}, environ {m} min restantes",
   "progress.batchesEtaSec": "Traduction… lot {done}/{total}, environ {s} s restantes",
   "settings.fitText": "Ajuster le texte plus long (réduire la police des diapos, élargir les colonnes)",
-  "done.columnsFitted": "{n} colonnes/cellules ajustées"
+  "done.columnsFitted": "{n} colonnes/cellules ajustées",
+  "scope.slides.label": "Diapositives à traduire",
+  "scope.slides.placeholder": "ex. 3-10, 12 (vide = toutes)",
+  "scope.slides.invalid": "Utilisez des numéros et plages, ex. 3-10, 12.",
+  "scope.sheet.currentOnly": "Traduire uniquement l'onglet affiché"
 }

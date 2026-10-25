@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "กำลังแปล… ชุดที่ {done}/{total} เหลืออีกประมาณ {m} นาที",
   "progress.batchesEtaSec": "กำลังแปล… ชุดที่ {done}/{total} เหลืออีกประมาณ {s} วินาที",
   "settings.fitText": "ปรับข้อความที่ยาวขึ้นอัตโนมัติ (ย่อฟอนต์สไลด์ ขยายคอลัมน์ชีต)",
-  "done.columnsFitted": "ปรับคอลัมน์/เซลล์ {n} รายการให้พอดี"
+  "done.columnsFitted": "ปรับคอลัมน์/เซลล์ {n} รายการให้พอดี",
+  "scope.slides.label": "สไลด์ที่จะแปล",
+  "scope.slides.placeholder": "เช่น 3-10, 12 (เว้นว่าง = ทั้งหมด)",
+  "scope.slides.invalid": "ใช้ตัวเลขและช่วง เช่น 3-10, 12",
+  "scope.sheet.currentOnly": "แปลเฉพาะชีตที่เปิดอยู่"
 }

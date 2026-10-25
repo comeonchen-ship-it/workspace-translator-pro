@@ -201,5 +201,9 @@
   "progress.batchesEtaMin": "Traduciendo… lote {done}/{total}, quedan unos {m} min",
   "progress.batchesEtaSec": "Traduciendo… lote {done}/{total}, quedan unos {s} s",
   "settings.fitText": "Ajustar texto más largo (reducir fuente en diapositivas, ensanchar columnas)",
-  "done.columnsFitted": "{n} columnas/celdas ajustadas"
+  "done.columnsFitted": "{n} columnas/celdas ajustadas",
+  "scope.slides.label": "Diapositivas a traducir",
+  "scope.slides.placeholder": "p. ej. 3-10, 12 (vacío = todas)",
+  "scope.slides.invalid": "Usa números y rangos como 3-10, 12.",
+  "scope.sheet.currentOnly": "Traducir solo la hoja actual"
 }

@@ -78,6 +78,18 @@
         </div>
       </div>
 
+      <!-- Optional scope: a slide range for Slides, the current tab for Sheets.
+           Shown per file type by popup.js updateScopeControls(). -->
+      <div class="control-group hidden" id="scope-slides">
+        <label for="slide-range" data-i18n="scope.slides.label">Slides to translate</label>
+        <input type="text" id="slide-range" autocomplete="off" data-i18n-placeholder="scope.slides.placeholder" placeholder="e.g. 3-10, 12 (blank = all)">
+        <div class="field-hint scope-error hidden" id="slide-range-error" data-i18n="scope.slides.invalid">Use numbers and ranges like 3-10, 12.</div>
+      </div>
+      <label class="checkbox-row hidden" id="scope-sheet" for="sheet-current-only">
+        <input type="checkbox" id="sheet-current-only">
+        <span data-i18n="scope.sheet.currentOnly">Only translate the sheet tab I'm on</span>
+      </label>
+
       <!-- Per-file glossary, merged over the global one (saved as you type) -->
       <details class="doc-glossary" id="doc-glossary-box">
         <summary data-i18n="prefs.docGlossary.summary">Glossary for this file</summary>
