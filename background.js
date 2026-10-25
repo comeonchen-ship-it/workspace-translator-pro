@@ -21,8 +21,35 @@ const BUNDLED_CLIENT_ID = '770405736518-j64169msnu3npqh1p09k4rko4022c80f.apps.go
  * delete. Every other Google call here (get / batchUpdate replaceAllText /
  * updateCells / updateItem) is effectively idempotent on retry.
  */
-function googleApiFetch(url, options = {}, presentationId = null) {
-  return fetchWithRetryAndTimeout(url, options, 60000, 3, presentationId, false, 0);
+async function googleApiFetch(url, options = {}, presentationId = null) {
+  const res = await fetchWithRetryAndTimeout(url, options, 60000, 3, presentationId, false, 0);
+  if (res.status !== 401) return res;
+
+  // Implicit-flow tokens expire after ~1h and cannot be refreshed, so a long job
+  // used to die at the final write (docs/05 H2). Re-run the silent OAuth flow and
+  // retry once with the new token. Callers keep passing their original token;
+  // later calls hit 401 once and pick up the cached fresh one here.
+  const sentAuth = options.headers?.Authorization || '';
+  const freshToken = await refreshAuthToken(sentAuth.replace(/^Bearer /, ''));
+  if (!freshToken) return res;
+  if (presentationId) await logDebug('Google token expired — refreshed and retrying.', presentationId);
+  const retryOptions = { ...options, headers: { ...options.headers, Authorization: `Bearer ${freshToken}` } };
+  return fetchWithRetryAndTimeout(url, retryOptions, 60000, 3, presentationId, false, 0);
+}
+
+// Latest token obtained in this service-worker lifetime; shared so concurrent jobs
+// refresh once instead of each popping their own OAuth flow.
+let latestToken = null;
+let refreshInFlight = null;
+
+async function refreshAuthToken(staleToken) {
+  if (latestToken && latestToken !== staleToken) return latestToken;
+  if (!refreshInFlight) {
+    refreshInFlight = getAuthToken({ silentOnly: true })
+      .catch(() => null)
+      .finally(() => { refreshInFlight = null; });
+  }
+  return refreshInFlight;
 }
 
 // Enable opening of Side Panel when clicking the extension action icon
@@ -30,20 +57,41 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error('Failed to set Side Panel behavior:', error));
 
-// Clean up any stale active or queued translation states on startup/reload
+// Recover any active or queued translations left over from a previous
+// service-worker lifetime on startup/reload.
 cleanUpStaleStates();
+
+// A job interrupted by a service-worker restart is restarted from scratch at most
+// this many times; after that it is reported as interrupted (avoids restart loops).
+const MAX_RESUME_ATTEMPTS = 1;
 
 async function cleanUpStaleStates() {
   try {
+    const before = await chrome.storage.local.get(['resumableTasks', 'queuedTranslations', 'activeCopies', 'cancelledTasks']);
+    const resumable = before.resumableTasks || {};
+    const queued = before.queuedTranslations || [];
+    const copies = before.activeCopies || {};
+    const cancelled = before.cancelledTasks || [];
+
     // 1. Reset active and queued task arrays
-    await chrome.storage.local.set({ activeTranslationIds: [], queuedTranslations: [] });
-    
-    // 2. Scan and mark any unfinished task states as interrupted
+    await chrome.storage.local.set({ activeTranslationIds: [], queuedTranslations: [], resumableTasks: {} });
+
+    // 2. Pick the interrupted jobs that can be restarted automatically (docs/05 H3)
+    const toRestart = [];
+    for (const [id, task] of Object.entries(resumable)) {
+      if (cancelled.includes(id)) continue;
+      if ((task.config?.resumeAttempt || 0) >= MAX_RESUME_ATTEMPTS) continue;
+      toRestart.push({ ...task, config: { ...task.config, resumeAttempt: (task.config?.resumeAttempt || 0) + 1 } });
+    }
+    const restartIds = new Set(toRestart.map((t) => t.presentationId));
+
+    // 3. Mark every other unfinished task state as interrupted
     const allData = await chrome.storage.local.get(null);
     for (const key in allData) {
       if (key.startsWith('taskState_')) {
+        const id = key.slice('taskState_'.length);
         const state = allData[key];
-        if (state && state.step !== 'done' && !state.error) {
+        if (state && state.step !== 'done' && !state.error && !restartIds.has(id) && !queued.some((q) => q.presentationId === id)) {
           state.step = 'error';
           state.pct = 0;
           state.error = 'Translation interrupted by browser or extension restart.';
@@ -51,9 +99,53 @@ async function cleanUpStaleStates() {
         }
       }
     }
+
+    // 4. The half-written copy of a restarted job would be left orphaned in Drive
+    for (const id of restartIds) {
+      if (!copies[id]) continue;
+      try {
+        await deleteGoogleFile(copies[id].copyId, latestToken || await getAuthToken({ silentOnly: true }));
+      } catch (e) {
+        await logDebug(`Could not remove partial copy after restart: ${e.message}`, id);
+      }
+      await unregisterActiveCopy(id);
+    }
+
+    // 5. Restart interrupted jobs first, then the ones that were still waiting
+    for (const task of [...toRestart, ...queued]) {
+      await logDebug('Resuming translation after service-worker restart.', task.presentationId);
+      await requestTranslationStart(task.presentationId, task.presentationTitle, task.fileType, task.targetLang, task.config, pushProgressToActivePort);
+    }
   } catch (e) {
     console.error('Failed to clean up stale task states:', e);
   }
+}
+
+// ── Keep-alive while translating ────────────────────────────────────────────
+// MV3 stops an idle service worker after ~30s without extension events, which
+// killed jobs once the side panel was closed. Any extension API call resets that
+// timer, so ping a cheap one while at least one job is active.
+let keepAliveTimer = null;
+
+function startKeepAlive() {
+  if (keepAliveTimer) return;
+  keepAliveTimer = setInterval(() => chrome.runtime.getPlatformInfo(() => {}), 20000);
+}
+
+function stopKeepAlive() {
+  clearInterval(keepAliveTimer);
+  keepAliveTimer = null;
+}
+
+async function setResumableTask(task) {
+  const data = await chrome.storage.local.get('resumableTasks');
+  const tasks = data.resumableTasks || {};
+  if (task.config) {
+    tasks[task.presentationId] = task;
+  } else {
+    delete tasks[task.presentationId];
+  }
+  await chrome.storage.local.set({ resumableTasks: tasks });
 }
 
 // Global state and helper functions to persist task states in chrome.storage.local
@@ -151,6 +243,19 @@ async function saveToHistory(copyId, title, fileType, url) {
 let activePort = null;
 let activeViewPresentationId = null;
 
+function pushProgressToActivePort(pid, state) {
+  if (activePort && activeViewPresentationId === pid) {
+    try {
+      activePort.postMessage({
+        type: 'translationProgress',
+        ...state
+      });
+    } catch (err) {
+      logDebug(`Failed to push progress: ${err.message}`, pid);
+    }
+  }
+}
+
 // Connection port listener to keep the Service Worker alive and push updates to Side Panel
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'translation-channel') {
@@ -191,20 +296,7 @@ chrome.runtime.onConnect.addListener((port) => {
           registerTabMapping(tabId, presentationId);
         }
         
-        const pushProgressToPort = (pid, state) => {
-          if (activePort && activeViewPresentationId === pid) {
-            try {
-              activePort.postMessage({
-                type: 'translationProgress',
-                ...state
-              });
-            } catch (err) {
-              logDebug(`Failed to push progress: ${err.message}`, pid);
-            }
-          }
-        };
-
-        requestTranslationStart(presentationId, presentationTitle, fileType, targetLang, config, pushProgressToPort);
+        requestTranslationStart(presentationId, presentationTitle, fileType, targetLang, config, pushProgressToActivePort);
       } else if (message.action === 'cancelTranslation') {
         const { presentationId } = message;
         logDebug(`Cancel request received for presentation ID: ${presentationId}`, presentationId);
@@ -254,7 +346,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         await Promise.all(list.map(async (item) => {
           try {
             const url = `https://www.googleapis.com/drive/v3/files/${item.presentationId}?fields=id,trashed`;
-            const res = await fetch(url, {
+            const res = await googleApiFetch(url, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -611,7 +703,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
 /**
  * Retrieves OAuth token. Tries silent first, falls back to interactive login.
  */
-async function getAuthToken() {
+async function getAuthToken({ silentOnly = false } = {}) {
   const redirectUrl = chrome.identity.getRedirectURL();
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${encodeURIComponent(BUNDLED_CLIENT_ID)}&` +
@@ -649,39 +741,15 @@ async function getAuthToken() {
 
   try {
     // Try silently first (requires user has already authorized)
-    return await runFlow(false);
+    latestToken = await runFlow(false);
   } catch (e) {
+    // A mid-job refresh must never pop a login window the user isn't watching.
+    if (silentOnly) throw e;
     console.log('Silent auth failed, opening interactive prompt...', e);
     // Open login dialog
-    return await runFlow(true);
+    latestToken = await runFlow(true);
   }
-}
-
-/**
- * Copies Google Slide presentation (Google Drive API v3)
- */
-async function duplicatePresentation(presentationId, newName, token) {
-  const url = `https://www.googleapis.com/drive/v3/files/${presentationId}/copy`;
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: newName,
-      mimeType: 'application/vnd.google-apps.presentation'
-    })
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Drive copy API error (${response.status}): ${errText}`);
-  }
-  
-  const file = await response.json();
-  return file.id;
+  return latestToken;
 }
 
 /**
@@ -1648,6 +1716,7 @@ async function requestTranslationStart(presentationId, presentationTitle, fileTy
 }
 
 async function onTranslationFinished(presentationId, portMessageSender) {
+  await setResumableTask({ presentationId, config: null });
   try {
     const data = await chrome.storage.local.get('cancelledTasks');
     let cancelledTasks = data.cancelledTasks || [];
@@ -1694,10 +1763,16 @@ async function onTranslationFinished(presentationId, portMessageSender) {
     triggerTranslation(nextTask.presentationId, nextTask.presentationTitle, nextTask.fileType, nextTask.targetLang, nextTask.config, portMessageSender);
   } else {
     await saveQueueState(activeTranslationIds, queuedTranslations);
+    if (activeTranslationIds.length === 0) stopKeepAlive();
   }
 }
 
 function triggerTranslation(presentationId, presentationTitle, fileType, targetLang, config, portMessageSender) {
+  // Snapshot params before the workflow mutates config (pageTextMap etc.) so a
+  // restarted service worker can rerun the job.
+  setResumableTask({ presentationId, presentationTitle, fileType, targetLang, config: { ...config } });
+  startKeepAlive();
+
   const taskState = {
     step: 'copy',
     pct: 0,
