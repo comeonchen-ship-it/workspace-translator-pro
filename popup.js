@@ -148,25 +148,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const scopeConcise = document.getElementById('scope-concise');
   const jobConcise = document.getElementById('job-concise');
 
-  // The main-screen "concise" box mirrors the saved preference. Preferences only
-  // apply to AI engines, so it is hidden for the free engine.
+  // The main-screen "concise" box is a per-presentation choice: it starts from the
+  // Settings default and, once changed, is remembered for this file only.
+  // Preferences only apply to AI engines, so it is hidden for the free engine.
+  const conciseKey = () => `concise_${currentPresentationId}`;
   function updateConciseControl() {
     scopeConcise.classList.toggle('hidden', currentFileType !== 'presentation' || selectEngine.value === 'free');
-    chrome.storage.local.get('translationPrefs', (items) => {
-      jobConcise.checked = items.translationPrefs?.concise === true;
+    if (!currentPresentationId) return;
+    chrome.storage.local.get(['translationPrefs', conciseKey()], (items) => {
+      const own = items[conciseKey()];
+      jobConcise.checked = typeof own === 'boolean' ? own : items.translationPrefs?.concise === true;
     });
   }
   jobConcise.addEventListener('change', () => {
-    const on = jobConcise.checked;
-    chrome.storage.local.get('translationPrefs', (items) => {
-      chrome.storage.local.set({ translationPrefs: { ...(items.translationPrefs || {}), concise: on } });
-    });
-    // Keep the Settings checkbox in step without marking Settings as unsaved.
-    const wasClean = settingsSnapshot() === savedSnapshot;
-    prefConcise.checked = on;
-    renderConciseSeg();
-    updateRulesPreview();
-    if (wasClean) markSettingsClean();
+    if (currentPresentationId) chrome.storage.local.set({ [conciseKey()]: jobConcise.checked });
   });
 
   function updateScopeControls() {
@@ -1509,7 +1504,11 @@ document.addEventListener('DOMContentLoaded', async () => {
               apiKey,
               modelName: items.modelName || DEFAULT_MODELS[translationEngine],
               customUrl: items.customUrl,
-              prefs: buildPrefsForJob(items.translationPrefs),
+              prefs: {
+                ...buildPrefsForJob(items.translationPrefs),
+                // Slides: the main-screen box holds this file's own choice.
+                ...(currentFileType === 'presentation' ? { concise: jobConcise.checked } : {}),
+              },
               scope,
               extraLangs: getExtraLangs()
             }
