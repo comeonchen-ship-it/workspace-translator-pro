@@ -58,11 +58,39 @@ export function targetLabel(lang) {
 }
 
 /**
- * Label for the INTERFACE language picker: the endonym alone.
- * Deliberately not localised — see the `endonym` note above.
+ * A target language's name in the interface language, e.g. Japanese → "Japanese"
+ * for an English UI, "日文" for a Traditional Chinese UI. Uses the browser's own
+ * language names (Intl.DisplayNames); falls back to the English name.
  */
-export function uiLabel(lang) {
-  return lang.endonym;
+export function localLangName(lang, uiCode = ROOT_LOCALE) {
+  const bcp = { 'zh-TW': 'zh-Hant', 'zh-CN': 'zh-Hans' };
+  try {
+    const name = new Intl.DisplayNames([uiCode], { type: 'language' }).of(bcp[lang.code] || lang.code);
+    if (name && name !== (bcp[lang.code] || lang.code)) return name.charAt(0).toLocaleUpperCase(uiCode) + name.slice(1);
+  } catch (_) { /* old browser or unknown code */ }
+  return lang.english;
+}
+
+/**
+ * Label for the target-language dropdown: the name in the interface language,
+ * then the native name — "Japanese — 日本語". Just one name when they match
+ * ("English" in an English UI, "繁體中文" in a Traditional Chinese UI).
+ */
+export function targetOptionLabel(lang, uiCode = ROOT_LOCALE) {
+  const local = localLangName(lang, uiCode);
+  return local === lang.endonym ? lang.endonym : `${local} — ${lang.endonym}`;
+}
+
+/**
+ * Label for the INTERFACE language picker: the native name first, then (given
+ * uiCode) the name in the current interface language, e.g. "日本語 — Japanese".
+ */
+export function uiLabel(lang, uiCode) {
+  // Native name always first, so a user who picked a script they can't read can
+  // still find their own language; the current interface's name follows.
+  if (!uiCode) return lang.endonym;
+  const local = localLangName(lang, uiCode);
+  return local === lang.endonym ? lang.endonym : `${lang.endonym} — ${local}`;
 }
 
 /**

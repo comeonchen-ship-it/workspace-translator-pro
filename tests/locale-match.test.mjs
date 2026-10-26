@@ -8,3 +8,14 @@ test('browser locale → our locale, Chinese by script and region', () => {
     'ja-JP': 'ja', 'de-AT': 'de', 'pt-BR': 'en', '': 'en' };
   for (const [input, want] of Object.entries(cases)) assert.equal(matchLocale(input), want, input);
 });
+
+import { TARGET_LANGUAGES, targetOptionLabel } from '../i18n/languages.js';
+
+test('target languages are named in the interface language, with the native name', () => {
+  const ja = TARGET_LANGUAGES.find((l) => l.code === 'ja');
+  const zhTW = TARGET_LANGUAGES.find((l) => l.code === 'zh-TW');
+  assert.equal(targetOptionLabel(ja, 'en'), 'Japanese — 日本語');
+  assert.equal(targetOptionLabel(zhTW, 'en'), 'Traditional Chinese — 繁體中文');
+  assert.equal(targetOptionLabel(zhTW, 'zh-TW'), '繁體中文');
+  assert.equal(targetOptionLabel(ja, 'zh-TW'), '日文 — 日本語');
+});

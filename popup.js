@@ -1,4 +1,4 @@
-import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang, matchLocale } from './i18n/languages.js';
+import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang, matchLocale, localLangName, targetOptionLabel } from './i18n/languages.js';
 import {
   loadLocale, t, tStatus, applyI18n, formatShortDateTime,
   getStoredUiLang, setStoredUiLang,
@@ -314,7 +314,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       chip.type = 'button';
       chip.className = 'lang-chip';
       chip.dataset.code = lang.code;
-      chip.textContent = lang.endonym;
+      // Name in the interface language (short), native name on hover.
+      chip.textContent = localLangName(lang, document.documentElement.lang);
+      chip.title = lang.endonym;
       chip.setAttribute('aria-pressed', String(ticked.has(lang.code)));
       chip.addEventListener('click', () => {
         chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
@@ -328,8 +330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (const lang of TARGET_LANGUAGES) {
       const opt = document.createElement('option');
       opt.value = lang.code;
-      opt.textContent = lang.endonym; // native name, same as the chips
-      opt.title = lang.english;
+      // "Japanese — 日本語": readable for the user, recognisable for a native reader.
+      opt.textContent = targetOptionLabel(lang, document.documentElement.lang);
       selectLang.appendChild(opt);
     }
     if (selectUiLang) {
@@ -337,9 +339,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       for (const lang of UI_LANGUAGES) {
         const opt = document.createElement('option');
         opt.value = lang.code;
-        // Endonym only, deliberately never localised, so a user who picked a
-        // script they can't read can still find their way back.
-        opt.textContent = uiLabel(lang);
+        // Native name first (a way back from a script you can't read), then the
+        // name in the current interface language: "日本語 — Japanese".
+        opt.textContent = uiLabel(lang, document.documentElement.lang);
         selectUiLang.appendChild(opt);
       }
       selectUiLang.value = uiLang;
@@ -1848,7 +1850,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const li = document.createElement('li');
       const a = document.createElement('a');
       const lang = TARGET_LANGUAGES.find((l) => l.code === r.lang);
-      const langName = lang ? lang.endonym : r.lang; // native name, as on the chips
+      const langName = lang ? localLangName(lang, document.documentElement.lang) : r.lang; // as on the chips
       a.textContent = '↗ ' + langName;
       a.addEventListener('click', () => chrome.tabs.create({ url: r.url }));
       li.appendChild(a);

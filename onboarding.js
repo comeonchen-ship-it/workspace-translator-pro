@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   for (const lang of UI_LANGUAGES) {
     const opt = document.createElement('option');
     opt.value = lang.code;
-    opt.textContent = uiLabel(lang);
+    opt.textContent = uiLabel(lang, document.documentElement.lang);
     picker.appendChild(opt);
   }
   picker.value = code;
