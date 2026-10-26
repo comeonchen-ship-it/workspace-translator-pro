@@ -45,7 +45,7 @@ PHOTOS = [
          title='Longer text still fits',
          sub='Columns widen and slide fonts shrink automatically — and the translated copy opens as soon as it’s ready.'),
     dict(key='form', accent='#7248b9', lang_name='Español', panel=dict(
-            demo='main', type='form', title='高級ファッションブランドに関する消費者調査', lang='es', range=''),
+            demo='main', type='form', title='高級ファッションブランドに関する消費者調査', lang='es'),
          title='', sub=''),
 ]
 CAPTION_CSS = (560, 300)               # caption page size in CSS px (card sits bottom-left)
