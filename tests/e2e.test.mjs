@@ -305,3 +305,10 @@ test('sheets: name wins over a colliding gid in a converted copy', async () => {
   assert.equal(state.step, 'done', state.error);
   assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts).sort(), ['Forecast 2027', 'Right tab text']);
 });
+
+test('completion summary lists glossary terms that are not in the file', async () => {
+  api.files.p15 = { slides: [slide('s1', [['a', 'Technical pitch deck\n']])] };
+  const state = await run('p15', 'presentation', { config: { prefs: { glossary: [{ src: 'DESK', dst: '' }, { src: 'pitch', dst: 'beach' }] } } });
+  assert.equal(state.step, 'done', state.error);
+  assert.deepEqual(state.summary.unusedTerms, ['DESK']);
+});

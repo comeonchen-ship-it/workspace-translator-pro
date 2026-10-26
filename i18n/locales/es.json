@@ -365,5 +365,6 @@
   "guide.group.steps": "Paso a paso",
   "guide.group.reference": "Referencia",
   "guide.stepLabel": "Paso {n}",
-  "guide.start.s2.alt": "¿Prefieres OpenAI o Claude? Crea una clave en su web y luego, en Ajustes → {engine}, elige el motor, pega la clave y pulsa {test}."
+  "guide.start.s2.alt": "¿Prefieres OpenAI o Claude? Crea una clave en su web y luego, en Ajustes → {engine}, elige el motor, pega la clave y pulsa {test}.",
+  "done.unusedTerms": "términos no encontrados en este archivo: {list} (revisa la ortografía)"
 }

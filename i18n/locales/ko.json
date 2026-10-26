@@ -365,5 +365,6 @@
   "guide.group.steps": "단계별 안내",
   "guide.group.reference": "참고 자료",
   "guide.stepLabel": "{n}단계",
-  "guide.start.s2.alt": "OpenAI나 Claude를 쓰고 싶다면 해당 사이트에서 키를 만든 뒤 설정 →{engine}에서 엔진을 선택하고 키를 붙여넣은 다음 {test}을(를) 누르세요."
+  "guide.start.s2.alt": "OpenAI나 Claude를 쓰고 싶다면 해당 사이트에서 키를 만든 뒤 설정 →{engine}에서 엔진을 선택하고 키를 붙여넣은 다음 {test}을(를) 누르세요.",
+  "done.unusedTerms": "파일에서 찾을 수 없는 용어: {list} (철자를 확인하세요)"
 }

@@ -365,5 +365,6 @@
   "guide.group.steps": "使い方",
   "guide.group.reference": "リファレンス",
   "guide.stepLabel": "ステップ {n}",
-  "guide.start.s2.alt": "OpenAI や Claude を使いたい場合は、各サイトでキーを作成し、設定 →{engine}でエンジンを選んでキーを貼り付け、{test} を押してください。"
+  "guide.start.s2.alt": "OpenAI や Claude を使いたい場合は、各サイトでキーを作成し、設定 →{engine}でエンジンを選んでキーを貼り付け、{test} を押してください。",
+  "done.unusedTerms": "ファイル内に見つからない語句：{list}（つづりを確認してください）"
 }

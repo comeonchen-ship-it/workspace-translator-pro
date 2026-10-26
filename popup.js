@@ -1672,6 +1672,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
     if (summary.columnsFitted) parts.push(t('done.columnsFitted', { n: summary.columnsFitted }));
     if (summary.customDropped) parts.push(t('done.customDropped'));
+    if (summary.unusedTerms?.length) {
+      parts.push(t('done.unusedTerms', { list: summary.unusedTerms.join(t('prefs.preview.listSep')) }));
+    }
     return parts.join(' · ');
   }
 

@@ -428,6 +428,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     model: config.translationEngine === 'free' ? null : config.modelName,
     targetLang,
     customDropped: !!config.prefsCustomDropped,
+    unusedTerms: config.unusedTerms || [],
     ...extra,
   });
   

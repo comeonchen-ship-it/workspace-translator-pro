@@ -365,5 +365,6 @@
   "guide.group.steps": "Từng bước",
   "guide.group.reference": "Tham khảo",
   "guide.stepLabel": "Bước {n}",
-  "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ, rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}."
+  "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ, rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}.",
+  "done.unusedTerms": "không tìm thấy các từ này trong tệp: {list} (hãy kiểm tra chính tả)"
 }

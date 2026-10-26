@@ -122,3 +122,16 @@ test('dropRedundantAnnotations keeps footnotes and partial-word notes', () => {
   assert.equal(dropRedundantAnnotations('Total (al)'), 'Total (al)');
   assert.equal(dropRedundantAnnotations('Use AI (AI) now'), 'Use AI now');
 });
+
+import { unusedGlossaryTerms } from '../lib/prefs.js';
+
+test('glossary prompt: exact-word rule, no misleading "deck" example', () => {
+  const block = buildPrefsBlock({ glossary: [{ src: 'DESK', dst: '' }, { src: 'pitch', dst: 'beach' }] }, 'Japanese');
+  assert.match(block, /Never apply it to a different or similar-looking word/);
+  assert.doesNotMatch(block, /deck/i);
+});
+
+test('unusedGlossaryTerms flags terms absent from the file (typo DESK vs deck)', () => {
+  const texts = ['Gemini Enterprise app technical pitch deck', 'Technical Pitch Deck'];
+  assert.deepEqual(unusedGlossaryTerms(texts, [{ src: 'DESK', dst: '' }, { src: 'pitch', dst: 'beach' }]), ['DESK']);
+});

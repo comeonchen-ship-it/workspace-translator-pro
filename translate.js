@@ -1,5 +1,5 @@
 import { getLanguage } from './i18n/languages.js';
-import { buildPrefsBlock, prefsFingerprint, normalizePrefs, postprocessTranslation } from './lib/prefs.js';
+import { buildPrefsBlock, prefsFingerprint, normalizePrefs, postprocessTranslation, unusedGlossaryTerms } from './lib/prefs.js';
 
 /**
  * Human-readable target language name for the LLM prompt.
@@ -95,6 +95,11 @@ export async function translateTexts(texts, targetLang, config) {
   // Preferences only apply to LLM engines. They are part of the cache key so a
   // glossary/tone change never serves translations made under different rules.
   config.activePrefs = engine === 'free' ? null : normalizePrefs(config.prefs);
+  // Terms the user set that don't occur in this file (often a typo, e.g. DESK vs deck):
+  // reported on the completion card so the user can fix the term.
+  if (config.activePrefs) {
+    config.unusedTerms = [...new Set([...(config.unusedTerms || []), ...unusedGlossaryTerms(texts, config.activePrefs.glossary)])];
+  }
   const fp = engine === 'free' ? '' : prefsFingerprint(config.activePrefs);
   const cacheKey = `translationCache_${engine}_${targetLang}${fp ? `_${fp}` : ''}`;
   let cache = {};

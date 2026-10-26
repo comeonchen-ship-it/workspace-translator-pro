@@ -365,5 +365,6 @@
   "guide.group.steps": "操作步驟",
   "guide.group.reference": "參考資料",
   "guide.stepLabel": "步驟 {n}",
-  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到對方網站建立金鑰，再到設定 →{engine}選擇引擎、貼上金鑰並按 {test}。"
+  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到對方網站建立金鑰，再到設定 →{engine}選擇引擎、貼上金鑰並按 {test}。",
+  "done.unusedTerms": "這些詞語在檔案中找不到：{list}（請檢查拼字）"
 }

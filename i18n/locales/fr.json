@@ -365,5 +365,6 @@
   "guide.group.steps": "Pas à pas",
   "guide.group.reference": "Référence",
   "guide.stepLabel": "Étape {n}",
-  "guide.start.s2.alt": "Vous préférez OpenAI ou Claude ? Créez une clé sur leur site, puis dans Paramètres → {engine}, choisissez le moteur, collez la clé et cliquez sur {test}."
+  "guide.start.s2.alt": "Vous préférez OpenAI ou Claude ? Créez une clé sur leur site, puis dans Paramètres → {engine}, choisissez le moteur, collez la clé et cliquez sur {test}.",
+  "done.unusedTerms": "termes introuvables dans ce fichier : {list} (vérifiez l'orthographe)"
 }

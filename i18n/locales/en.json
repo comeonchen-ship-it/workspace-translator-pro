@@ -365,5 +365,6 @@
   "guide.group.steps": "Step by step",
   "guide.group.reference": "Reference",
   "guide.stepLabel": "Step {n}",
-  "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site, then in Settings → {engine} choose the engine, paste the key and click {test}."
+  "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site, then in Settings → {engine} choose the engine, paste the key and click {test}.",
+  "done.unusedTerms": "terms not found in this file: {list} (check the spelling)"
 }
