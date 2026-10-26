@@ -132,12 +132,53 @@
   .ftype { width: 64px; height: 76px; border-radius: 10px; position: relative; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
   .ftype::after { content: ''; position: absolute; top: 0; right: 0; width: 18px; height: 18px; border-radius: 0 10px 0 6px; background: rgba(255,255,255,.35); }
   .ftype svg { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); width: 34px; height: 34px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  /* Marquee: two mini slides with the same layout, different language */
+  .ms { position: absolute; top: 140px; width: 300px; height: 240px; border-radius: 12px; background: #fff; color: #1d1d1f; overflow: hidden;
+        box-shadow: 0 28px 64px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06); text-align: left; }
+  .ms.a { left: 752px; } .ms.b { left: 1080px; }
+  .ms .hd { height: 46px; padding: 0 16px; display: flex; align-items: center; font-size: 17px; font-weight: 700; color: #fff; background: #1a3a6b; letter-spacing: -0.01em; }
+  .ms .bd { display: grid; grid-template-columns: 1fr 104px; gap: 12px; padding: 14px 16px; }
+  .mq .ms ul { list-style: none; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; line-height: 1.35; color: #1d1d1f; }
+  .ms li { padding-left: 12px; position: relative; }
+  .mq .ms li::before { content: ''; margin: 0; color: transparent; position: absolute; left: 0; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: #1a73e8; }
+  .ms em { font-style: normal; color: #1a73e8; font-weight: 700; }
+  .ms .chart { display: flex; align-items: flex-end; gap: 6px; height: 104px; padding: 8px; border-radius: 8px; background: #f1f4f9; }
+  .ms .chart i { flex: 1; border-radius: 3px 3px 0 0; }
+  .ms .ft { position: absolute; left: 16px; right: 16px; bottom: 12px; display: flex; justify-content: space-between; font-size: 10px; color: #9a9aa2; }
+  .ms .strip { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: linear-gradient(90deg, #4285f4 0 50%, #ea4335 50% 70%, #fbbc04 70%); }
+  .ms-lbl { position: absolute; top: 396px; width: 300px; text-align: center; font-size: 15px; font-weight: 600; color: #c7c7d1; }
+  .ms-arrow { position: absolute; left: 1058px; top: 246px; width: 20px; text-align: center; font-size: 22px; color: #b18cff; }
+  .kept { position: absolute; left: 1196px; top: 102px; padding: 7px 14px; border-radius: 980px; font-size: 14px; font-weight: 700; color: #0b5c2e; background: #c8f2d8; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
 const shot = new URLSearchParams(location.search).get('shot') || '1';
+const lang = new URLSearchParams(location.search).get('lang') || 'en';
+const mini = (cls, d) => `<div class="ms ${cls}"><div class="hd">${d.title}</div><div class="bd"><ul>${d.items.map((i) => `<li>${i}</li>`).join('')}</ul>
+  <div class="chart"><i style="height:40%;background:#9bbcf0"></i><i style="height:62%;background:#6a9be8"></i><i style="height:80%;background:#1a73e8"></i><i style="height:100%;background:#0b4fae"></i></div></div>
+  <div class="ft"><span>Google Cloud</span><span>${d.conf}</span></div><div class="strip"></div></div>`;
+const SRC = { title: 'Q3 Product Roadmap', items: ['Launch <em>beta</em> in September', 'Customer pilots in 5 regions', 'General availability in January'], conf: 'Confidential' };
+const T = {
+  en: { html: 'en', h1: 'Translate Google files.', h2: 'Keep the layout.', kept: 'Layout kept',
+        pts: ['Slides, Docs, Sheets &amp; Forms · 10 languages', 'Formatting follows every word', 'Your original stays untouched'],
+        types: ['Slides', 'Docs', 'Sheets', 'Forms'], tile: 'AI translation · 10 languages · layout kept',
+        slide: { name: '日本語', title: '第3四半期 製品ロードマップ', items: ['9月に<em>ベータ版</em>を公開', '5 地域で顧客パイロット', '1月に一般提供を開始'], conf: '社外秘' } },
+  'zh-TW': { html: 'zh-Hant', h1: '翻譯 Google 檔案，', h2: '版面完全不跑。', kept: '版面保留',
+        pts: ['簡報、文件、試算表、表單 · 10 種語言', '格式跟著每個字走', '原始檔案絕不修改'],
+        types: ['簡報', '文件', '試算表', '表單'], tile: 'AI 翻譯 · 10 種語言 · 版面不跑',
+        slide: { name: '繁體中文', title: '第三季產品路線圖', items: ['9 月推出 <em>Beta 版</em>', '在 5 個地區進行客戶試行', '1 月正式上市'], conf: '機密' } },
+  ja: { html: 'ja', h1: 'Google ファイルを翻訳。', h2: 'レイアウトはそのまま。', kept: 'レイアウト保持',
+        pts: ['スライド・ドキュメント・スプレッドシート・フォーム · 10 言語', '書式は訳文についていく', '元のファイルは変更しません'],
+        types: ['スライド', 'ドキュメント', 'シート', 'フォーム'], tile: 'AI 翻訳 · 10 言語 · レイアウト保持',
+        slide: { name: '日本語', title: '第3四半期 製品ロードマップ', items: ['9月に<em>ベータ版</em>を公開', '5 地域で顧客パイロット', '1月に一般提供を開始'], conf: '社外秘' } },
+  es: { html: 'es', h1: 'Traduce archivos de Google.', h2: 'Conserva el diseño.', kept: 'Diseño intacto',
+        pts: ['Presentaciones, Documentos, Hojas y Formularios · 10 idiomas', 'El formato sigue a cada palabra', 'Tu original queda intacto'],
+        types: ['Slides', 'Docs', 'Sheets', 'Forms'], tile: 'Traducción con IA · 10 idiomas · diseño intacto',
+        slide: { name: 'Español', title: 'Hoja de ruta del 3.er trimestre', items: ['Lanzamiento de la <em>beta</em> en septiembre', 'Pilotos con clientes en 5 regiones', 'Disponibilidad general en enero'], conf: 'Confidencial' } },
+};
+
 const device = (state, style = '', marks = '') => `
   <div class="device" style="${style}"><div class="screen"><iframe src="../popup.html?demo=${state}&ui=en${marks ? '&marks=' + marks : ''}"></iframe></div></div>`;
 const brand = `<div class="brand"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>`;
@@ -177,23 +218,22 @@ const shots = {
         'Translate Google Slides, Docs, Sheets and Forms — and keep every layout.')}
       <div class="grid"><div class="card"><div class="ic" style="background:#0071e3"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div><b>Layout kept</b><span>Formatting follows the words; longer text shrinks to fit.</span></div><div class="card"><div class="ic" style="background:#34a853"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5"/><path d="M5 14h14"/></svg></div><b>Free to start</b><span>A free Gemini key in a minute — or OpenAI, Claude, custom.</span></div><div class="card"><div class="ic" style="background:#7d4cdb"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg></div><b>Your rules</b><span>Names, terms, tone and length — set once, used every time.</span></div><div class="card"><div class="ic" style="background:#e37400"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7"/></svg></div><b>Whole file or part</b><span>Every slide, or just 3-10, 12. Whole sheet or the current tab.</span></div><div class="card"><div class="ic" style="background:#d93025"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><b>Many languages at once</b><span>Pick several languages and get one copy for each.</span></div><div class="card"><div class="ic" style="background:#188038"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><b>Private by design</b><span>Your original never changes. Your key stays in your browser.</span></div></div>
       <div class="langs"><span class="chip t" style="background:#f4b400">Slides</span><span class="chip t" style="background:#4285f4">Docs</span><span class="chip t" style="background:#0f9d58">Sheets</span><span class="chip t" style="background:#7248b9">Forms</span><span style="width:14px"></span><span class="chip">English</span><span class="chip">繁體中文</span><span class="chip">简体中文</span><span class="chip">日本語</span><span class="chip">한국어</span><span class="chip">Español</span><span class="chip">Français</span><span class="chip">Deutsch</span><span class="chip">Tiếng Việt</span><span class="chip">ไทย</span></div></div>`,
-  marquee: `<div class="mq dark"><div class="copy">
+  marquee: (() => { const L = T[lang] || T.en; return `<div class="mq dark" lang="${L.html}"><div class="copy">
         <div class="name"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>
-        <h1>Translate Google files.<br><span class="grad2">Keep the layout.</span></h1>
-        <ul><li>Slides, Docs, Sheets &amp; Forms · 10 languages</li><li>Formatting follows every word</li><li>Your original stays untouched</li></ul>
+        <h1>${L.h1}<br><span class="grad2">${L.h2}</span></h1>
+        <ul>${L.pts.map((p) => `<li>${p}</li>`).join('')}</ul>
         <div class="ftypes">
           <div class="ftype" style="background:#f4b400"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M7 10h10"/></svg></div>
           <div class="ftype" style="background:#4285f4"><svg viewBox="0 0 24 24"><path d="M6 6h12M6 10h12M6 14h12M6 18h8"/></svg></div>
           <div class="ftype" style="background:#0f9d58"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 10h16M4 14.5h16M10 5v14"/></svg></div>
           <div class="ftype" style="background:#7248b9"><svg viewBox="0 0 24 24"><circle cx="6.5" cy="7" r="1.2"/><circle cx="6.5" cy="12" r="1.2"/><circle cx="6.5" cy="17" r="1.2"/><path d="M10 7h8M10 12h8M10 17h8"/></svg></div>
         </div></div>
-      <div class="slide s1"><span class="tag" style="background:#e8f0fe;color:#1a73e8">ORIGINAL · EN</span>
-        <h3>Google Cloud is <em>the only provider</em> to offer the entire AI stack.</h3><p>Q3 Product Roadmap</p><div class="bar"></div></div>
-      <div class="slide s2"><span class="tag" style="background:#f3e8fd;color:#7d4cdb">COPY · 日本語</span>
-        <h3>Google Cloud は AI スタック全体を提供する<em>唯一のプロバイダー</em>です。</h3><p>第3四半期 製品ロードマップ</p><div class="bar"></div></div></div>`,
-  tile: `<div class="tl dark"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
-        <div class="types"><span style="background:#f4b400">Slides</span><span style="background:#4285f4">Docs</span><span style="background:#0f9d58">Sheets</span><span style="background:#7248b9">Forms</span></div>
-        <p>AI translation · 10 languages · layout kept</p></div>`,
+      ${mini('a', SRC)}<div class="ms-arrow">→</div>${mini('b', L.slide)}
+      <div class="ms-lbl" style="left:752px">English</div><div class="ms-lbl" style="left:1080px">${L.slide.name}</div>
+      <div class="kept">✓ ${L.kept}</div></div>`; })(),
+  tile: (() => { const L = T[lang] || T.en; return `<div class="tl dark" lang="${L.html}"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
+        <div class="types">${L.types.map((t, i) => `<span style="background:${['#f4b400', '#4285f4', '#0f9d58', '#7248b9'][i]}">${t}</span>`).join('')}</div>
+        <p>${L.tile}</p></div>`; })(),
 };
 document.getElementById('root').outerHTML = shots[shot];
 </script>

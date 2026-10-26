@@ -35,9 +35,9 @@ def serve():
     return httpd
 
 
-def render(shot, w, h, name):
+def render(shot, w, h, name, lang='en'):
     path = os.path.join(OUT, name)
-    url = f'http://127.0.0.1:{PORT}/store-assets/compose.html?shot={shot}'
+    url = f'http://127.0.0.1:{PORT}/store-assets/compose.html?shot={shot}&lang={lang}'
     subprocess.run([
         CHROME, '--headless=new', '--hide-scrollbars', '--force-device-scale-factor=1',
         f'--window-size={w},{h}', '--virtual-time-budget=6000', '--default-background-color=0b0c12ff',
@@ -61,6 +61,10 @@ def main():
         for shot, w, h, name in SHOTS:
             if not only or shot in only:
                 render(shot, w, h, name)
+                # Localized store listings: marquee and tile also in 繁中, 日本語 and Español.
+                if shot in ('marquee', 'tile'):
+                    for lang in ('zh-TW', 'ja', 'es'):
+                        render(shot, w, h, name.replace('.png', f'-{lang}.png'), lang)
     finally:
         httpd.shutdown()
 
