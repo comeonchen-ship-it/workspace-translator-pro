@@ -373,8 +373,14 @@
   "guide.cl.170.2": "Long translations shrink a little more to fit their boxes, and a new optional setting keeps translations concise. The result card reminds you to take a quick look.",
   "done.untranslated": "{n} text segments could not be translated and were left as is — try again or another model",
   "prefs.concise.label": "Keep translations concise so they fit the layout",
-  "prefs.concise.hint": "The AI picks shorter wording, close to the original length. No content is left out, but the phrasing may feel more compact. Leave it off for text that must be precise word for word, such as contracts.",
+  "prefs.concise.hint": "\"Concise\" picks shorter wording so text fits slides more easily. Nothing is left out, but phrasing becomes more compact — keep the default for contracts and other word-for-word text.",
   "prefs.preview.concise": "Translations are kept concise, close to the original length.",
   "done.fitCheck": "Font size reduced in {n} text boxes so longer translations fit. Some text may still run past its box — a quick look through the file is worth it",
-  "guide.pr.concise": "Keep translations concise — optional, off by default. The AI chooses shorter wording so text fits slides more easily. Nothing is left out, though phrasing may become more compact; leave it off for contracts and other word-for-word text."
+  "guide.pr.concise": "Keep translations concise — optional, off by default. The AI chooses shorter wording so text fits slides more easily. Nothing is left out, though phrasing may become more compact; leave it off for contracts and other word-for-word text.",
+  "scope.concise.hint": "Wording becomes more compact; nothing is left out. Best left off for contracts.",
+  "prefs.length.label": "Translation length",
+  "prefs.length.full": "As in the original (default)",
+  "prefs.length.concise": "Concise, fits the layout",
+  "prefs.length.full.example": "we're delighted to announce",
+  "prefs.length.concise.example": "we announce"
 }

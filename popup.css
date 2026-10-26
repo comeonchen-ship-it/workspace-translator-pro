@@ -1651,6 +1651,7 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-color);
 }
+.segmented.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .segmented button {
   font: inherit;
   font-size: 11px;

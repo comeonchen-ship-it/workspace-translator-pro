@@ -373,8 +373,14 @@
   "guide.cl.170.2": "Bản dịch dài được thu nhỏ thêm cho vừa khung, thêm tùy chọn dịch ngắn gọn (mặc định tắt). Thẻ kết quả sẽ nhắc bạn xem nhanh lại.",
   "done.untranslated": "{n} đoạn văn bản không dịch được và được giữ nguyên — hãy thử lại hoặc dùng mô hình khác",
   "prefs.concise.label": "Dịch ngắn gọn để chữ vừa với bố cục",
-  "prefs.concise.hint": "AI sẽ chọn cách diễn đạt ngắn hơn, giữ độ dài gần với bản gốc. Nội dung không bị lược bỏ, nhưng câu chữ có thể gọn hơn. Nên tắt với văn bản cần chính xác từng chữ, như hợp đồng.",
+  "prefs.concise.hint": "\"Ngắn gọn\" chọn cách diễn đạt ngắn hơn để chữ dễ vừa trang chiếu. Nội dung không bị lược bỏ, chỉ câu chữ gọn hơn — với hợp đồng hay văn bản cần sát từng chữ, nên giữ mặc định.",
   "prefs.preview.concise": "Bản dịch được giữ ngắn gọn, gần độ dài bản gốc.",
   "done.fitCheck": "Đã tự động thu nhỏ chữ trong {n} khung văn bản để vừa bản dịch dài hơn. Một số chữ vẫn có thể tràn khỏi khung — bạn nên mở tệp và xem nhanh một lượt",
-  "guide.pr.concise": "Dịch ngắn gọn — tùy chọn, mặc định tắt. AI chọn cách diễn đạt ngắn hơn để chữ dễ vừa với trang chiếu. Nội dung không bị lược bỏ, nhưng câu chữ có thể gọn hơn; nên tắt với hợp đồng và văn bản cần dịch sát từng chữ."
+  "guide.pr.concise": "Dịch ngắn gọn — tùy chọn, mặc định tắt. AI chọn cách diễn đạt ngắn hơn để chữ dễ vừa với trang chiếu. Nội dung không bị lược bỏ, nhưng câu chữ có thể gọn hơn; nên tắt với hợp đồng và văn bản cần dịch sát từng chữ.",
+  "scope.concise.hint": "Câu chữ gọn hơn nhưng không lược bỏ nội dung. Nên tắt với hợp đồng.",
+  "prefs.length.label": "Độ dài bản dịch",
+  "prefs.length.full": "Theo bản gốc (mặc định)",
+  "prefs.length.concise": "Ngắn gọn, vừa bố cục",
+  "prefs.length.full.example": "chúng tôi vui mừng thông báo",
+  "prefs.length.concise.example": "xin thông báo"
 }

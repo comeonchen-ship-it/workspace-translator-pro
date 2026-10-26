@@ -116,6 +116,15 @@
         <input type="checkbox" id="sheet-current-only">
         <span data-i18n="scope.sheet.currentOnly">Only translate the sheet tab I'm on</span>
       </label>
+      <!-- Same switch as Settings → Translation preferences; shown here for Slides,
+           where long translations are most likely to break the layout. -->
+      <div class="control-group hidden" id="scope-concise">
+        <label class="checkbox-row" for="job-concise">
+          <input type="checkbox" id="job-concise">
+          <span data-i18n="prefs.concise.label">Keep translations concise so they fit the layout</span>
+        </label>
+        <div class="field-hint" data-i18n="scope.concise.hint">Wording gets more compact; nothing is left out. Best left off for contracts.</div>
+      </div>
 
       <!-- Per-file glossary, merged over the global one (saved as you type) -->
       <details class="doc-glossary" id="doc-glossary-box">
@@ -280,11 +289,12 @@
             </div>
           </div>
 
+          <!-- Translation length: a 2-way segmented control (same look as the name
+               modes) backed by the hidden #pref-concise checkbox. -->
           <div class="form-group">
-            <label class="checkbox-row" for="pref-concise">
-              <input type="checkbox" id="pref-concise">
-              <span data-i18n="prefs.concise.label">Keep translations concise so they fit the layout</span>
-            </label>
+            <label data-i18n="prefs.length.label">Translation length</label>
+            <div class="segmented two" id="concise-seg" role="radiogroup"></div>
+            <input type="checkbox" id="pref-concise" hidden>
             <div class="field-hint" data-i18n="prefs.concise.hint">The AI picks shorter wording, close to the original length. Nothing is left out, but phrasing may feel more compact. Leave off for text that must be precise word for word, such as contracts.</div>
           </div>
 

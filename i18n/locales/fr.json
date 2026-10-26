@@ -373,8 +373,14 @@
   "guide.cl.170.2": "Les traductions longues sont un peu plus réduites pour tenir dans leur cadre, et une nouvelle option facultative rend les traductions concises. La carte de résultat vous invite à jeter un coup d'œil.",
   "done.untranslated": "{n} segments n'ont pas pu être traduits et restent tels quels — réessayez ou changez de modèle",
   "prefs.concise.label": "Traductions concises, pour mieux tenir dans la mise en page",
-  "prefs.concise.hint": "L'IA choisit des formulations plus courtes, proches de la longueur d'origine. Rien n'est omis, mais le style peut paraître plus compact. Laissez désactivé pour les textes qui doivent être exacts mot pour mot, comme les contrats.",
+  "prefs.concise.hint": "« Concise » choisit des formulations plus courtes pour mieux tenir dans les diapositives. Rien n'est omis, seul le style est plus compact — gardez le réglage par défaut pour les contrats et textes littéraux.",
   "prefs.preview.concise": "Les traductions restent concises, proches de la longueur d'origine.",
   "done.fitCheck": "Taille de police réduite dans {n} zones de texte pour faire tenir les traductions plus longues. Un peu de texte peut encore déborder : un rapide coup d'œil au fichier est conseillé",
-  "guide.pr.concise": "Traductions concises — facultatif, désactivé par défaut. L'IA choisit des formulations plus courtes pour que le texte tienne mieux dans les diapositives. Rien n'est omis, mais le style peut être plus compact ; laissez désactivé pour les contrats et textes à traduire mot pour mot."
+  "guide.pr.concise": "Traductions concises — facultatif, désactivé par défaut. L'IA choisit des formulations plus courtes pour que le texte tienne mieux dans les diapositives. Rien n'est omis, mais le style peut être plus compact ; laissez désactivé pour les contrats et textes à traduire mot pour mot.",
+  "scope.concise.hint": "Formulation plus compacte, sans rien omettre. À laisser désactivé pour les contrats.",
+  "prefs.length.label": "Longueur de la traduction",
+  "prefs.length.full": "Fidèle (par défaut)",
+  "prefs.length.concise": "Concise, tient en page",
+  "prefs.length.full.example": "nous sommes ravis d'annoncer",
+  "prefs.length.concise.example": "nous annonçons"
 }

@@ -74,6 +74,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefConcise = document.getElementById('pref-concise');
   // Name categories: one segmented control (translate / keep / annotate) each.
   const nameModes = { ...normalizeNames({}) };
+  // Translation length segments ↔ the hidden #pref-concise checkbox.
+  function renderConciseSeg() {
+    const group = document.getElementById('concise-seg');
+    if (!group) return;
+    group.innerHTML = '';
+    for (const on of [false, true]) {
+      const key = on ? 'concise' : 'full';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', String(prefConcise.checked === on));
+      const label = document.createElement('span');
+      label.className = 'seg-label';
+      label.textContent = t(`prefs.length.${key}`);
+      const example = document.createElement('span');
+      example.className = 'seg-example';
+      example.textContent = t(`prefs.length.${key}.example`);
+      btn.append(label, example);
+      btn.addEventListener('click', () => {
+        if (prefConcise.checked === on) return;
+        prefConcise.checked = on;
+        prefConcise.dispatchEvent(new Event('change'));
+      });
+      group.appendChild(btn);
+    }
+  }
+
   function renderNameModes() {
     for (const row of document.querySelectorAll('.name-mode-row')) {
       const cat = row.dataset.category;
@@ -118,10 +145,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const slideRangeError = document.getElementById('slide-range-error');
   const scopeSheet = document.getElementById('scope-sheet');
   const sheetCurrentOnly = document.getElementById('sheet-current-only');
+  const scopeConcise = document.getElementById('scope-concise');
+  const jobConcise = document.getElementById('job-concise');
+
+  // The main-screen "concise" box mirrors the saved preference. Preferences only
+  // apply to AI engines, so it is hidden for the free engine.
+  function updateConciseControl() {
+    scopeConcise.classList.toggle('hidden', currentFileType !== 'presentation' || selectEngine.value === 'free');
+    chrome.storage.local.get('translationPrefs', (items) => {
+      jobConcise.checked = items.translationPrefs?.concise === true;
+    });
+  }
+  jobConcise.addEventListener('change', () => {
+    const on = jobConcise.checked;
+    chrome.storage.local.get('translationPrefs', (items) => {
+      chrome.storage.local.set({ translationPrefs: { ...(items.translationPrefs || {}), concise: on } });
+    });
+    // Keep the Settings checkbox in step without marking Settings as unsaved.
+    const wasClean = settingsSnapshot() === savedSnapshot;
+    prefConcise.checked = on;
+    renderConciseSeg();
+    updateRulesPreview();
+    if (wasClean) markSettingsClean();
+  });
 
   function updateScopeControls() {
     scopeSlides.classList.toggle('hidden', currentFileType !== 'presentation');
     scopeSheet.classList.toggle('hidden', currentFileType !== 'spreadsheet');
+    updateConciseControl();
     slideRange.value = '';
     slideRangeError.classList.add('hidden');
     sheetCurrentOnly.checked = false;
@@ -279,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadHistory();
     globalTerms.rerender();
     docTerms.rerender();
-    renderNameModes();
+    renderNameModes(); renderConciseSeg();
     updateRulesPreview();
   }
 
@@ -325,6 +376,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prefs = items.translationPrefs || {};
     prefTone.value = prefs.tone || 'keep';
     prefConcise.checked = prefs.concise === true;
+    renderConciseSeg();
     // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
     globalTerms.setRows(prefs.terms || glossaryTextToRows(prefs.glossaryText));
     Object.assign(nameModes, normalizeNames(prefs));
@@ -333,6 +385,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateCustomCount();
     updateRulesPreview();
     selectEngine.value = items.translationEngine || 'gemini';
+    updateConciseControl();
     if (inputAutoOpen) inputAutoOpen.checked = items.autoOpenResult !== false;
     inputApiKey.value = items.apiKey || '';
     inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
@@ -467,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
   prefTone.addEventListener('change', updateRulesPreview);
-  prefConcise.addEventListener('change', updateRulesPreview);
+  prefConcise.addEventListener('change', () => { renderConciseSeg(); updateRulesPreview(); updateUnsavedNote(); });
 
   // Plain-language summary of the current preference rules (read-only).
   function updateRulesPreview() {
@@ -814,6 +867,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       markSettingsClean();
+      updateConciseControl();
       // Saved, but keep the panel open so the failed test's message stays visible.
       if (!testFailed) closeSettings();
     });

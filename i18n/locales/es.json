@@ -373,8 +373,14 @@
   "guide.cl.170.2": "Las traducciones largas se reducen un poco más para caber en su cuadro, y una nueva opción hace las traducciones más concisas. La tarjeta de resultado te recuerda echar un vistazo.",
   "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo",
   "prefs.concise.label": "Traducciones concisas para que quepan en el diseño",
-  "prefs.concise.hint": "La IA elige expresiones más cortas, cercanas a la longitud original. No se omite contenido, pero la redacción puede resultar más compacta. Déjalo desactivado en textos que deban ser exactos palabra por palabra, como contratos.",
+  "prefs.concise.hint": "«Concisa» elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, solo la redacción es más compacta; para contratos y textos literales, mantén el valor predeterminado.",
   "prefs.preview.concise": "Las traducciones se mantienen concisas, cerca de la longitud original.",
   "done.fitCheck": "Se redujo el tamaño de letra en {n} cuadros de texto para que quepan las traducciones más largas. Algún texto aún puede salirse de su cuadro: conviene echar un vistazo rápido al archivo",
-  "guide.pr.concise": "Traducciones concisas — opcional, desactivado por defecto. La IA elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, aunque la redacción puede ser más compacta; déjalo desactivado para contratos y textos que deban ser literales."
+  "guide.pr.concise": "Traducciones concisas — opcional, desactivado por defecto. La IA elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, aunque la redacción puede ser más compacta; déjalo desactivado para contratos y textos que deban ser literales.",
+  "scope.concise.hint": "Redacción más compacta, sin omitir contenido. Mejor desactivado para contratos.",
+  "prefs.length.label": "Longitud de la traducción",
+  "prefs.length.full": "Como el original (predet.)",
+  "prefs.length.concise": "Concisa, cabe en el diseño",
+  "prefs.length.full.example": "nos complace anunciar",
+  "prefs.length.concise.example": "anunciamos"
 }
