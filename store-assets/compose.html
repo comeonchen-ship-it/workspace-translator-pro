@@ -1,122 +1,123 @@
 <!DOCTYPE html>
 <!-- Chrome Web Store images (not shipped). Rendered by store-assets/build.py:
      compose.html?shot=1..5 → 1280×800 screenshots, ?shot=marquee → 1400×560,
-     ?shot=tile → 440×280. Panels are the real popup.html in an iframe. -->
+     ?shot=tile → 440×280. The panels are the real popup.html in demo mode.
+     Style: light, centred headline, the product rising from the bottom edge. -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body {
-    font-family: 'Outfit', -apple-system, "PingFang TC", "Noto Sans JP", sans-serif;
-    color: #f5f6fa;
-    background:
-      radial-gradient(50% 60% at 12% 18%, rgba(108, 92, 231, 0.35), transparent 70%),
-      radial-gradient(45% 55% at 92% 88%, rgba(0, 206, 201, 0.22), transparent 70%),
-      #0b0c12;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang TC",
+                 "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans", sans-serif;
+    color: #1d1d1f;
+    background: radial-gradient(120% 90% at 50% 0%, #ffffff 0%, #f5f5f7 55%, #e9e9ee 100%);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
-  /* Body copy may contain Vietnamese/CJK, which Outfit lacks. */
-  .points, .sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans", sans-serif; }
-  .canvas { position: relative; width: 100%; height: 100%; display: flex; align-items: center; padding: 0 64px; gap: 48px; }
-  .copy { flex: 1; min-width: 0; }
-  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; color: #a0a5c0; margin-bottom: 22px; }
-  .eyebrow img { width: 36px; height: 36px; border-radius: 9px; }
-  h1 { font-size: 52px; line-height: 1.08; font-weight: 800; letter-spacing: -0.5px; }
-  h1 em { font-style: normal; background: linear-gradient(90deg, #f1c40f, #f39c12 60%, #e67e22); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .sub { margin-top: 18px; font-size: 22px; color: #c7cbe0; line-height: 1.4; max-width: 560px; }
-  .points { margin-top: 30px; display: flex; flex-direction: column; gap: 14px; list-style: none; }
-  .points li { display: flex; gap: 12px; align-items: flex-start; font-size: 19px; color: #e6e8f2; line-height: 1.35; }
-  .points li::before { content: ''; flex-shrink: 0; margin-top: 7px; width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #6c5ce7, #00cec9); box-shadow: 0 0 10px rgba(0, 206, 201, 0.6); }
 
-  /* Chrome side-panel frame around the real extension UI */
-  .sidepanel {
-    width: 384px; height: 712px; flex-shrink: 0; border-radius: 14px; overflow: hidden; background: #f8f9fa;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    display: flex; flex-direction: column;
+  /* ── 1280×800 screenshot template ─────────────────────────────────── */
+  .shot { position: relative; width: 100%; height: 100%; text-align: center; }
+  .brand { position: absolute; top: 44px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 10px;
+           font-size: 17px; font-weight: 600; color: #6e6e73; }
+  .brand img { width: 26px; height: 26px; border-radius: 6px; }
+  .shot h1 { position: absolute; top: 92px; left: 0; right: 0; font-size: 54px; line-height: 1.08; font-weight: 700; letter-spacing: -0.03em; }
+  .shot .sub { position: absolute; top: 162px; left: 0; right: 0; font-size: 22px; color: #6e6e73; }
+  .grad { background: linear-gradient(90deg, #0071e3, #7d4cdb); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* The product: real panel, rising from the bottom edge */
+  .device {
+    position: absolute; left: 50%; top: 236px; transform: translateX(-50%);
+    width: 404px; height: 620px; padding: 10px; border-radius: 30px;
+    background: #1c1c1e;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
-  .sidepanel-bar { height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #202124; font: 500 15px -apple-system, "Segoe UI", sans-serif; background: #f1f3f4; }
-  .sidepanel-bar img { width: 18px; height: 18px; border-radius: 4px; }
-  .sidepanel iframe { flex: 1; border: 0; width: 100%; background: #0d0e14; }
+  .device .screen { width: 384px; height: 600px; border-radius: 22px; overflow: hidden; background: #0d0e14; }
+  .device iframe { width: 384px; height: 720px; border: 0; display: block; }
 
-  /* Before → after document cards (shot 1) */
-  .docs { display: flex; align-items: center; gap: 16px; margin-top: 34px; }
-  .doc { width: 230px; border-radius: 10px; overflow: hidden; background: #fff; color: #1f2430; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45); }
-  .doc-head { padding: 10px 12px; background: #1a73e8; color: #fff; font-weight: 700; font-size: 14px; }
-  .doc.ja .doc-head { background: #0f9d58; }
-  .doc-body { padding: 10px 12px; font-size: 12px; line-height: 1.5; }
-  .doc-body b { display: block; font-size: 13px; margin-bottom: 4px; }
-  .doc-body .row { display: flex; justify-content: space-between; border-top: 1px solid #e6e8ee; padding: 4px 0; }
-  .doc-lang { font-size: 11px; font-weight: 700; color: #6b7280; padding: 6px 12px; background: #f3f4f6; }
-  .arrow { font-size: 30px; color: #00cec9; font-weight: 700; }
+  /* Feature points beside the product */
+  .points { position: absolute; top: 330px; width: 300px; list-style: none; display: flex; flex-direction: column; gap: 26px; text-align: left; }
+  .points.left { left: 80px; }
+  .points.right { right: 80px; }
+  .points li { display: flex; flex-direction: column; gap: 4px; }
+  .points b { font-size: 19px; font-weight: 600; }
+  .points span { font-size: 15px; color: #6e6e73; line-height: 1.45; }
 
-  /* Marquee + tile */
-  .marquee { padding: 0 56px; gap: 0; }
-  .marquee .copy { flex: 0 0 600px; }
-  .marquee h1 { font-size: 56px; }
-  .stack { position: relative; flex: 1; height: 100%; }
-  .stack .sidepanel { position: absolute; width: 300px; height: 520px; transform-origin: top left; }
-  .stack .sidepanel iframe { width: 384px; height: 665px; flex: none; transform: scale(0.78125); transform-origin: top left; }
-  .tile { flex-direction: column; justify-content: center; gap: 12px; padding: 0 24px; text-align: center; }
-  .tile img { width: 60px; height: 60px; border-radius: 14px; }
-  .tile h1 { font-size: 26px; }
-  .tile .sub { margin: 0; font-size: 15px; max-width: none; }
-  .tile .chips { display: flex; gap: 8px; justify-content: center; }
-  .tile .chips span { font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+  /* Before / after documents (shot 1) */
+  .doc { position: absolute; top: 360px; width: 290px; border-radius: 14px; overflow: hidden; background: #fff; text-align: left;
+         box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.05); }
+  .doc.left { left: 92px; transform: rotate(-3deg); }
+  .doc.right { right: 92px; transform: rotate(3deg); }
+  .doc-lang { font-size: 12px; font-weight: 600; color: #6e6e73; padding: 10px 14px 0; letter-spacing: 0.04em; text-transform: uppercase; }
+  .doc-title { font-size: 19px; font-weight: 700; padding: 6px 14px 10px; }
+  .doc-body { padding: 0 14px 14px; font-size: 13px; }
+  .doc-body .row { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid #ececf0; }
+  .doc-body .row span:last-child { color: #6e6e73; }
+  .doc .bar { height: 6px; background: linear-gradient(90deg, #0071e3, #7d4cdb); }
+
+  /* ── Marquee 1400×560 ─────────────────────────────────────────────── */
+  .marquee { position: relative; width: 100%; height: 100%; }
+  .marquee .copy { position: absolute; left: 96px; top: 50%; transform: translateY(-50%); width: 640px; }
+  .marquee .brand { position: static; justify-content: flex-start; margin-bottom: 18px; }
+  .marquee h1 { position: static; font-size: 58px; line-height: 1.06; font-weight: 700; letter-spacing: -0.03em; }
+  .marquee .sub { position: static; margin-top: 18px; font-size: 22px; color: #6e6e73; }
+  .marquee .device { left: auto; right: 150px; top: 96px; transform: none; }
+
+  .sub, .points span { text-wrap: balance; }
+
+  /* ── Tile 440×280 ─────────────────────────────────────────────────── */
+  .tile { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; }
+  .tile img { width: 72px; height: 72px; border-radius: 17px; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15); }
+  .tile h1 { font-size: 27px; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; }
+  .tile p { font-size: 15px; color: #6e6e73; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
 const shot = new URLSearchParams(location.search).get('shot') || '1';
-const panel = (state, extra = '') => `
-  <div class="sidepanel" ${extra}>
-    <div class="sidepanel-bar"><img src="../icons/icon48.png" alt="">Workspace Translator Pro</div>
-    <iframe src="../popup.html?demo=${state}&ui=en"></iframe>
-  </div>`;
-const eyebrow = `<div class="eyebrow"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>`;
+const device = (state, style = '') => `
+  <div class="device" style="${style}"><div class="screen"><iframe src="../popup.html?demo=${state}&ui=en"></iframe></div></div>`;
+const brand = `<div class="brand"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>`;
+const head = (h1, sub) => `${brand}<h1>${h1}</h1><p class="sub">${sub}</p>`;
+const pts = (side, items) => `<ul class="points ${side}">${items.map(([b, s]) => `<li><b>${b}</b><span>${s}</span></li>`).join('')}</ul>`;
+
 const shots = {
-  1: `<div class="canvas"><div class="copy">${eyebrow}
-        <h1>Translate Google <em>Slides, Docs, Sheets &amp; Forms</em></h1>
-        <p class="sub">A translated copy in minutes. Layout and formatting stay; your original is never touched.</p>
-        <div class="docs">
-          <div class="doc"><div class="doc-lang">ORIGINAL · English</div><div class="doc-head">Q3 Product Roadmap</div>
-            <div class="doc-body"><b>Next steps</b><div class="row"><span>Launch beta</span><span>Sep 14</span></div><div class="row"><span>Customer pilots</span><span>Oct 1</span></div><div class="row"><span>General availability</span><span>Jan 31</span></div></div></div>
-          <div class="arrow">→</div>
-          <div class="doc ja"><div class="doc-lang">COPY · 日本語</div><div class="doc-head">第3四半期 製品ロードマップ</div>
-            <div class="doc-body"><b>次のステップ</b><div class="row"><span>ベータ版の公開</span><span>9月14日</span></div><div class="row"><span>顧客パイロット</span><span>10月1日</span></div><div class="row"><span>一般提供開始</span><span>1月31日</span></div></div></div>
-        </div></div>${panel('done')}</div>`,
-  2: `<div class="canvas"><div class="copy">${eyebrow}
-        <h1>Free Gemini key,<br><em>set up in a minute</em></h1>
-        <p class="sub">No credit card. Paste the key — it is checked and saved automatically.</p>
-        <ul class="points"><li>Natural, fluent AI translation</li><li>Also works with OpenAI, Claude or any OpenAI-compatible endpoint</li><li>Basic free mode available without a key</li></ul>
-      </div>${panel('setup-done')}</div>`,
-  3: `<div class="canvas"><div class="copy">${eyebrow}
-        <h1>Your names, terms <em>&amp; tone</em></h1>
-        <p class="sub">Tell the AI how to handle names once — it recognises them by itself.</p>
-        <ul class="points"><li>People, brands and places: translate, keep, or both — 蘋果公司（Apple Inc.）</li><li>Fixed translations for your own terms, per file or for all files</li><li>Formal, neutral or casual tone, plus custom instructions in any language</li></ul>
-      </div>${panel('prefs')}</div>`,
-  4: `<div class="canvas"><div class="copy">${eyebrow}
-        <h1>Several languages <em>in one run</em></h1>
-        <p class="sub">Pick the extra languages and get one translated copy per language.</p>
-        <ul class="points"><li>10 languages: English, 繁體中文, 简体中文, 日本語, 한국어, Español, Français, Deutsch, Tiếng Việt, ไทย</li><li>Translate only some slides, or just the current sheet tab</li><li>Longer text still fits: fonts shrink, columns widen</li></ul>
-      </div>${panel('main')}</div>`,
-  5: `<div class="canvas"><div class="copy">${eyebrow}
-        <h1>Close the panel, <em>keep working</em></h1>
-        <p class="sub">Large files keep translating in the background — you get a notification when the copy is ready.</p>
-        <ul class="points"><li>Progress with time left</li><li>Resumes automatically after a browser restart</li><li>Clear, plain-language messages if something needs your attention</li></ul>
-      </div>${panel('progress')}</div>`,
-  marquee: `<div class="canvas marquee"><div class="copy">${eyebrow}
-        <h1>Translate Google <em>Slides, Docs, Sheets &amp; Forms</em></h1>
-        <p class="sub">AI translation into 10 languages. Layout kept, original untouched.</p></div>
-        <div class="stack">
-          ${panel('setup-done', 'style="left:20px;top:40px;transform:rotate(-4deg)"')}
-          ${panel('done', 'style="left:390px;top:20px;transform:rotate(3deg);z-index:2"')}
-        </div></div>`,
-  tile: `<div class="canvas tile"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
-        <p class="sub">AI translation · layout preserved</p>
-        <div class="chips"><span style="background:#f4b400;color:#202124">Slides</span><span style="background:#4285f4">Docs</span><span style="background:#0f9d58">Sheets</span><span style="background:#7248b9">Forms</span></div></div>`,
+  1: `<div class="shot">${head('Translate Google files. <span class="grad">Keep the layout.</span>',
+        'Slides, Docs, Sheets and Forms — a translated copy, your original untouched.')}
+      <div class="doc left"><div class="bar"></div><div class="doc-lang">Original · English</div><div class="doc-title">Q3 Product Roadmap</div>
+        <div class="doc-body"><div class="row"><span>Launch beta</span><span>Sep 14</span></div><div class="row"><span>Customer pilots</span><span>Oct 1</span></div><div class="row"><span>General availability</span><span>Jan 31</span></div></div></div>
+      <div class="doc right"><div class="bar"></div><div class="doc-lang">Copy · 日本語</div><div class="doc-title">第3四半期 製品ロードマップ</div>
+        <div class="doc-body"><div class="row"><span>ベータ版の公開</span><span>9月14日</span></div><div class="row"><span>顧客パイロット</span><span>10月1日</span></div><div class="row"><span>一般提供開始</span><span>1月31日</span></div></div></div>
+      ${device('done')}</div>`,
+  2: `<div class="shot">${head('Set up in a minute. <span class="grad">Free.</span>',
+        'Get a free Gemini key — no credit card. Pasted, checked and saved automatically.')}
+      ${pts('left', [['Free Gemini key', 'Natural, fluent AI translation at no cost to start.'], ['Or bring your own', 'OpenAI, Claude or any OpenAI-compatible endpoint.']])}
+      ${pts('right', [['Checked for you', 'The key is tested the moment you paste it.'], ['Stays in your browser', 'Your key is sent only to the provider you chose.']])}
+      ${device('setup-done')}</div>`,
+  3: `<div class="shot">${head('Your names. Your terms. <span class="grad">Your tone.</span>',
+        'Tell it once how to handle names — the AI recognises them by itself.')}
+      ${pts('left', [['People, brands, places', 'Translate, keep the original, or both: Nintendo (任天堂).'], ['Fixed terms', 'Your own words, the same way every time.']])}
+      ${pts('right', [['Tone', 'Keep the original, or go formal, neutral or casual.'], ['Any language', 'Write extra instructions in your own language.']])}
+      ${device('prefs')}</div>`,
+  4: `<div class="shot">${head('Many languages. <span class="grad">One click.</span>',
+        'Pick extra languages and get a translated copy for each.')}
+      ${pts('left', [['10 languages', 'English, 繁體中文, 简体中文, 日本語, 한국어, Español, Français, Deutsch, Tiếng Việt, ไทย.'], ['Just what you need', 'Only some slides, or only the current sheet.']])}
+      ${pts('right', [['Fits the layout', 'Longer text shrinks to fit; columns widen.'], ['Office files too', '.pptx, .docx and .xlsx opened from Drive.']])}
+      ${device('main')}</div>`,
+  5: `<div class="shot">${head('Close the panel. <span class="grad">Keep working.</span>',
+        'Big files keep translating in the background — you get a notification when it’s done.')}
+      ${pts('left', [['Time left', 'See the progress and how long it will take.'], ['Resumes', 'Picks up again after a browser restart.']])}
+      ${pts('right', [['Notified', 'A notification the moment your copy is ready.'], ['Clear messages', 'Plain language if something needs you.']])}
+      ${device('progress')}</div>`,
+  marquee: `<div class="marquee"><div class="copy">${brand}
+        <h1>Translate Google files.<br><span class="grad">Keep the layout.</span></h1>
+        <p class="sub">Slides, Docs, Sheets and Forms in 10 languages — your original untouched.</p></div>
+      ${device('done')}</div>`,
+  tile: `<div class="tile"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
+        <p>Translate Google files. Keep the layout.</p></div>`,
 };
 document.getElementById('root').outerHTML = shots[shot];
 </script>
