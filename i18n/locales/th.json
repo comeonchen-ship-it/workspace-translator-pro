@@ -392,5 +392,13 @@
   "prefs.terms.desc": "คำที่ต้องจัดการตามแบบของคุณทุกครั้ง หากต้องการใช้กับไฟล์เดียว ให้ใช้ \"คำเฉพาะของไฟล์นี้\" ที่หน้าจอหลัก",
   "prefs.terms.empty": "ยังไม่มีคำที่กำหนด เมื่อเพิ่มแล้ว ทุกการแปลจะจัดการตามแบบของคุณ",
   "prefs.custom.desc": "คำขออื่น ๆ ที่อยากให้ AI รู้ เขียนด้วยคำของคุณเอง",
-  "prefs.docTerms.empty": "ไฟล์นี้ยังไม่มีคำเฉพาะ"
+  "prefs.docTerms.empty": "ไฟล์นี้ยังไม่มีคำเฉพาะ",
+  "prefs.toneSeg.keep": "ตามต้นฉบับ (ค่าเริ่มต้น)",
+  "prefs.toneSeg.formal": "ทางการ",
+  "prefs.toneSeg.neutral": "กลาง ๆ",
+  "prefs.toneSeg.casual": "กันเอง",
+  "prefs.toneSeg.keep.example": "คงน้ำเสียงต้นฉบับ",
+  "prefs.toneSeg.formal.example": "โปรดดูเอกสารแนบ",
+  "prefs.toneSeg.neutral.example": "ดูไฟล์แนบ",
+  "prefs.toneSeg.casual.example": "ดูไฟล์แนบหน่อยนะ"
 }

@@ -1,7 +1,7 @@
 # Chrome Web Store — v1.7.0 submission
 
 Upload package: `dist/workspace-translator-pro-1.7.0.zip` (build with `python3 store-assets/package.py`).
-Images: `上架宣傳圖片/v1.6/` (rebuild with `python3 store-assets/build.py`).
+Images: `上架宣傳圖片/v1.7/` (rebuild with `python3 store-assets/build.py`).
 
 ## Store listing tab
 

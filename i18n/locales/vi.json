@@ -392,5 +392,13 @@
   "prefs.terms.desc": "Những từ luôn được xử lý theo cách của bạn. Chỉ cho một tệp, hãy dùng \"Từ ngữ riêng cho tệp này\" ở màn hình chính.",
   "prefs.terms.empty": "Chưa có thuật ngữ nào. Sau khi thêm, mỗi lần dịch sẽ xử lý theo cách của bạn.",
   "prefs.custom.desc": "Bất cứ yêu cầu nào khác bạn muốn AI biết, viết bằng lời của bạn.",
-  "prefs.docTerms.empty": "Tệp này chưa có từ ngữ riêng."
+  "prefs.docTerms.empty": "Tệp này chưa có từ ngữ riêng.",
+  "prefs.toneSeg.keep": "Theo bản gốc (mặc định)",
+  "prefs.toneSeg.formal": "Trang trọng",
+  "prefs.toneSeg.neutral": "Trung tính",
+  "prefs.toneSeg.casual": "Thân mật",
+  "prefs.toneSeg.keep.example": "giữ giọng văn gốc",
+  "prefs.toneSeg.formal.example": "xin vui lòng xem tệp đính kèm",
+  "prefs.toneSeg.neutral.example": "xem tệp đính kèm",
+  "prefs.toneSeg.casual.example": "xem file đính kèm nhé"
 }

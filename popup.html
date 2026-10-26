@@ -283,8 +283,10 @@
             <h5 class="pref-title" data-i18n="prefs.group.style">Style</h5>
             <p class="pref-desc" data-i18n="prefs.group.style.desc">How the translation sounds and how long it is.</p>
             <div class="form-group">
-              <label for="pref-tone" data-i18n="prefs.tone.label">Tone</label>
-              <div class="select-wrapper">
+              <label data-i18n="prefs.tone.label">Tone</label>
+              <!-- 2×2 segmented control with examples; the hidden select keeps the value. -->
+              <div class="segmented grid2" id="tone-seg" role="radiogroup"></div>
+              <div hidden>
                 <select id="pref-tone">
                   <option value="keep" data-i18n="prefs.tone.keep">Keep as in the original (default)</option>
                   <option value="formal" data-i18n="prefs.tone.formal">Formal</option>

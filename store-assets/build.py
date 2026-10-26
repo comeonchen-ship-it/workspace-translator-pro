@@ -11,7 +11,7 @@ from functools import partial
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, '上架宣傳圖片', 'v1.6')
+OUT = os.path.join(ROOT, '上架宣傳圖片', 'v1.7')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 PORT = 8799
 SHOTS = [

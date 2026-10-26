@@ -392,5 +392,13 @@
   "prefs.terms.desc": "Des mots toujours traités à votre façon. Pour un seul fichier, utilisez « Termes propres à ce fichier » sur l'écran principal.",
   "prefs.terms.empty": "Aucun terme pour l'instant. Une fois ajoutés, chaque traduction les traite à votre façon.",
   "prefs.custom.desc": "Tout ce que vous voulez dire à l'IA, avec vos propres mots.",
-  "prefs.docTerms.empty": "Aucun terme pour ce fichier pour l'instant."
+  "prefs.docTerms.empty": "Aucun terme pour ce fichier pour l'instant.",
+  "prefs.toneSeg.keep": "Fidèle (par défaut)",
+  "prefs.toneSeg.formal": "Formel",
+  "prefs.toneSeg.neutral": "Neutre",
+  "prefs.toneSeg.casual": "Familier",
+  "prefs.toneSeg.keep.example": "même ton que l'original",
+  "prefs.toneSeg.formal.example": "veuillez trouver ci-joint",
+  "prefs.toneSeg.neutral.example": "voir la pièce jointe",
+  "prefs.toneSeg.casual.example": "jette un œil à la PJ"
 }

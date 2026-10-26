@@ -392,5 +392,13 @@
   "prefs.terms.desc": "Wörter, die immer nach Ihren Vorgaben behandelt werden. Nur für eine Datei: „Begriffe für diese Datei“ im Hauptbildschirm.",
   "prefs.terms.empty": "Noch keine Begriffe. Hinzugefügte Begriffe werden bei jeder Übersetzung nach Ihren Vorgaben behandelt.",
   "prefs.custom.desc": "Alles Weitere, was die KI wissen soll – in eigenen Worten.",
-  "prefs.docTerms.empty": "Noch keine Begriffe für diese Datei."
+  "prefs.docTerms.empty": "Noch keine Begriffe für diese Datei.",
+  "prefs.toneSeg.keep": "Wie Original (Standard)",
+  "prefs.toneSeg.formal": "Förmlich",
+  "prefs.toneSeg.neutral": "Neutral",
+  "prefs.toneSeg.casual": "Locker",
+  "prefs.toneSeg.keep.example": "Ton des Originals",
+  "prefs.toneSeg.formal.example": "anbei erhalten Sie",
+  "prefs.toneSeg.neutral.example": "siehe Anhang",
+  "prefs.toneSeg.casual.example": "schau mal in den Anhang"
 }

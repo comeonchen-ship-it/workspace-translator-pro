@@ -211,7 +211,7 @@
   "prefs.terms.label": "指定词语（所有文件）",
   "prefs.terms.srcPlaceholder": "AI",
   "prefs.terms.dstPlaceholder": "人工智能",
-  "prefs.terms.mode.translate": "译成",
+  "prefs.terms.mode.translate": "翻译为",
   "prefs.terms.mode.keep": "保持原文",
   "prefs.terms.remove": "删除",
   "prefs.terms.add": "＋ 新增词语",
@@ -219,7 +219,7 @@
   "prefs.preview.tone": "语气：{tone}",
   "prefs.preview.keepCategories": "{list}保持原文",
   "prefs.preview.listSep": "、",
-  "prefs.preview.translate": "“{src}”一律译成“{dst}”",
+  "prefs.preview.translate": "“{src}”一律翻译为“{dst}”",
   "prefs.preview.keep": "“{src}”保持原文",
   "prefs.preview.custom": "遵守你的自定义说明",
   "prefs.preview.none": "自然翻译，没有特别规则",
@@ -392,5 +392,13 @@
   "prefs.terms.desc": "让特定的词每次都按你的方式处理。只想应用于单个文件，请用主界面的“此文件专属词语”。",
   "prefs.terms.empty": "还没有指定词语。添加后，每次翻译都会按你的方式处理。",
   "prefs.custom.desc": "其他想让 AI 知道的要求，用你自己的话写。",
-  "prefs.docTerms.empty": "这个文件还没有专属词语。"
+  "prefs.docTerms.empty": "这个文件还没有专属词语。",
+  "prefs.toneSeg.keep": "照原文（默认）",
+  "prefs.toneSeg.formal": "正式",
+  "prefs.toneSeg.neutral": "中性",
+  "prefs.toneSeg.casual": "口语",
+  "prefs.toneSeg.keep.example": "保留原文语气",
+  "prefs.toneSeg.formal.example": "敬请参阅附件",
+  "prefs.toneSeg.neutral.example": "请参阅附件",
+  "prefs.toneSeg.casual.example": "附件看一下"
 }

@@ -392,5 +392,13 @@
   "prefs.terms.desc": "特定の語を毎回あなたの指定どおりに扱います。1 つのファイルだけに適用するには、メイン画面の「このファイル専用の語句」を使います。",
   "prefs.terms.empty": "まだ用語はありません。追加すると、毎回の翻訳で指定どおりに扱われます。",
   "prefs.custom.desc": "そのほか AI に伝えたいことを、自分の言葉で書いてください。",
-  "prefs.docTerms.empty": "このファイル専用の語句はまだありません。"
+  "prefs.docTerms.empty": "このファイル専用の語句はまだありません。",
+  "prefs.toneSeg.keep": "原文どおり（初期設定）",
+  "prefs.toneSeg.formal": "フォーマル",
+  "prefs.toneSeg.neutral": "ニュートラル",
+  "prefs.toneSeg.casual": "カジュアル",
+  "prefs.toneSeg.keep.example": "原文の口調のまま",
+  "prefs.toneSeg.formal.example": "ご査収ください",
+  "prefs.toneSeg.neutral.example": "添付をご確認ください",
+  "prefs.toneSeg.casual.example": "添付見てね"
 }

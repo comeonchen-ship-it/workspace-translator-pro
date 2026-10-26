@@ -392,5 +392,13 @@
   "prefs.terms.desc": "특정 단어를 매번 원하는 방식으로 처리합니다. 한 파일에만 적용하려면 메인 화면의 '이 파일 전용 용어'를 사용하세요.",
   "prefs.terms.empty": "아직 지정한 용어가 없습니다. 추가하면 번역할 때마다 원하는 방식으로 처리됩니다.",
   "prefs.custom.desc": "그 밖에 AI에게 알리고 싶은 요청을 직접 적어 주세요.",
-  "prefs.docTerms.empty": "이 파일 전용 용어가 아직 없습니다."
+  "prefs.docTerms.empty": "이 파일 전용 용어가 아직 없습니다.",
+  "prefs.toneSeg.keep": "원문대로 (기본값)",
+  "prefs.toneSeg.formal": "격식체",
+  "prefs.toneSeg.neutral": "중립",
+  "prefs.toneSeg.casual": "구어체",
+  "prefs.toneSeg.keep.example": "원문 어조 유지",
+  "prefs.toneSeg.formal.example": "첨부 파일을 확인해 주시기 바랍니다",
+  "prefs.toneSeg.neutral.example": "첨부 파일을 확인하세요",
+  "prefs.toneSeg.casual.example": "첨부 파일 봐 줘"
 }

@@ -392,5 +392,13 @@
   "prefs.terms.desc": "Palabras que siempre se tratan a tu manera. Para un solo archivo, usa «Términos de este archivo» en la pantalla principal.",
   "prefs.terms.empty": "Aún no hay términos. Una vez añadidos, cada traducción los tratará a tu manera.",
   "prefs.custom.desc": "Cualquier otra cosa que quieras que sepa la IA, con tus propias palabras.",
-  "prefs.docTerms.empty": "Aún no hay términos para este archivo."
+  "prefs.docTerms.empty": "Aún no hay términos para este archivo.",
+  "prefs.toneSeg.keep": "Como el original (predet.)",
+  "prefs.toneSeg.formal": "Formal",
+  "prefs.toneSeg.neutral": "Neutro",
+  "prefs.toneSeg.casual": "Informal",
+  "prefs.toneSeg.keep.example": "mismo tono que el original",
+  "prefs.toneSeg.formal.example": "adjunto le remito",
+  "prefs.toneSeg.neutral.example": "consulte el adjunto",
+  "prefs.toneSeg.casual.example": "échale un ojo al adjunto"
 }

@@ -74,6 +74,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefConcise = document.getElementById('pref-concise');
   // Name categories: one segmented control (translate / keep / annotate) each.
   const nameModes = { ...normalizeNames({}) };
+  // Tone segments (2×2) ↔ the hidden #pref-tone select.
+  function renderToneSeg() {
+    const group = document.getElementById('tone-seg');
+    if (!group) return;
+    group.innerHTML = '';
+    for (const tone of ['keep', 'formal', 'neutral', 'casual']) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', String(prefTone.value === tone));
+      const label = document.createElement('span');
+      label.className = 'seg-label';
+      label.textContent = t(`prefs.toneSeg.${tone}`);
+      const example = document.createElement('span');
+      example.className = 'seg-example';
+      example.textContent = t(`prefs.toneSeg.${tone}.example`);
+      btn.append(label, example);
+      btn.addEventListener('click', () => {
+        if (prefTone.value === tone) return;
+        prefTone.value = tone;
+        prefTone.dispatchEvent(new Event('change'));
+      });
+      group.appendChild(btn);
+    }
+  }
+
   // Translation length segments ↔ the hidden #pref-concise checkbox.
   function renderConciseSeg() {
     const group = document.getElementById('concise-seg');
@@ -336,7 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadHistory();
     globalTerms.rerender();
     docTerms.rerender();
-    renderNameModes(); renderConciseSeg();
+    renderNameModes(); renderConciseSeg(); renderToneSeg();
     updateRulesPreview();
   }
 
@@ -381,6 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputFitText) inputFitText.checked = items.fitTextToBoxes !== false;
     const prefs = items.translationPrefs || {};
     prefTone.value = prefs.tone || 'keep';
+    renderToneSeg();
     prefConcise.checked = prefs.concise === true;
     renderConciseSeg();
     // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
@@ -525,7 +552,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     prefCustomCount.textContent = `${prefCustom.value.length}/${CUSTOM_MAX_CHARS}`;
   }
   prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
-  prefTone.addEventListener('change', updateRulesPreview);
+  prefTone.addEventListener('change', () => { renderToneSeg(); updateRulesPreview(); updateUnsavedNote(); });
   prefConcise.addEventListener('change', () => { renderConciseSeg(); updateRulesPreview(); updateUnsavedNote(); });
 
   // Plain-language summary of the current preference rules (read-only).

@@ -3,7 +3,7 @@
 
 Usage (from the repo root):  python3 store-assets/retouch.py
 Inputs : 上架宣傳圖片/1280-800-<type>-1(原始).png  (2880×1800 retina photos)
-Output : 上架宣傳圖片/v1.6/photo-<type>.png         (1280×800, RGB, no alpha)
+Output : 上架宣傳圖片/v1.7/photo-<type>.png         (1280×800, RGB, no alpha)
 
 Only the extension's area inside Chrome's side panel is replaced; the rest of
 each photo (Google editor, browser chrome, Chrome's panel title bar) is kept.
@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, '上架宣傳圖片')
-OUT = os.path.join(SRC, 'v1.6')
+OUT = os.path.join(SRC, 'v1.7')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 PORT = 8797
 # Extension area inside Chrome's side panel, in the 2880×1800 photos (measured).
@@ -29,12 +29,12 @@ import json
 # and a caption card names the language first, then the feature.
 PHOTOS = [
     dict(key='slide', accent='#e37400', lang_name='Tiếng Việt', panel=dict(
-            demo='main', type='presentation', title='Google_IO_2026', lang='vi', range='3-8'),
+            demo='main', type='presentation', title='Google_IO_2026', lang='vi', range='3-8', concise='1'),
          title='Pick the language — and the slides',
-         sub='Translate the whole deck or only slides\u00a03\u20118. Every layout stays exactly as it was.'),
+         sub='Translate the whole deck or only slides\u00a03\u20118 — optionally concise, so the text fits the layout.'),
     dict(key='doc', accent='#1a73e8', lang_name='繁體中文', panel=dict(
             demo='prefs', type='document', title='Hezbollah rejects renewed ceasefire agreed by Israel and Lebanon',
-            lang='zh-TW', tone='formal',
+            lang='zh-TW', tone='formal', scroll='names',
             names=json.dumps({'people': 'keep', 'brands': 'keep', 'places': 'translate'}),
             terms=json.dumps([{'src': 'Hezbollah', 'mode': 'keep', 'dst': ''},
                               {'src': 'ceasefire', 'mode': 'translate', 'dst': '停火'}], ensure_ascii=False)),
