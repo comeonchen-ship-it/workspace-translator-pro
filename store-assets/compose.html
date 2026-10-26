@@ -94,7 +94,7 @@
   .card .ic svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .card b { display: block; font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
   .card span { font-size: 15px; color: #6e6e73; line-height: 1.5; text-wrap: balance; }
-  .ov .langs { position: absolute; left: 0; right: 0; bottom: 46px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .ov .langs { position: absolute; left: 60px; right: 60px; bottom: 34px; row-gap: 10px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
   .chip { padding: 7px 14px; border-radius: 980px; font-size: 14px; font-weight: 600; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
   .chip.t { color: #fff; box-shadow: none; }
 
@@ -155,10 +155,13 @@
   .stack .hd { height: 40px; padding: 0 14px; display: flex; align-items: center; font-size: 15px; font-weight: 700; color: #fff; background: #1a3a6b; }
   .multi { position: absolute; top: 400px; left: 1010px; width: 340px; text-align: center; font-size: 15px; font-weight: 600; color: #c7c7d1; }
   .multi b { color: #fff; }
-  .langrow { position: absolute; left: 730px; width: 610px; top: 440px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .langrow { position: absolute; left: 700px; width: 660px; top: 440px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .langrow span { white-space: nowrap; }
   .langrow span { text-align: center; }
   .langrow span { padding: 5px 11px; border-radius: 980px; font-size: 13px; font-weight: 600; color: #d2d2da; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
   .langrow span.on { color: #0b0d16; background: #b18cff; box-shadow: none; }
+  .ov .langs .br { flex-basis: 100%; height: 0; }
+  .ov .langs .chip { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -169,6 +172,11 @@ const lang = new URLSearchParams(location.search).get('lang') || 'en';
 const mini = (cls, d) => `<div class="ms ${cls}"><div class="hd">${d.title}</div><div class="bd"><ul>${d.items.map((i) => `<li>${i}</li>`).join('')}</ul>
   <div class="chart"><i style="height:40%;background:#9bbcf0"></i><i style="height:62%;background:#6a9be8"></i><i style="height:80%;background:#1a73e8"></i><i style="height:100%;background:#0b4fae"></i></div></div>
   <div class="ft"><span>Google Cloud</span><span>${d.conf}</span></div><div class="strip"></div></div>`;
+const CODES = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'es', 'fr', 'de', 'vi', 'th'];
+const NATIVE = ['English', '繁體中文', '简体中文', '日本語', '한국어', 'Español', 'Français', 'Deutsch', 'Tiếng Việt', 'ไทย'];
+// Language names in the viewer's language (same as the extension's chips).
+const langNames = (ui) => { const dn = new Intl.DisplayNames([ui], { type: 'language' });
+  return CODES.map((c) => { const n = dn.of(c); return n.charAt(0).toLocaleUpperCase(ui) + n.slice(1); }); };
 const SRC = { title: 'Q3 Product Roadmap', items: ['Launch <em>beta</em> in September', 'Customer pilots in 5 regions', 'General availability in January'], conf: 'Confidential' };
 const T = {
   en: { back: ['Hoja de ruta del 3.er trimestre', 'Roadmap für das 3. Quartal', '第3四半期 製品ロードマップ'], multi: '<b>10 languages</b> · one copy each', html: 'en', h1: 'Translate Google files.', h2: 'Keep the layout.', kept: 'Layout kept',
@@ -227,7 +235,7 @@ const shots = {
   overview: `<div class="shot ov">${head('Everything you need. <span class="grad">Nothing to reformat.</span>',
         'Translate Google Slides, Docs, Sheets and Forms — and keep every layout.')}
       <div class="grid"><div class="card"><div class="ic" style="background:#0071e3"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div><b>Layout kept</b><span>Formatting follows the words; longer text shrinks to fit.</span></div><div class="card"><div class="ic" style="background:#34a853"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5"/><path d="M5 14h14"/></svg></div><b>Free to start</b><span>A free Gemini key in a minute — or OpenAI, Claude, custom.</span></div><div class="card"><div class="ic" style="background:#7d4cdb"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg></div><b>Your rules</b><span>Names, terms, tone and length — set once, used every time.</span></div><div class="card"><div class="ic" style="background:#e37400"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7"/></svg></div><b>Whole file or part</b><span>Every slide, or just 3-10, 12. Whole sheet or the current tab.</span></div><div class="card"><div class="ic" style="background:#d93025"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><b>Many languages at once</b><span>Pick several languages and get one copy for each.</span></div><div class="card"><div class="ic" style="background:#188038"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><b>Private by design</b><span>Your original never changes. Your key stays in your browser.</span></div></div>
-      <div class="langs"><span class="chip t" style="background:#f4b400">Slides</span><span class="chip t" style="background:#4285f4">Docs</span><span class="chip t" style="background:#0f9d58">Sheets</span><span class="chip t" style="background:#7248b9">Forms</span><span style="width:14px"></span><span class="chip">English</span><span class="chip">繁體中文</span><span class="chip">简体中文</span><span class="chip">日本語</span><span class="chip">한국어</span><span class="chip">Español</span><span class="chip">Français</span><span class="chip">Deutsch</span><span class="chip">Tiếng Việt</span><span class="chip">ไทย</span></div></div>`,
+      <div class="langs"><span class="chip t" style="background:#f4b400">Slides</span><span class="chip t" style="background:#4285f4">Docs</span><span class="chip t" style="background:#0f9d58">Sheets</span><span class="chip t" style="background:#7248b9">Forms</span><span class="br"></span>${langNames('en').map((n) => `<span class="chip">${n}</span>`).join('')}</div></div>`,
   marquee: (() => { const L = T[lang] || T.en; return `<div class="mq dark" lang="${L.html}"><div class="copy">
         <div class="name"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>
         <h1>${L.h1}<br><span class="grad2">${L.h2}</span></h1>
@@ -243,7 +251,7 @@ const shots = {
       ${mini('b', L.slide).replace('class="ms b"', 'class="ms b" style="top:150px"')}
       <div class="ms-lbl" style="left:690px; top:406px">English</div>
       <div class="multi">${L.multi}</div>
-      <div class="langrow">${['English', '繁體中文', '简体中文', '日本語', '한국어', 'Español', 'Français', 'Deutsch', 'Tiếng Việt', 'ไทย'].map((n) => `<span class="${n === L.slide.name ? 'on' : ''}">${n}</span>`).join('')}</div>
+      <div class="langrow">${langNames(lang).map((n, i) => `<span class="${NATIVE[i] === L.slide.name ? 'on' : ''}">${n}</span>`).join('')}</div>
       <div class="kept" style="left:1200px; top:30px">✓ ${L.kept}</div></div>`; })(),
   tile: (() => { const L = T[lang] || T.en; return `<div class="tl dark" lang="${L.html}"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
         <div class="types">${L.types.map((t, i) => `<span style="background:${['#f4b400', '#4285f4', '#0f9d58', '#7248b9'][i]}">${t}</span>`).join('')}</div>
