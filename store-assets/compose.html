@@ -55,6 +55,10 @@
   .doc-body { padding: 0 14px 14px; font-size: 13px; }
   .doc-body .row { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid #ececf0; }
   .doc-body .row span:last-child { color: #6e6e73; }
+  .fit-tag { display: inline-flex; align-items: center; gap: 6px; margin: 0 14px 14px; padding: 5px 10px; border-radius: 980px;
+             font-size: 12px; font-weight: 600; color: #0b7a3b; background: #e6f6ec; }
+  .fit-tag::before { content: '⤡'; font-size: 13px; }
+  .doc.right .doc-title { font-size: 16px; }
   .doc .bar { height: 6px; background: linear-gradient(90deg, #0071e3, #7d4cdb); }
 
   /* ── Marquee 1400×560 ─────────────────────────────────────────────── */
@@ -87,20 +91,21 @@
 <div id="root"></div>
 <script>
 const shot = new URLSearchParams(location.search).get('shot') || '1';
-const device = (state, style = '') => `
-  <div class="device" style="${style}"><div class="screen"><iframe src="../popup.html?demo=${state}&ui=en"></iframe></div></div>`;
+const device = (state, style = '', marks = '') => `
+  <div class="device" style="${style}"><div class="screen"><iframe src="../popup.html?demo=${state}&ui=en${marks ? '&marks=' + marks : ''}"></iframe></div></div>`;
 const brand = `<div class="brand"><img src="../icons/icon128.png" alt="">Workspace Translator Pro</div>`;
 const head = (h1, sub) => `${brand}<h1>${h1}</h1><p class="sub">${sub}</p>`;
 const pts = (side, items) => `<ul class="points ${side}">${items.map(([b, s]) => `<li><b>${b}</b><span>${s}</span></li>`).join('')}</ul>`;
 
 const shots = {
   1: `<div class="shot">${head('Translate Google files. <span class="grad">Keep the layout.</span>',
-        'Slides, Docs, Sheets and Forms — a translated copy, your original untouched.')}
+        'Slides, Docs, Sheets and Forms — longer text auto-fits, your original untouched.')}
       <div class="doc left"><div class="bar"></div><div class="doc-lang">Original · English</div><div class="doc-title">Q3 Product Roadmap</div>
         <div class="doc-body"><div class="row"><span>Launch beta</span><span>Sep 14</span></div><div class="row"><span>Customer pilots</span><span>Oct 1</span></div><div class="row"><span>General availability</span><span>Jan 31</span></div></div></div>
       <div class="doc right"><div class="bar"></div><div class="doc-lang">Copy · 日本語</div><div class="doc-title">第3四半期 製品ロードマップ</div>
-        <div class="doc-body"><div class="row"><span>ベータ版の公開</span><span>9月14日</span></div><div class="row"><span>顧客パイロット</span><span>10月1日</span></div><div class="row"><span>一般提供開始</span><span>1月31日</span></div></div></div>
-      ${device('done')}</div>`,
+        <div class="doc-body"><div class="row"><span>ベータ版の公開</span><span>9月14日</span></div><div class="row"><span>顧客パイロット</span><span>10月1日</span></div><div class="row"><span>一般提供開始</span><span>1月31日</span></div></div>
+        <div class="fit-tag">Longer text auto-fitted · 6 text boxes</div></div>
+      ${device('done', '', 'done')}</div>`,
   2: `<div class="shot">${head('Set up in a minute. <span class="grad">Free.</span>',
         'Get a free Gemini key — no credit card. Pasted, checked and saved automatically.')}
       ${pts('left', [['Free Gemini key', 'Natural, fluent AI translation at no cost to start.'], ['Or bring your own', 'OpenAI, Claude or any OpenAI-compatible endpoint.']])}
