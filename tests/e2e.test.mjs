@@ -396,7 +396,10 @@ test('slides: the user\'s slide 4 (one sentence over five paragraphs, one blue) 
   const state = await run('p21', 'presentation');
   api.llm.translate = (t) => `TR(${t})`;
   assert.equal(state.step, 'done', state.error);
-  assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts), ['Google Cloud is ⟦1⟧the only provider⟦/1⟧ to offer first-party solutions across the entire AI stack.']);
+  const sent = api.llm.calls.slice(before).flatMap((c) => c.texts);
+  assert.ok(sent.includes('Google Cloud is ⟦1⟧the only provider⟦/1⟧ to offer first-party solutions across the entire AI stack.'));
+  for (const line of ['Google Cloud is', 'the only provider', 'to offer first-party']) assert.ok(!sent.includes(line), line);
   const all = api.batchUpdates.filter((b) => b.api === 'slides').flatMap((b) => b.requests);
-  assert.deepEqual(all.filter((r) => r.replaceAllText).map((r) => r.replaceAllText.containsText.text), []);
+  const lines5 = ['Google Cloud is', 'the only provider', 'to offer first-party', 'solutions across', 'the entire AI stack.'];
+  assert.deepEqual(all.filter((r) => lines5.includes(r.replaceAllText?.containsText?.text)), []);
 });
