@@ -115,3 +115,10 @@ test('postprocess only strips duplicates when a category uses annotate', () => {
 test('default prefs are no longer empty (people + brands kept by default)', () => {
   assert.notEqual(buildPrefsBlock({}, 'Japanese'), '');
 });
+
+test('dropRedundantAnnotations keeps footnotes and partial-word notes', () => {
+  assert.equal(dropRedundantAnnotations('Revenue grew in 2021 (1)'), 'Revenue grew in 2021 (1)');
+  assert.equal(dropRedundantAnnotations('Step 1 (1)'), 'Step 1 (1)');
+  assert.equal(dropRedundantAnnotations('Total (al)'), 'Total (al)');
+  assert.equal(dropRedundantAnnotations('Use AI (AI) now'), 'Use AI now');
+});

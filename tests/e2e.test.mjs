@@ -295,3 +295,13 @@ test("update marks what's new; first install opens the guide once", async () => 
   assert.equal(fake.store.whatsNewSeen, '9.9.9');
   assert.equal(fake.record.tabsCreated.at(-1).url, 'onboarding.html');
 });
+
+test('sheets: name wins over a colliding gid in a converted copy', async () => {
+  const sheet = (sheetId, title, text) => ({ properties: { title, sheetId, gridProperties: { columnCount: 1 } },
+    data: [{ rowData: [{ values: [{ userEnteredValue: { stringValue: text } }] }] }] });
+  api.files.x6 = { sheets: [sheet(5, 'Summary', 'Wrong tab text'), sheet(6, 'Forecast 2027', 'Right tab text')] };
+  const before = api.llm.calls.length;
+  const state = await run('x6', 'spreadsheet', { config: { scope: { sheetGid: 5, sheetTitle: 'Forecast 2027', currentSheetOnly: true } } });
+  assert.equal(state.step, 'done', state.error);
+  assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts).sort(), ['Forecast 2027', 'Right tab text']);
+});
