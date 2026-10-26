@@ -366,5 +366,9 @@
   "guide.group.reference": "Tham khảo",
   "guide.stepLabel": "Bước {n}",
   "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ, rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}.",
-  "done.unusedTerms": "không tìm thấy các từ này trong tệp: {list} (hãy kiểm tra chính tả)"
+  "done.unusedTerms": "không tìm thấy các từ này trong tệp: {list} (hãy kiểm tra chính tả)",
+  "done.overlapSlides": "trang chiếu {list} có hộp văn bản chồng lên nhau — hãy kiểm tra",
+  "guide.cl.170.date": "Tháng 10 năm 2026",
+  "guide.cl.170.1": "Trang chiếu: các từ có màu hoặc định dạng khác trong câu giờ di chuyển theo bản dịch, không còn bị chồng lên nhau.",
+  "guide.cl.170.2": "Thẻ kết quả liệt kê các trang chiếu có hộp văn bản chồng nhau để bạn kiểm tra."
 }

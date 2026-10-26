@@ -312,3 +312,52 @@ test('completion summary lists glossary terms that are not in the file', async (
   assert.equal(state.step, 'done', state.error);
   assert.deepEqual(state.summary.unusedTerms, ['DESK']);
 });
+
+test('slides: mixed-format sentence is rebuilt with its coloured words (v1.7)', async () => {
+  const WHITE = { foregroundColor: { opaqueColor: { rgbColor: { red: 1, green: 1, blue: 1 } } } };
+  const BLUE = { foregroundColor: { opaqueColor: { rgbColor: { blue: 1 } } } };
+  const runs = [['Google Cloud is\u000b', WHITE], ['the only provider', BLUE], ['\u000bto offer AI.\n', WHITE]];
+  let i = 0;
+  const textElements = runs.map(([content, style]) => { const e = { startIndex: i, endIndex: i + content.length, textRun: { content, style } }; i += content.length; return e; });
+  api.files.p16 = { slides: [{ objectId: 's1', pageElements: [{ objectId: 'box', shape: { text: { textElements } } }] }] };
+  const before = api.llm.calls.length;
+  api.llm.translate = (t) => (t.includes('⟦1⟧') ? 'Google Cloud 是⟦1⟧唯一⟦/1⟧提供 AI 的供應商' : `TR(${t})`);
+  const state = await run('p16', 'presentation');
+  api.llm.translate = (t) => `TR(${t})`;
+  assert.equal(state.step, 'done', state.error);
+  const sent = api.llm.calls.slice(before).flatMap((c) => c.texts);
+  assert.deepEqual(sent, ['Google Cloud is ⟦1⟧the only provider⟦/1⟧ to offer AI.']);
+  assert.match(api.llm.calls[before].system, /Formatting markers ⟦1⟧/);
+  const reqs = api.batchUpdates.filter((b) => b.api === 'slides' && b.id !== 'p16').find((b) => b.requests.some((r) => r.deleteText)).requests;
+  assert.deepEqual(reqs.map((r) => Object.keys(r)[0]), ['deleteText', 'insertText', 'updateTextStyle', 'updateTextStyle']);
+  assert.equal(reqs[1].insertText.text, 'Google Cloud 是唯一提供 AI 的供應商');
+  assert.deepEqual(reqs[3].updateTextStyle.style, BLUE);
+});
+
+test('slides: overlapping text boxes are reported on the completion card', async () => {
+  const shape = (id, x, y, w, h, text) => ({ objectId: id, size: { width: { magnitude: w }, height: { magnitude: h } },
+    transform: { translateX: x, translateY: y, scaleX: 1, scaleY: 1 },
+    shape: { text: { textElements: [{ startIndex: 0, endIndex: text.length, textRun: { content: text, style: {} } }] } } });
+  api.files.p17 = { slides: [
+    { objectId: 'a', pageElements: [shape('x', 0, 0, 100, 50, 'Alone\n')] },
+    { objectId: 'b', pageElements: [shape('y', 0, 0, 400, 300, 'Big text\n'), shape('z', 20, 100, 200, 40, 'Overlay\n')] },
+  ] };
+  const state = await run('p17', 'presentation');
+  assert.equal(state.step, 'done', state.error);
+  assert.deepEqual(state.summary.overlapSlides, [2]);
+});
+
+test('slides: if the styled batch is rejected, the sentence still gets translated (plain fallback)', async () => {
+  const WHITE = { bold: false };
+  const BLUE = { bold: true };
+  const runs = [['Plain start ', WHITE], ['bold part', BLUE], [' end.\n', WHITE]];
+  let i = 0;
+  const textElements = runs.map(([content, style]) => { const e = { startIndex: i, endIndex: i + content.length, textRun: { content, style } }; i += content.length; return e; });
+  api.files.p18 = { slides: [{ objectId: 's1', pageElements: [{ objectId: 'box', shape: { text: { textElements } } }] }] };
+  api.failNext[':batchUpdate'] = 400;
+  const state = await run('p18', 'presentation');
+  assert.equal(state.step, 'done', state.error);
+  const replaced = api.batchUpdates.filter((b) => b.api === 'slides').flatMap((b) => b.requests).filter((r) => r.replaceAllText)
+    .map((r) => r.replaceAllText.containsText.text);
+  assert.ok(replaced.includes('Plain start bold part end.'), JSON.stringify(replaced));
+});

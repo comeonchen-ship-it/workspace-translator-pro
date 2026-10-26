@@ -366,5 +366,9 @@
   "guide.group.reference": "Référence",
   "guide.stepLabel": "Étape {n}",
   "guide.start.s2.alt": "Vous préférez OpenAI ou Claude ? Créez une clé sur leur site, puis dans Paramètres → {engine}, choisissez le moteur, collez la clé et cliquez sur {test}.",
-  "done.unusedTerms": "termes introuvables dans ce fichier : {list} (vérifiez l'orthographe)"
+  "done.unusedTerms": "termes introuvables dans ce fichier : {list} (vérifiez l'orthographe)",
+  "done.overlapSlides": "les diapositives {list} ont des zones de texte superposées — vérifiez-les",
+  "guide.cl.170.date": "Octobre 2026",
+  "guide.cl.170.1": "Diapositives : les mots d'une autre couleur ou d'un autre style dans une phrase suivent désormais leur traduction au lieu de rester superposés.",
+  "guide.cl.170.2": "La carte de résultat signale les diapositives aux zones de texte superposées."
 }

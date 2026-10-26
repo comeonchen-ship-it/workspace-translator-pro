@@ -1,4 +1,5 @@
 import { getLanguage } from './i18n/languages.js';
+import { marksIntact } from './lib/styled-runs.js';
 import { buildPrefsBlock, prefsFingerprint, normalizePrefs, postprocessTranslation, unusedGlossaryTerms } from './lib/prefs.js';
 
 /**
@@ -262,7 +263,9 @@ export async function translateTexts(texts, targetLang, config) {
         const raw = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
         const translated = postprocessTranslation(original, raw, config.activePrefs);
         translationsMap.set(original, translated);
-        if (!config.prefsCustomDropped) cache[original.trim()] = translated;
+        // Results whose formatting markers came back broken aren't cached, so a
+        // rerun asks the model again instead of reusing the one-style fallback.
+        if (!config.prefsCustomDropped && marksIntact(original, translated)) cache[original.trim()] = translated;
       }
     }
   }
@@ -537,6 +540,7 @@ Keep unchanged (do NOT translate or reformat):
 - URLs (http/https/www) and email addresses.
 - Numbers, dates, measurements, currency, and product codes/SKUs.
 - Placeholders and markup such as {name}, {{var}}, %s, <tag>, and any leading/trailing spaces.
+- Formatting markers ⟦1⟧…⟦/1⟧, ⟦2⟧…⟦/2⟧: they wrap words with special formatting (e.g. a highlighted colour). Keep every marker pair exactly once, placed around the translated words that carry that meaning, even if the word order changes; never translate, renumber, drop or add markers.
 - Brand names, product names, and acronyms, unless a widely accepted ${targetLangName} form exists.
 
 If an item is already written in ${targetLangName}, or is a proper noun/code with no meaningful translation, return it unchanged. Never return an empty array or fewer items than you were given.` + buildPrefsBlock(prefs, targetLangName);

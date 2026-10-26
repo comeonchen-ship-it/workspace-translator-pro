@@ -366,5 +366,9 @@
   "guide.group.reference": "Nachschlagen",
   "guide.stepLabel": "Schritt {n}",
   "guide.start.s2.alt": "Lieber OpenAI oder Claude? Erstelle dort einen Schlüssel, wähle dann unter Einstellungen → {engine} die Engine, füge den Schlüssel ein und klicke auf {test}.",
-  "done.unusedTerms": "Begriffe nicht in dieser Datei gefunden: {list} (Schreibweise prüfen)"
+  "done.unusedTerms": "Begriffe nicht in dieser Datei gefunden: {list} (Schreibweise prüfen)",
+  "done.overlapSlides": "Folien {list} haben überlappende Textfelder – bitte prüfen",
+  "guide.cl.170.date": "Oktober 2026",
+  "guide.cl.170.1": "Folien: Wörter in anderer Farbe oder Formatierung innerhalb eines Satzes wandern jetzt mit ihrer Übersetzung, statt überlagert stehen zu bleiben.",
+  "guide.cl.170.2": "Die Ergebniskarte nennt Folien mit überlappenden Textfeldern."
 }

@@ -366,5 +366,9 @@
   "guide.group.reference": "Reference",
   "guide.stepLabel": "Step {n}",
   "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site, then in Settings → {engine} choose the engine, paste the key and click {test}.",
-  "done.unusedTerms": "terms not found in this file: {list} (check the spelling)"
+  "done.unusedTerms": "terms not found in this file: {list} (check the spelling)",
+  "done.overlapSlides": "slides {list} have overlapping text boxes — please check them",
+  "guide.cl.170.date": "October 2026",
+  "guide.cl.170.1": "Slides: words in a different colour or style inside a sentence now move with their translation instead of being left behind on top of it.",
+  "guide.cl.170.2": "The result card points out slides with overlapping text boxes so you can check them."
 }

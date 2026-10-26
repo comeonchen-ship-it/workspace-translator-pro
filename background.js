@@ -8,6 +8,7 @@ import { extractTextFromElements, extractTextFromDocElements } from './lib/text-
 import { translateSpreadsheet } from './lib/sheets.js';
 import { translateForm } from './lib/forms.js';
 import { measureShapes, planFontScaling } from './lib/overflow.js';
+import { collectStyledParagraphs, buildStyledRequests, slidesWithOverlappingText } from './lib/styled-runs.js';
 import { getLanguage } from './i18n/languages.js';
 
 // Enable opening of Side Panel when clicking the extension action icon
@@ -429,6 +430,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     targetLang,
     customDropped: !!config.prefsCustomDropped,
     unusedTerms: config.unusedTerms || [],
+    overlapSlides: config.overlapSlides || [],
     ...extra,
   });
   
@@ -583,6 +585,52 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
           extractTextFromElements(slide.slideProperties.notesPage.pageElements, pageTextMap, notesPageId, uniqueTexts, shapeIdsWithText);
         }
       }
+      // v1.7: sentences with differently formatted words (e.g. one phrase in
+      // another colour) are translated with formatting markers and rebuilt, so
+      // the coloured run follows its translated words instead of being left
+      // behind. Needs an AI engine (the basic free engine can't keep markers).
+      config.styledParagraphs = [];
+      if (config.translationEngine !== 'free') {
+        const styled = collectStyledParagraphs(slidesInScope);
+        // Drop a line from the plain path only if every shape on that page with
+        // this exact line is a styled one (otherwise plain copies stay translated).
+        const plainCounts = new Map();
+        const countLines = (elements, pageId) => {
+          for (const el of elements || []) {
+            const texts = el.shape?.text ? [el.shape.text] : el.table?.tableRows?.flatMap((r) => (r.tableCells || []).map((c) => c.text).filter(Boolean)) || [];
+            for (const tx of texts) {
+              const full = (tx.textElements || []).map((te) => te.textRun?.content || '').join('');
+              for (const line of full.split('\n')) {
+                const k = pageId + '\u0000' + line.trim();
+                if (line.trim()) plainCounts.set(k, (plainCounts.get(k) || 0) + 1);
+              }
+            }
+            if (el.group?.children) countLines(el.group.children, pageId);
+          }
+        };
+        for (const sl of slidesInScope) {
+          countLines(sl.pageElements, sl.objectId);
+          const notes = sl.slideProperties?.notesPage;
+          if (notes) countLines(notes.pageElements, notes.objectId);
+        }
+        const styledCounts = new Map();
+        for (const sp of styled) {
+          uniqueTexts.add(sp.tagged);
+          const k = sp.pageId + '\u0000' + sp.raw;
+          styledCounts.set(k, (styledCounts.get(k) || 0) + 1);
+        }
+        for (const sp of styled) {
+          const k = sp.pageId + '\u0000' + sp.raw;
+          if ((plainCounts.get(k) || 0) <= styledCounts.get(k)) pageTextMap.get(sp.pageId)?.delete(sp.raw);
+        }
+        // Lines now handled only by the styled path need no plain translation.
+        const stillUsed = new Set([...pageTextMap.values()].flatMap((set) => [...set]));
+        for (const sp of styled) if (!stillUsed.has(sp.raw)) uniqueTexts.delete(sp.raw);
+        config.styledParagraphs = styled;
+        if (styled.length) await logDebug(`Mixed-format paragraphs to rebuild: ${styled.length}.`, presentationId);
+      }
+      const slideNumbers = slidesInScope.map((sl) => presentation.slides.indexOf(sl) + 1);
+      config.overlapSlides = slidesWithOverlappingText(slidesInScope, (i) => slideNumbers[i]);
       // Keep a reference to pageTextMap in the config so we can access it below
       config.pageTextMap = pageTextMap;
       config.shapeIdsWithText = shapeIdsWithText;
@@ -635,6 +683,33 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       }
       // Note: updateTableCellStyle is handled separately below as a best-effort step
     } else {
+      // Styled paragraphs first: they must be rewritten before any plain
+      // replaceAllText on the same page could touch their text.
+      const styledPlan = buildStyledRequests(config.styledParagraphs || [], translationsMap);
+      // Own batch first: batchUpdate is all-or-nothing, so a rejected styled
+      // request must not block the rest of the deck. On failure those lines go
+      // through the plain replaceAllText path instead.
+      if (styledPlan.requests.length) {
+        try {
+          await updatePresentation(copyId, styledPlan.requests, token);
+          await logDebug(`Rebuilt ${styledPlan.rebuilt + styledPlan.fallbacks} mixed-format paragraph(s).`, presentationId);
+        } catch (styledErr) {
+          await logDebug(`Mixed-format rebuild failed, using plain replacement instead: ${styledErr.message}`, presentationId);
+          const missing = (config.styledParagraphs || []).filter((sp) => !translationsMap.has(sp.raw));
+          if (missing.length) {
+            const extra = await translateTexts([...new Set(missing.map((sp) => sp.raw))], targetLang, config);
+            for (const [k, v] of extra) translationsMap.set(k, v);
+          }
+          for (const sp of config.styledParagraphs || []) {
+            if (!config.pageTextMap.has(sp.pageId)) config.pageTextMap.set(sp.pageId, new Set());
+            config.pageTextMap.get(sp.pageId).add(sp.raw);
+          }
+          styledPlan.rebuilt = 0;
+        }
+      }
+      config.styledRebuilt = styledPlan.rebuilt;
+      config.styledFallbacks = styledPlan.fallbacks;
+      if (styledPlan.fallbacks) await logDebug(`${styledPlan.fallbacks} mixed-format paragraph(s) written in one style (markers not kept by the model).`, presentationId);
       const pageTextMap = config.pageTextMap;
       for (const [pageId, pageTexts] of pageTextMap.entries()) {
         const sortedTexts = Array.from(pageTexts).sort((a, b) => b.length - a.length);

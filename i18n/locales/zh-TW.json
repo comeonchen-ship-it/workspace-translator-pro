@@ -366,5 +366,9 @@
   "guide.group.reference": "參考資料",
   "guide.stepLabel": "步驟 {n}",
   "guide.start.s2.alt": "想用 OpenAI 或 Claude？到對方網站建立金鑰，再到設定 →{engine}選擇引擎、貼上金鑰並按 {test}。",
-  "done.unusedTerms": "這些詞語在檔案中找不到：{list}（請檢查拼字）"
+  "done.unusedTerms": "這些詞語在檔案中找不到：{list}（請檢查拼字）",
+  "done.overlapSlides": "第 {list} 張投影片有重疊的文字框，請手動檢查",
+  "guide.cl.170.date": "2026 年 10 月",
+  "guide.cl.170.1": "簡報：句子中不同顏色或格式的字，現在會跟著譯文一起移動，不再留在原位和譯文疊在一起。",
+  "guide.cl.170.2": "完成卡片會列出有重疊文字框的投影片，方便你檢查。"
 }
