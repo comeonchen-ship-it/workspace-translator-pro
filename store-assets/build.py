@@ -20,6 +20,7 @@ SHOTS = [
     ('3', 1280, 800, 'screenshot-3-preferences.png'),
     ('4', 1280, 800, 'screenshot-4-languages.png'),
     ('5', 1280, 800, 'screenshot-5-background.png'),
+    ('overview', 1280, 800, 'screenshot-overview.png'),
     ('marquee', 1400, 560, 'marquee-1400x560.png'),
     ('tile', 440, 280, 'small-tile-440x280.png'),
 ]
