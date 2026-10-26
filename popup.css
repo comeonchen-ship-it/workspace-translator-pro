@@ -1446,7 +1446,7 @@ body.theme-form {
 .field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; white-space: pre-line; }
 .prefs-free-note { font-size: 11px; color: var(--text-warning, #fdcb6e); margin-bottom: 8px; }
 .prefs-free-note.hidden { display: none; }
-#prefs-card.disabled .form-group { opacity: 0.45; pointer-events: none; }
+#prefs-card.disabled .form-group, #prefs-card.disabled .pref-section { opacity: 0.45; pointer-events: none; }
 .doc-glossary { font-size: 12px; color: var(--text-muted); }
 .doc-glossary summary { cursor: pointer; padding: 4px 0; }
 .doc-glossary textarea { margin-top: 6px; }
@@ -1711,5 +1711,21 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
 
 /* Translation preferences: separate the items clearly, and keep a hint tight
    under the control it explains so it isn't read as the next item's intro. */
-#prefs-card > .form-group { margin-bottom: 18px; }
 .pref-length .field-hint { margin-top: -2px; font-size: 10.5px; opacity: 0.8; }
+
+/* Preference sections: card title (h4) > section title (h5) > sub-label. */
+.pref-section { padding: 12px 0 14px; border-top: 1px solid var(--border-color); }
+.pref-section:first-of-type { border-top: none; padding-top: 2px; }
+.pref-title { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 2px; }
+.pref-title label { font: inherit; color: inherit; }
+.pref-desc { font-size: 11px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.5; }
+.pref-section .form-group { margin-bottom: 12px; }
+.pref-section .form-group:last-child { margin-bottom: 0; }
+.pref-section .name-mode-label { font-size: 11px; color: var(--text-muted); }
+.term-empty { font-size: 11px; color: var(--text-muted); padding: 10px 12px; border: 1px dashed var(--border-color); border-radius: 8px; line-height: 1.5; }
+
+/* Main screen follows the same rules as Settings: a hint sits tight under the
+   control it explains. */
+#scope-concise { gap: 4px; }
+#scope-concise .field-hint { margin-top: 0; font-size: 10.5px; opacity: 0.8; }
+.doc-glossary .pref-desc { margin: 4px 0 8px; }

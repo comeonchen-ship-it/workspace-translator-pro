@@ -135,8 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
   const rulesPreviewList = document.getElementById('rules-preview-list');
-  const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview });
-  const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms });
+  const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview, emptyKey: 'prefs.terms.empty' });
+  const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms, emptyKey: 'prefs.docTerms.empty' });
   const prefCustom = document.getElementById('pref-custom');
   const prefCustomCount = document.getElementById('pref-custom-count');
   const docGlossaryBox = document.getElementById('doc-glossary-box');

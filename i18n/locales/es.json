@@ -377,12 +377,20 @@
   "prefs.preview.concise": "Las traducciones se mantienen concisas, cerca de la longitud original.",
   "done.fitCheck": "Se redujo el tamaño de letra en {n} cuadros de texto para que quepan las traducciones más largas. Algún texto aún puede salirse de su cuadro: conviene echar un vistazo rápido al archivo",
   "guide.pr.concise": "Longitud de la traducción: «Como el original» (predeterminado) o «Concisa, cabe en el diseño». Concisa elige expresiones más cortas para que el texto quepa mejor en las diapositivas; no se omite contenido, solo la redacción es más compacta. Es el valor predeterminado para todos los archivos; en Slides puedes cambiarlo solo para esa presentación en la pantalla principal. Para contratos y textos literales, mantén el valor predeterminado.",
-  "scope.concise.hint": "Solo se aplica a esta presentación (el valor predeterminado viene de Ajustes). Redacción más compacta, sin omitir contenido.",
+  "scope.concise.hint": "Solo esta presentación. Frases más cortas, sin omitir nada.",
   "prefs.length.label": "Longitud de la traducción",
   "prefs.length.full": "Como el original (predet.)",
   "prefs.length.concise": "Concisa, cabe en el diseño",
   "prefs.length.full.example": "nos complace anunciar",
   "prefs.length.concise.example": "anunciamos",
   "guide.cl.170.3": "Hojas de cálculo: las opciones de los desplegables se traducen junto con las celdas, así que los valores traducidos ya no se marcan como no válidos.",
-  "guide.cl.170.4": "Más fiable: una respuesta inusual de la IA ya no detiene todo el trabajo, el registro se muestra si hay un error, la guía sigue disponible durante la traducción, y la interfaz y el idioma de destino siguen el idioma del navegador (chino tradicional o simplificado según la región)."
+  "guide.cl.170.4": "Más fiable: una respuesta inusual de la IA ya no detiene todo el trabajo, el registro se muestra si hay un error, la guía sigue disponible durante la traducción, y la interfaz y el idioma de destino siguen el idioma del navegador (chino tradicional o simplificado según la región).",
+  "prefs.group.style": "Estilo",
+  "prefs.group.style.desc": "El tono de la traducción y su longitud.",
+  "prefs.names.title": "Nombres propios",
+  "prefs.names.desc": "La IA reconoce los nombres sola: solo elige cómo tratar cada tipo.",
+  "prefs.terms.desc": "Palabras que siempre se tratan a tu manera. Para un solo archivo, usa «Términos de este archivo» en la pantalla principal.",
+  "prefs.terms.empty": "Aún no hay términos. Una vez añadidos, cada traducción los tratará a tu manera.",
+  "prefs.custom.desc": "Cualquier otra cosa que quieras que sepa la IA, con tus propias palabras.",
+  "prefs.docTerms.empty": "Aún no hay términos para este archivo."
 }

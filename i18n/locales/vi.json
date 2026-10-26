@@ -377,12 +377,20 @@
   "prefs.preview.concise": "Bản dịch được giữ ngắn gọn, gần độ dài bản gốc.",
   "done.fitCheck": "Đã tự động thu nhỏ chữ trong {n} khung văn bản để vừa bản dịch dài hơn. Một số chữ vẫn có thể tràn khỏi khung — bạn nên mở tệp và xem nhanh một lượt",
   "guide.pr.concise": "Độ dài bản dịch — \"Theo bản gốc\" (mặc định) hoặc \"Ngắn gọn, vừa bố cục\". Ngắn gọn chọn cách diễn đạt ngắn hơn để chữ dễ vừa trang chiếu; nội dung không bị lược bỏ, chỉ câu chữ gọn hơn. Đây là mặc định cho mọi tệp; khi dịch Slides, bạn có thể đổi riêng cho bản trình bày đó ở màn hình chính. Với hợp đồng và văn bản cần sát từng chữ, nên giữ mặc định.",
-  "scope.concise.hint": "Chỉ áp dụng cho bản trình bày này (mặc định lấy từ Cài đặt). Câu chữ gọn hơn nhưng không lược bỏ nội dung.",
+  "scope.concise.hint": "Chỉ cho bản trình bày này. Câu chữ ngắn hơn, không lược nội dung.",
   "prefs.length.label": "Độ dài bản dịch",
   "prefs.length.full": "Theo bản gốc (mặc định)",
   "prefs.length.concise": "Ngắn gọn, vừa bố cục",
   "prefs.length.full.example": "chúng tôi vui mừng thông báo",
   "prefs.length.concise.example": "xin thông báo",
   "guide.cl.170.3": "Trang tính: các lựa chọn trong danh sách thả xuống được dịch cùng ô, nên giá trị đã dịch không còn bị báo không hợp lệ.",
-  "guide.cl.170.4": "Ổn định hơn: phản hồi bất thường của AI không còn làm dừng cả lượt dịch, nhật ký tự hiện khi có lỗi, vẫn mở được hướng dẫn trong lúc dịch, giao diện và ngôn ngữ đích tự theo ngôn ngữ trình duyệt (tiếng Trung phồn thể hoặc giản thể theo khu vực)."
+  "guide.cl.170.4": "Ổn định hơn: phản hồi bất thường của AI không còn làm dừng cả lượt dịch, nhật ký tự hiện khi có lỗi, vẫn mở được hướng dẫn trong lúc dịch, giao diện và ngôn ngữ đích tự theo ngôn ngữ trình duyệt (tiếng Trung phồn thể hoặc giản thể theo khu vực).",
+  "prefs.group.style": "Phong cách",
+  "prefs.group.style.desc": "Giọng văn và độ dài của bản dịch.",
+  "prefs.names.title": "Tên riêng",
+  "prefs.names.desc": "AI tự nhận biết tên riêng — bạn chỉ cần chọn cách xử lý cho từng loại.",
+  "prefs.terms.desc": "Những từ luôn được xử lý theo cách của bạn. Chỉ cho một tệp, hãy dùng \"Từ ngữ riêng cho tệp này\" ở màn hình chính.",
+  "prefs.terms.empty": "Chưa có thuật ngữ nào. Sau khi thêm, mỗi lần dịch sẽ xử lý theo cách của bạn.",
+  "prefs.custom.desc": "Bất cứ yêu cầu nào khác bạn muốn AI biết, viết bằng lời của bạn.",
+  "prefs.docTerms.empty": "Tệp này chưa có từ ngữ riêng."
 }

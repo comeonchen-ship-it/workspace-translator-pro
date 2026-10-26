@@ -377,12 +377,20 @@
   "prefs.preview.concise": "Übersetzungen bleiben knapp, nahe an der Originallänge.",
   "done.fitCheck": "Schriftgröße in {n} Textfeldern verkleinert, damit längere Übersetzungen passen. Einzelne Texte können trotzdem überstehen – ein kurzer Blick durch die Datei lohnt sich",
   "guide.pr.concise": "Übersetzungslänge – „Wie im Original“ (Standard) oder „Knapp, passt ins Layout“. Knapp wählt kürzere Formulierungen, damit Text besser auf Folien passt; es fällt nichts weg, nur die Sprache wird knapper. Das ist der Standard für alle Dateien; bei Präsentationen lässt er sich im Hauptbildschirm nur für diese Präsentation ändern. Für Verträge und wortgenaue Texte die Standardeinstellung behalten.",
-  "scope.concise.hint": "Gilt nur für diese Präsentation (Standard aus den Einstellungen). Knappere Formulierungen, es fällt nichts weg.",
+  "scope.concise.hint": "Nur für diese Präsentation. Kürzer formuliert, nichts weggelassen.",
   "prefs.length.label": "Übersetzungslänge",
   "prefs.length.full": "Wie im Original (Standard)",
   "prefs.length.concise": "Knapp, passt ins Layout",
   "prefs.length.full.example": "wir freuen uns, mitzuteilen",
   "prefs.length.concise.example": "wir melden",
   "guide.cl.170.3": "Tabellen: Auswahllisten werden zusammen mit den Zellen übersetzt, übersetzte Werte gelten nicht mehr als ungültig.",
-  "guide.cl.170.4": "Zuverlässiger: eine ungewöhnliche KI-Antwort stoppt nicht mehr den ganzen Auftrag, bei Fehlern erscheint das Protokoll, die Anleitung bleibt während der Übersetzung offen, und Oberfläche sowie Zielsprache folgen der Browsersprache (Chinesisch traditionell oder vereinfacht je nach Region)."
+  "guide.cl.170.4": "Zuverlässiger: eine ungewöhnliche KI-Antwort stoppt nicht mehr den ganzen Auftrag, bei Fehlern erscheint das Protokoll, die Anleitung bleibt während der Übersetzung offen, und Oberfläche sowie Zielsprache folgen der Browsersprache (Chinesisch traditionell oder vereinfacht je nach Region).",
+  "prefs.group.style": "Stil",
+  "prefs.group.style.desc": "Wie die Übersetzung klingt und wie lang sie ist.",
+  "prefs.names.title": "Eigennamen",
+  "prefs.names.desc": "Die KI erkennt Namen selbst – wählen Sie nur, wie jede Art behandelt wird.",
+  "prefs.terms.desc": "Wörter, die immer nach Ihren Vorgaben behandelt werden. Nur für eine Datei: „Begriffe für diese Datei“ im Hauptbildschirm.",
+  "prefs.terms.empty": "Noch keine Begriffe. Hinzugefügte Begriffe werden bei jeder Übersetzung nach Ihren Vorgaben behandelt.",
+  "prefs.custom.desc": "Alles Weitere, was die KI wissen soll – in eigenen Worten.",
+  "prefs.docTerms.empty": "Noch keine Begriffe für diese Datei."
 }
