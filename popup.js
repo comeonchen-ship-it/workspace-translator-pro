@@ -1672,6 +1672,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
     if (summary.columnsFitted) parts.push(t('done.columnsFitted', { n: summary.columnsFitted }));
     if (summary.customDropped) parts.push(t('done.customDropped'));
+    if (summary.untranslated) parts.push(t('done.untranslated', { n: summary.untranslated }));
     if (summary.overlapSlides?.length) {
       parts.push(t('done.overlapSlides', { list: summary.overlapSlides.join(t('prefs.preview.listSep')) }));
     }

@@ -211,6 +211,44 @@ export async function translateTexts(texts, targetLang, config) {
       return Promise.resolve([]);
     };
 
+    const isFormatError = (err) => /Translation mismatch|invalid response format/.test(err?.message || '');
+    const checked = async (items) => {
+      const out = await translateBatch(items);
+      if (!Array.isArray(out)) throw new Error('Translation API returned an invalid response format (expected an array).');
+      if (out.length !== items.length) {
+        throw new Error(`Translation mismatch: sent ${items.length} items to translate, but received ${out.length} items.`);
+      }
+      return out;
+    };
+    // When the model returns the wrong number of items (it merged or dropped
+    // some), don't fail the whole job: drop the custom instructions once if any,
+    // then split the batch in halves and retry; a single item that still fails
+    // stays untranslated (its text is kept as is) instead of stopping the job.
+    const translateResilient = async (items, label) => {
+      try {
+        return await checked(items);
+      } catch (err) {
+        if (!isFormatError(err)) throw err;
+        await logDebug(`Batch ${label}: ${err.message}`, presentationId);
+        if (config.activePrefs?.custom) {
+          await logDebug('Retrying without the custom instructions, which may have broken the output format.', presentationId);
+          config.activePrefs = { ...config.activePrefs, custom: '' };
+          config.prefsCustomDropped = true;
+          try { return await checked(items); } catch (e2) { if (!isFormatError(e2)) throw e2; }
+        }
+        if (items.length === 1) {
+          await logDebug(`Kept one item untranslated after repeated format errors: "${items[0].slice(0, 60)}"`, presentationId);
+          config.untranslatedCount = (config.untranslatedCount || 0) + 1;
+          return [items[0]];
+        }
+        const mid = Math.ceil(items.length / 2);
+        await logDebug(`Splitting batch ${label} (${items.length} items) and retrying.`, presentationId);
+        const left = await translateResilient(items.slice(0, mid), `${label}a`);
+        const right = await translateResilient(items.slice(mid), `${label}b`);
+        return [...left, ...right];
+      }
+    };
+
     // done=0 starts the caller's ETA clock just before the first request.
     if (typeof config.onBatchProgress === 'function') config.onBatchProgress(0, batches.length);
 
@@ -229,28 +267,8 @@ export async function translateTexts(texts, targetLang, config) {
       }
 
       await logDebug(`Translating batch ${idx + 1}/${batches.length} (size: ${batch.length} items)...`, presentationId);
-      let batchTranslations = [];
-      try {
-        batchTranslations = await translateBatch(batch);
-        if (!Array.isArray(batchTranslations)) {
-          throw new Error(`Translation API returned an invalid response format (expected an array).`);
-        }
-        if (batchTranslations.length !== batch.length) {
-          throw new Error(`Translation mismatch: sent ${batch.length} items to translate, but received ${batchTranslations.length} items.`);
-        }
-        await logDebug(`Successfully translated batch ${idx + 1}/${batches.length}.`, presentationId);
-      } catch (err) {
-        await logDebug(`Error translating batch ${idx + 1}: ${err.message}`, presentationId);
-        // A free-text instruction can derail the JSON contract. Drop only that part
-        // (tone + glossary are structured and safe) and retry this batch once.
-        const formatBroken = /Translation mismatch|invalid response format/.test(err.message);
-        if (!formatBroken || !config.activePrefs?.custom) throw err;
-        await logDebug('Retrying without the custom instructions, which may have broken the output format.', presentationId);
-        config.activePrefs = { ...config.activePrefs, custom: '' };
-        config.prefsCustomDropped = true;
-        batchTranslations = await translateBatch(batch);
-        if (!Array.isArray(batchTranslations) || batchTranslations.length !== batch.length) throw err;
-      }
+      let batchTranslations = await translateResilient(batch, idx + 1);
+      await logDebug(`Successfully translated batch ${idx + 1}/${batches.length}.`, presentationId);
 
       if (typeof config.onBatchProgress === 'function') {
         config.onBatchProgress(idx + 1, batches.length);

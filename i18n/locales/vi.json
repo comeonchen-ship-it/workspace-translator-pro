@@ -370,5 +370,6 @@
   "done.overlapSlides": "trang chiếu {list} có hộp văn bản chồng lên nhau — hãy kiểm tra",
   "guide.cl.170.date": "Tháng 10 năm 2026",
   "guide.cl.170.1": "Trang chiếu: các từ có màu hoặc định dạng khác trong câu giờ di chuyển theo bản dịch, không còn bị chồng lên nhau.",
-  "guide.cl.170.2": "Thẻ kết quả liệt kê các trang chiếu có hộp văn bản chồng nhau để bạn kiểm tra."
+  "guide.cl.170.2": "Thẻ kết quả liệt kê các trang chiếu có hộp văn bản chồng nhau để bạn kiểm tra.",
+  "done.untranslated": "{n} đoạn văn bản không dịch được và được giữ nguyên — hãy thử lại hoặc dùng mô hình khác"
 }

@@ -370,5 +370,6 @@
   "done.overlapSlides": "les diapositives {list} ont des zones de texte superposées — vérifiez-les",
   "guide.cl.170.date": "Octobre 2026",
   "guide.cl.170.1": "Diapositives : les mots d'une autre couleur ou d'un autre style dans une phrase suivent désormais leur traduction au lieu de rester superposés.",
-  "guide.cl.170.2": "La carte de résultat signale les diapositives aux zones de texte superposées."
+  "guide.cl.170.2": "La carte de résultat signale les diapositives aux zones de texte superposées.",
+  "done.untranslated": "{n} segments n'ont pas pu être traduits et restent tels quels — réessayez ou changez de modèle"
 }

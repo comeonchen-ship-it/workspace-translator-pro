@@ -370,5 +370,6 @@
   "done.overlapSlides": "Folien {list} haben überlappende Textfelder – bitte prüfen",
   "guide.cl.170.date": "Oktober 2026",
   "guide.cl.170.1": "Folien: Wörter in anderer Farbe oder Formatierung innerhalb eines Satzes wandern jetzt mit ihrer Übersetzung, statt überlagert stehen zu bleiben.",
-  "guide.cl.170.2": "Die Ergebniskarte nennt Folien mit überlappenden Textfeldern."
+  "guide.cl.170.2": "Die Ergebniskarte nennt Folien mit überlappenden Textfeldern.",
+  "done.untranslated": "{n} Textabschnitte konnten nicht übersetzt werden und bleiben unverändert – erneut versuchen oder anderes Modell wählen"
 }

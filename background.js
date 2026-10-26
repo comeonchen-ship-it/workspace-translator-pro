@@ -431,6 +431,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     customDropped: !!config.prefsCustomDropped,
     unusedTerms: config.unusedTerms || [],
     overlapSlides: config.overlapSlides || [],
+    untranslated: config.untranslatedCount || 0,
     ...extra,
   });
   

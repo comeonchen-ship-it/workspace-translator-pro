@@ -361,3 +361,25 @@ test('slides: if the styled batch is rejected, the sentence still gets translate
     .map((r) => r.replaceAllText.containsText.text);
   assert.ok(replaced.includes('Plain start bold part end.'), JSON.stringify(replaced));
 });
+
+test('a batch with the wrong item count is split and retried instead of failing the job', async () => {
+  api.files.p19 = { slides: [slide('s1', [['a', 'Alpha one\n'], ['b', 'Beta two\n'], ['c', 'Gamma three\n']])] };
+  // The model merges items whenever it gets more than one at a time.
+  api.llm.override = (texts) => (texts.length > 1 ? texts.slice(1).map((t) => `TR(${t})`) : texts.map((t) => `TR(${t})`));
+  const state = await run('p19', 'presentation');
+  api.llm.override = null;
+  assert.equal(state.step, 'done', state.error);
+  const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean).sort();
+  assert.deepEqual(written, ['TR(Alpha one)', 'TR(Beta two)', 'TR(Gamma three)']);
+});
+
+test('an item that never comes back right is kept as is; the job still completes', async () => {
+  api.files.p20 = { slides: [slide('s1', [['a', 'Fine text\n'], ['b', 'Cursed text\n']])] };
+  api.llm.override = (texts) => (texts.includes('Cursed text') ? [] : texts.map((t) => `TR(${t})`));
+  const state = await run('p20', 'presentation');
+  api.llm.override = null;
+  assert.equal(state.step, 'done', state.error);
+  const written = lastBatch('slides').requests.map((r) => r.replaceAllText?.replaceText).filter(Boolean);
+  assert.deepEqual(written, ['TR(Fine text)']);
+  assert.equal(state.summary.untranslated, 1);
+});

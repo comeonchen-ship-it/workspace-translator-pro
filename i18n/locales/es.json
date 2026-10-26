@@ -370,5 +370,6 @@
   "done.overlapSlides": "las diapositivas {list} tienen cuadros de texto superpuestos; revísalas",
   "guide.cl.170.date": "Octubre de 2026",
   "guide.cl.170.1": "Diapositivas: las palabras de otro color o estilo dentro de una frase ahora se mueven con su traducción en lugar de quedar superpuestas.",
-  "guide.cl.170.2": "La tarjeta de resultado indica las diapositivas con cuadros de texto superpuestos."
+  "guide.cl.170.2": "La tarjeta de resultado indica las diapositivas con cuadros de texto superpuestos.",
+  "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo"
 }
