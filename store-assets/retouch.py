@@ -29,21 +29,21 @@ import json
 # and a caption card names the language first, then the feature.
 PHOTOS = [
     dict(key='slide', accent='#e37400', lang_name='Tiếng Việt', panel=dict(
-            demo='main', type='presentation', title='Google_IO_2026', lang='vi', range='3-8', marks='lang,range'),
+            demo='main', type='presentation', title='Google_IO_2026', lang='vi', range='3-8', marks='job'),
          title='Pick the language — and the slides',
          sub='Translate the whole deck or only slides\u00a03\u20118. Every layout stays exactly as it was.'),
     dict(key='doc', accent='#1a73e8', lang_name='繁體中文', panel=dict(
             demo='prefs', type='document', title='Hezbollah rejects renewed ceasefire agreed by Israel and Lebanon',
-            lang='zh-TW', tone='formal', marks='tone,names',
+            lang='zh-TW', tone='formal', marks='names',
             names=json.dumps({'people': 'keep', 'brands': 'keep', 'places': 'translate'}),
             terms=json.dumps([{'src': 'Hezbollah', 'mode': 'keep', 'dst': ''},
                               {'src': 'ceasefire', 'mode': 'translate', 'dst': '停火'}], ensure_ascii=False)),
          title='Names stay as they are',
-         sub='Keep people’s and brand names, translate places, pick a formal tone — the AI spots names by itself.'),
+         sub='Keep people’s and brand names, translate places — the AI spots names by itself.'),
     dict(key='sheets', accent='#188038', lang_name='English', panel=dict(
-            demo='done', type='spreadsheet', title='Projektcontrolling_Tabelle', lang='en', sheetOnly='1', marks='sheet'),
-         title='A translated copy in minutes',
-         sub='Translate the whole workbook or only the sheet you’re on. Columns widen to fit longer text.'),
+            demo='prefs', type='spreadsheet', title='Projektcontrolling_Tabelle', lang='en', scroll='result', marks='result'),
+         title='Longer text still fits',
+         sub='Columns widen and slide fonts shrink automatically — and the translated copy opens as soon as it’s ready.'),
     dict(key='form', accent='#7248b9', lang_name='Español', panel=dict(
             demo='prefs', type='form', title='高級ファッションブランドに関する消費者調査', lang='es', scroll='terms', marks='terms',
             terms=json.dumps([{'src': 'ブランド', 'mode': 'translate', 'dst': 'marca'},
