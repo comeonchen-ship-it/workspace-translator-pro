@@ -42,7 +42,7 @@ PRIVACY
 No servers, no tracking. Your API key and settings stay in your browser; the text is sent only to the translation service you choose.
 ```
 
-**Screenshots** (upload in this order): `screenshot-1-translate.png`, `screenshot-2-setup.png`, `screenshot-3-preferences.png`, `screenshot-4-languages.png`, `screenshot-5-background.png`
+**Screenshots** (upload in this order): `photo-slide.png`, `photo-doc.png`, `photo-sheets.png`, `photo-form.png` — real Google Slides/Docs/Sheets/Forms photos with the current side panel (rebuild with `python3 store-assets/retouch.py`). Optional 5th: `screenshot-3-preferences.png` (translation preferences).
 **Small promo tile**: `small-tile-440x280.png` · **Marquee**: `marquee-1400x560.png`
 
 ## Privacy practices tab
