@@ -45,11 +45,8 @@ PHOTOS = [
          title='Longer text still fits',
          sub='Columns widen and slide fonts shrink automatically — and the translated copy opens as soon as it’s ready.'),
     dict(key='form', accent='#7248b9', lang_name='Español', panel=dict(
-            demo='prefs', type='form', title='高級ファッションブランドに関する消費者調査', lang='es', scroll='terms',
-            terms=json.dumps([{'src': 'ブランド', 'mode': 'translate', 'dst': 'marca'},
-                              {'src': 'Gucci', 'mode': 'keep', 'dst': ''}], ensure_ascii=False)),
-         title='Your words, every time',
-         sub='Set fixed translations for your own terms — e.g. ブランド\u00a0→\u00a0marca — or keep a word untranslated.'),
+            demo='main', type='form', title='高級ファッションブランドに関する消費者調査', lang='es', range=''),
+         title='', sub=''),
 ]
 CAPTION_CSS = (560, 300)               # caption page size in CSS px (card sits bottom-left)
 PHOTO_CSS_SCALE = 2.25                 # 2880-px photo ÷ 1280-px output
