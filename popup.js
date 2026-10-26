@@ -470,7 +470,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateRulesPreview() {
     const items = [];
     if (prefTone.value !== 'keep') items.push(t('prefs.preview.tone', { tone: t(`prefs.tone.${prefTone.value}`) }));
-    const listOf = (mode) => NAME_CATEGORIES.filter((k) => nameModes[k] === mode).map((k) => t(`prefs.keep.${k}`)).join(t('prefs.preview.listSep'));
+    // Category labels are capitalised as headings; mid-sentence they shouldn't be
+    // (German nouns stay capitalised; CJK/Thai have no case).
+    const inSentence = (label) => (['en', 'es', 'fr', 'vi'].includes(document.documentElement.lang)
+      ? label.charAt(0).toLowerCase() + label.slice(1) : label);
+    const listOf = (mode) => NAME_CATEGORIES.filter((k) => nameModes[k] === mode)
+      .map((k) => inSentence(t(`prefs.keep.${k}`))).join(t('prefs.preview.listSep'));
     if (listOf('keep')) items.push(t('prefs.preview.keepCategories', { list: listOf('keep') }));
     if (listOf('annotate')) items.push(t('prefs.preview.annotateCategories', { list: listOf('annotate') }));
     for (const { src, dst } of rowsToGlossary(globalTerms.getRows())) {
