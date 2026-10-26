@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="popup.css">
   <!-- type="module" so popup.js can import the i18n layer. Module scripts are
        deferred by default, so the DOMContentLoaded listener inside still fires. -->
+  <!-- Inert unless opened as popup.html?demo=… (user guide illustrations, store images) -->
+  <script src="lib/demo-mode.js"></script>
   <script src="popup.js" type="module"></script>
 </head>
 <body>
@@ -68,6 +70,24 @@
         </div>
       </div>
 
+      <!-- Completion card: shown on the source file when a job finishes, and on the
+           translated copy ("translated from …"). Filled by popup.js showCompletion(). -->
+      <div class="completion-card hidden" id="completion-card">
+        <div class="completion-head">
+          <span class="completion-title" id="completion-title" data-i18n="done.title">✅ Translation complete</span>
+          <button class="close-btn completion-close" id="btn-completion-close" data-i18n-title="settings.close">&times;</button>
+        </div>
+        <div class="completion-sub" id="completion-sub"></div>
+        <div class="completion-stats" id="completion-stats"></div>
+        <ul class="completion-results" id="completion-results"></ul>
+        <div class="completion-actions" id="completion-actions">
+          <button class="btn btn-primary btn-sm" id="btn-open-result" data-i18n="done.open">Open translated file</button>
+          <button class="btn btn-secondary btn-sm" id="btn-translate-again" data-i18n="done.again">Translate to another language</button>
+        </div>
+      </div>
+
+      <!-- Job options (hidden while a translation runs, see body.is-busy) -->
+      <div class="job-options" id="job-options">
       <!-- Selector Options -->
       <div class="control-group">
         <label for="select-lang" data-i18n="main.targetLangLabel">Translate Target Language</label>
@@ -76,6 +96,34 @@
                Do not hard-code <option> here — see docs/06 §10.9. -->
           <select id="select-lang"></select>
         </div>
+      </div>
+
+      <!-- Extra target languages: one copy per language in a single run.
+           Checkboxes are generated from TARGET_LANGUAGES by popup.js. -->
+      <details class="extra-langs" id="extra-langs-box">
+        <summary><span data-i18n="multi.summary">Also translate into other languages</span><span id="extra-langs-count" class="extra-langs-picked"></span></summary>
+        <div class="extra-langs-grid" id="extra-langs-grid"></div>
+      </details>
+
+      <!-- Optional scope: a slide range for Slides, the current tab for Sheets.
+           Shown per file type by popup.js updateScopeControls(). -->
+      <div class="control-group hidden" id="scope-slides">
+        <label for="slide-range" data-i18n="scope.slides.label">Slides to translate</label>
+        <input type="text" id="slide-range" autocomplete="off" data-i18n-placeholder="scope.slides.placeholder" placeholder="e.g. 3-10, 12 (blank = all)">
+        <div class="field-hint scope-error hidden" id="slide-range-error" data-i18n="scope.slides.invalid">Use numbers and ranges like 3-10, 12.</div>
+      </div>
+      <label class="checkbox-row hidden" id="scope-sheet" for="sheet-current-only">
+        <input type="checkbox" id="sheet-current-only">
+        <span data-i18n="scope.sheet.currentOnly">Only translate the sheet tab I'm on</span>
+      </label>
+
+      <!-- Per-file glossary, merged over the global one (saved as you type) -->
+      <details class="doc-glossary" id="doc-glossary-box">
+        <summary data-i18n="prefs.docGlossary.summary">Glossary for this file</summary>
+        <div class="term-editor" id="terms-doc"></div>
+        <div class="field-hint" data-i18n="prefs.docGlossary.hint">Overrides the global glossary for the same term. AI engines only.</div>
+      </details>
+
       </div>
 
       <!-- Submit / Trigger -->
@@ -116,15 +164,15 @@
           </li>
           <li id="step-extract" class="pending">
             <span class="step-bullet"></span>
-            <span data-i18n="steps.extract">Extract elements &amp; text runs</span>
+            <span data-i18n="steps.extract">Read the text</span>
           </li>
           <li id="step-api" class="pending">
             <span class="step-bullet"></span>
-            <span data-i18n="steps.translate">Translate text runs via LLM API</span>
+            <span data-i18n="steps.translate">Translate with AI</span>
           </li>
           <li id="step-write" class="pending">
             <span class="step-bullet"></span>
-            <span data-i18n="steps.write">Write back translations to copy</span>
+            <span data-i18n="steps.write">Write the translation into the copy</span>
           </li>
         </ul>
 
@@ -155,22 +203,6 @@
       </div>
 
       <div class="settings-scroll-container">
-        <!-- Interface language. Applies immediately and is NOT governed by the
-             Save/Cancel buttons below, hence its own card. -->
-        <div class="setting-group-card">
-          <h4 data-i18n="settings.section.uiLanguage">Interface Language</h4>
-
-          <div class="form-group">
-            <label for="select-ui-lang" data-i18n="settings.uiLanguage.label">Display language</label>
-            <div class="select-wrapper">
-              <!-- Options generated from i18n/languages.js (UI_LANGUAGES), always
-                   labelled with the endonym so any user can find their way back. -->
-              <select id="select-ui-lang"></select>
-            </div>
-            <div class="ui-lang-hint" data-i18n="settings.uiLanguage.hint">Applies immediately — no need to save.</div>
-          </div>
-        </div>
-
         <!-- Translation Engine settings -->
         <div class="setting-group-card">
           <h4 data-i18n="settings.section.engine">Translation Engine</h4>
@@ -202,15 +234,12 @@
           <div class="form-group" id="group-model-name">
             <label for="model-name" data-i18n="settings.modelName.label">Model Name</label>
             <input type="text" id="model-name" placeholder="gemini-3.1-flash-lite">
-            <div class="model-sunset-tip" id="model-sunset-tip">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-              <span data-i18n-html="settings.modelSunsetTip">Model names may be deprecated over time. Please verify the current available models at <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" class="tip-link">Google AI Docs</a> / <a href="https://platform.openai.com/docs/models" target="_blank" class="tip-link">OpenAI Docs</a> and update this field if needed.</span>
-            </div>
-          </div>
-
-          <div class="settings-quota-tip" id="group-quota-tip">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span data-i18n-html="settings.quotaTip">For best results, choose a model with <strong>&ge;1,500 free requests/day (RPD)</strong> and <strong>&ge;30 requests/min (RPM)</strong> &mdash; this gives you the most quota headroom per translation session.</span>
+            <!-- Model guidance folded into one line; most users keep the default. -->
+            <details class="model-help" id="group-quota-tip">
+              <summary data-i18n="settings.modelHelp.summary">How do I choose a model?</summary>
+              <p id="model-sunset-tip"><span data-i18n-html="settings.modelSunsetTip">Model names may be deprecated over time. Please verify the current available models at <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" class="tip-link">Google AI Docs</a> / <a href="https://developers.openai.com/api/docs/models" target="_blank" class="tip-link">OpenAI Docs</a> and update this field if needed.</span></p>
+              <p><span data-i18n-html="settings.quotaTip">For best results, choose a model with <strong>&ge;1,500 free requests/day (RPD)</strong> and <strong>&ge;30 requests/min (RPM)</strong> &mdash; this gives you the most quota headroom per translation session.</span></p>
+            </details>
           </div>
 
           <div class="form-group hidden" id="group-custom-url">
@@ -233,11 +262,139 @@
             <div class="test-result-msg" id="test-result-msg"></div>
           </div>
         </div>
+        <!-- Translation preferences, layered onto the fixed prompt (lib/prefs.js).
+             LLM engines only; disabled for the basic free engine. -->
+        <div class="setting-group-card" id="prefs-card">
+          <h4 data-i18n="settings.section.prefs">Translation Preferences</h4>
+          <div class="prefs-free-note hidden" id="prefs-free-note" data-i18n="prefs.freeNote">Preferences need an AI engine (Gemini, OpenAI, Claude, or custom).</div>
+
+          <div class="form-group">
+            <label for="pref-tone" data-i18n="prefs.tone.label">Tone</label>
+            <div class="select-wrapper">
+              <select id="pref-tone">
+                <option value="keep" data-i18n="prefs.tone.keep">Keep as in the original (default)</option>
+                <option value="formal" data-i18n="prefs.tone.formal">Formal</option>
+                <option value="neutral" data-i18n="prefs.tone.neutral">Neutral</option>
+                <option value="casual" data-i18n="prefs.tone.casual">Casual</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Name categories: the model recognises them itself, so a beginner picks
+               one mode per category instead of listing every name. Segments are
+               generated by popup.js (lib/prefs.js NAME_MODES). -->
+          <div class="form-group">
+            <label data-i18n="prefs.names.label">Names (the AI recognises them)</label>
+            <div class="name-modes">
+              <div class="name-mode-row" data-category="people">
+                <span class="name-mode-label" data-i18n="prefs.keep.people">People's names</span>
+                <div class="segmented" role="radiogroup"></div>
+              </div>
+              <div class="name-mode-row" data-category="brands">
+                <span class="name-mode-label" data-i18n="prefs.keep.brands">Company, brand and product names</span>
+                <div class="segmented" role="radiogroup"></div>
+              </div>
+              <div class="name-mode-row" data-category="places">
+                <span class="name-mode-label" data-i18n="prefs.keep.places">Place names</span>
+                <div class="segmented" role="radiogroup"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specific terms, one sentence-like row each: [term] [translate as ▾ / keep] [target] -->
+          <div class="form-group">
+            <label data-i18n="prefs.terms.label">Specific terms (all files)</label>
+            <div class="term-editor" id="terms-global"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="pref-custom" data-i18n="prefs.custom.label">Additional instructions</label>
+            <textarea id="pref-custom" rows="3" maxlength="500" data-i18n-placeholder="prefs.custom.placeholder" placeholder="e.g. The audience is Japanese clients; keep sentences short."></textarea>
+            <div class="field-hint"><span data-i18n="prefs.custom.hint">Any language is fine. Cannot change the output format.</span> <span id="pref-custom-count">0/500</span></div>
+          </div>
+
+          <!-- Read-only, plain-language summary of everything above -->
+          <div class="rules-preview" id="rules-preview">
+            <div class="rules-preview-title" data-i18n="prefs.preview.title">When translating, the AI will:</div>
+            <ul id="rules-preview-list"></ul>
+          </div>
+        </div>
+
+        <!-- What happens when a job finishes. Saved with the Save button. -->
+        <div class="setting-group-card">
+          <h4 data-i18n="settings.section.result">After Translation</h4>
+          <label class="checkbox-row" for="auto-open-result">
+            <input type="checkbox" id="auto-open-result" checked>
+            <span data-i18n="settings.autoOpenResult">Switch to the translated file automatically</span>
+          </label>
+          <label class="checkbox-row" for="fit-text">
+            <input type="checkbox" id="fit-text" checked>
+            <span data-i18n="settings.fitText">Fit longer text (shrink slide fonts, widen sheet columns)</span>
+          </label>
+        </div>
+        <!-- Interface language. Applies immediately and is NOT governed by the
+             Save/Cancel buttons below, hence its own card. -->
+        <div class="setting-group-card">
+          <h4 data-i18n="settings.section.uiLanguage">Interface Language</h4>
+
+          <div class="form-group">
+            <label for="select-ui-lang" data-i18n="settings.uiLanguage.label">Display language</label>
+            <div class="select-wrapper">
+              <!-- Options generated from i18n/languages.js (UI_LANGUAGES), always
+                   labelled with the endonym so any user can find their way back. -->
+              <select id="select-ui-lang"></select>
+            </div>
+            <div class="ui-lang-hint" data-i18n="settings.uiLanguage.hint">Applies immediately — no need to save.</div>
+          </div>
+        </div>
+
       </div>
 
+      <div class="unsaved-note hidden" id="unsaved-note" data-i18n="settings.unsaved.note">● Unsaved changes</div>
       <div class="settings-actions">
         <button class="btn btn-secondary" id="btn-cancel-settings" data-i18n="settings.btnCancel">Cancel</button>
         <button class="btn btn-primary" id="btn-save-settings" data-i18n="settings.btnSave">Save Configurations</button>
+      </div>
+    </div>
+
+    <!-- First-run setup: get a free Gemini key in ~1 minute. Shown by popup.js
+         when no API key is configured and the user has not skipped it. -->
+    <div class="panel setup-panel" id="setup-panel">
+      <div class="settings-header-bar">
+        <h3 data-i18n="setup.title">Quick setup</h3>
+        <button class="close-btn" id="btn-close-setup" data-i18n-title="settings.close">&times;</button>
+      </div>
+      <div class="settings-scroll-container">
+        <p class="setup-intro" data-i18n="setup.intro">Get a free Gemini key for natural, high-quality translations. No credit card, about 1 minute.</p>
+
+        <!-- Illustrative comparison so users see why the key is worth it. The
+             source sentence is deliberately English in every UI language. -->
+        <div class="setup-compare">
+          <div class="setup-compare-src"><span class="setup-compare-label" data-i18n="setup.compare.source">Original</span><span data-i18n-ignore>Let's touch base next week and circle back on the Q3 roadmap.</span></div>
+          <div class="setup-compare-row bad"><span class="setup-compare-label" data-i18n="setup.compare.free">Free translation</span><span data-i18n="setup.compare.freeText"></span></div>
+          <div class="setup-compare-row good"><span class="setup-compare-label" data-i18n="setup.compare.gemini">Gemini</span><span data-i18n="setup.compare.geminiText"></span></div>
+          <div class="setup-compare-note" data-i18n="setup.compare.note">Illustrative example.</div>
+        </div>
+
+        <ol class="setup-steps">
+          <li class="setup-step" id="setup-step-1">
+            <div class="setup-step-title" data-i18n="setup.step1.title">Create a free key</div>
+            <div class="setup-step-desc" data-i18n="setup.step1.desc">Sign in with Google, then click “Create API key” and copy it.</div>
+            <button class="btn btn-primary btn-sm" id="btn-setup-getkey" data-i18n="setup.step1.btn">Open Google AI Studio ↗</button>
+          </li>
+          <li class="setup-step" id="setup-step-2">
+            <div class="setup-step-title" data-i18n="setup.step2.title">Paste your key here</div>
+            <input type="password" id="setup-key" autocomplete="off" data-i18n-placeholder="setup.step2.placeholder" placeholder="Paste API key">
+          </li>
+          <li class="setup-step" id="setup-step-3">
+            <div class="setup-step-title" data-i18n="setup.step3.title">We'll check it automatically</div>
+            <div class="test-result-msg" id="setup-result"></div>
+          </li>
+        </ol>
+      </div>
+      <div class="setup-actions">
+        <button class="btn btn-primary btn-large" id="btn-setup-done" disabled data-i18n="setup.start">Start translating</button>
+        <button class="link-btn" id="btn-setup-free" data-i18n="setup.useFree">Use basic free translation</button>
       </div>
     </div>
 

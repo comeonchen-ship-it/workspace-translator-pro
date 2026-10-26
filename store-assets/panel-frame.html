@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<!-- Store images only: hosts the side panel (demo mode) at an exact CSS size,
+     because headless Chrome's minimum window is wider than a side panel. -->
+<html><head><meta charset="UTF-8"><style>html,body{margin:0;background:#000;overflow:hidden}iframe{position:absolute;left:0;top:0;border:0}</style></head>
+<body><iframe id="f"></iframe>
+<script>
+const p = new URLSearchParams(location.search);
+const f = document.getElementById('f');
+f.style.width = p.get('w') + 'px'; f.style.height = p.get('h') + 'px';
+p.delete('w'); p.delete('h');
+f.src = '../popup.html?' + p.toString();
+</script></body></html>

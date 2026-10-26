@@ -1,49 +1,67 @@
-import { translateTexts, logDebug, fetchWithRetryAndTimeout } from './translate.js';
+import { translateTexts, logDebug } from './translate.js';
+import {
+  googleApiFetch, getAuthToken, getCachedToken, deleteGoogleFile, duplicateGoogleFile, getDriveFileName,
+  getPresentationDetails, updatePresentation, getDocumentDetails, updateDocument,
+} from './lib/google-api.js';
+import { getTaskState, setTaskState, checkCancelledGlobal } from './lib/task-state.js';
+import { extractTextFromElements, extractTextFromDocElements } from './lib/text-extract.js';
+import { translateSpreadsheet } from './lib/sheets.js';
+import { translateForm } from './lib/forms.js';
+import { measureShapes, planFontScaling } from './lib/overflow.js';
 import { getLanguage } from './i18n/languages.js';
-
-// Bundled OAuth 2.0 Client ID — users do not need to configure their own
-const BUNDLED_CLIENT_ID = '770405736518-j64169msnu3npqh1p09k4rko4022c80f.apps.googleusercontent.com';
-
-/**
- * Wrapper for every Google API (Drive/Slides/Docs/Sheets/Forms) call.
- *
- * Google's REST APIs return transient 500/503 ("Internal Error") and can time
- * out; without retries a single blip fails the whole translation and the user
- * has to start over (see docs/05 H1). This reuses translate.js's proven
- * retry+timeout+backoff helper. useLock=false and cooldownMs=0 keep Google calls
- * OFF the LLM rate-limit lock (that lock exists to pace the translation model,
- * not Google). Drop-in for fetch(): same args in, same Response out — callers
- * still check response.ok themselves.
- *
- * NOTE: retrying a 5xx on the non-idempotent Drive "copy" can, very rarely,
- * leave an orphan duplicate if the server actually completed before erroring.
- * That is far preferable to failing the entire job, and easy for the user to
- * delete. Every other Google call here (get / batchUpdate replaceAllText /
- * updateCells / updateItem) is effectively idempotent on retry.
- */
-function googleApiFetch(url, options = {}, presentationId = null) {
-  return fetchWithRetryAndTimeout(url, options, 60000, 3, presentationId, false, 0);
-}
 
 // Enable opening of Side Panel when clicking the extension action icon
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error('Failed to set Side Panel behavior:', error));
 
-// Clean up any stale active or queued translation states on startup/reload
+// After an update, the side panel's help button shows a dot until the user has
+// opened the guide's "What's new" section (see onboarding.js / popup.js).
+// A first install opens the guide once.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  const version = chrome.runtime.getManifest().version;
+  if (reason === 'update') chrome.storage.local.set({ whatsNewVersion: version });
+  if (reason === 'install') {
+    chrome.storage.local.set({ whatsNewVersion: version, whatsNewSeen: version });
+    chrome.tabs.create({ url: 'onboarding.html' });
+  }
+});
+
+// Recover any active or queued translations left over from a previous
+// service-worker lifetime on startup/reload.
 cleanUpStaleStates();
+
+// A job interrupted by a service-worker restart is restarted from scratch at most
+// this many times; after that it is reported as interrupted (avoids restart loops).
+const MAX_RESUME_ATTEMPTS = 1;
 
 async function cleanUpStaleStates() {
   try {
+    const before = await chrome.storage.local.get(['resumableTasks', 'queuedTranslations', 'activeCopies', 'cancelledTasks']);
+    const resumable = before.resumableTasks || {};
+    const queued = before.queuedTranslations || [];
+    const copies = before.activeCopies || {};
+    const cancelled = before.cancelledTasks || [];
+
     // 1. Reset active and queued task arrays
-    await chrome.storage.local.set({ activeTranslationIds: [], queuedTranslations: [] });
-    
-    // 2. Scan and mark any unfinished task states as interrupted
+    await chrome.storage.local.set({ activeTranslationIds: [], queuedTranslations: [], resumableTasks: {} });
+
+    // 2. Pick the interrupted jobs that can be restarted automatically (docs/05 H3)
+    const toRestart = [];
+    for (const [id, task] of Object.entries(resumable)) {
+      if (cancelled.includes(id)) continue;
+      if ((task.config?.resumeAttempt || 0) >= MAX_RESUME_ATTEMPTS) continue;
+      toRestart.push({ ...task, config: { ...task.config, resumeAttempt: (task.config?.resumeAttempt || 0) + 1 } });
+    }
+    const restartIds = new Set(toRestart.map((t) => t.presentationId));
+
+    // 3. Mark every other unfinished task state as interrupted
     const allData = await chrome.storage.local.get(null);
     for (const key in allData) {
       if (key.startsWith('taskState_')) {
+        const id = key.slice('taskState_'.length);
         const state = allData[key];
-        if (state && state.step !== 'done' && !state.error) {
+        if (state && state.step !== 'done' && !state.error && !restartIds.has(id) && !queued.some((q) => q.presentationId === id)) {
           state.step = 'error';
           state.pct = 0;
           state.error = 'Translation interrupted by browser or extension restart.';
@@ -51,29 +69,67 @@ async function cleanUpStaleStates() {
         }
       }
     }
+
+    // 4. The half-written copy of a restarted job would be left orphaned in Drive
+    for (const id of restartIds) {
+      if (!copies[id]) continue;
+      try {
+        await deleteGoogleFile(copies[id].copyId, getCachedToken() || await getAuthToken({ silentOnly: true }));
+      } catch (e) {
+        await logDebug(`Could not remove partial copy after restart: ${e.message}`, id);
+      }
+      await unregisterActiveCopy(id);
+    }
+
+    // 5. Restart interrupted jobs first, then the ones that were still waiting
+    for (const task of [...toRestart, ...queued]) {
+      await logDebug('Resuming translation after service-worker restart.', task.presentationId);
+      await requestTranslationStart(task.presentationId, task.presentationTitle, task.fileType, task.targetLang, task.config, pushProgressToActivePort);
+    }
   } catch (e) {
     console.error('Failed to clean up stale task states:', e);
   }
 }
 
-// Global state and helper functions to persist task states in chrome.storage.local
-async function getTaskState(presentationId) {
-  const key = `taskState_${presentationId}`;
-  const data = await chrome.storage.local.get(key);
-  return data[key] || null;
+// ── Keep-alive while translating ────────────────────────────────────────────
+// MV3 stops an idle service worker after ~30s without extension events, which
+// killed jobs once the side panel was closed. Any extension API call resets that
+// timer, so ping a cheap one while at least one job is active.
+let keepAliveTimer = null;
+
+function startKeepAlive() {
+  if (keepAliveTimer) return;
+  keepAliveTimer = setInterval(() => chrome.runtime.getPlatformInfo(() => {}), 20000);
 }
 
-async function setTaskState(presentationId, state) {
-  const key = `taskState_${presentationId}`;
-  await chrome.storage.local.set({ [key]: state });
+function stopKeepAlive() {
+  clearInterval(keepAliveTimer);
+  keepAliveTimer = null;
 }
 
-async function checkCancelledGlobal(presentationId) {
-  const data = await chrome.storage.local.get('cancelledTasks');
-  const cancelledTasks = data.cancelledTasks || [];
-  if (cancelledTasks.includes(presentationId)) {
-    throw new Error('Translation stopped by user.');
+// Up to MAX_CONCURRENT_TRANSLATIONS jobs update the same storage maps
+// (resumableTasks, activeCopies). Each get→modify→set runs through this chain so
+// two jobs never overwrite each other's entry.
+let storageChain = Promise.resolve();
+function withStorageLock(fn) {
+  const run = storageChain.then(fn, fn);
+  storageChain = run.catch(() => {});
+  return run;
+}
+
+function setResumableTask(task) {
+  return withStorageLock(() => writeResumableTask(task));
+}
+
+async function writeResumableTask(task) {
+  const data = await chrome.storage.local.get('resumableTasks');
+  const tasks = data.resumableTasks || {};
+  if (task.config) {
+    tasks[task.presentationId] = task;
+  } else {
+    delete tasks[task.presentationId];
   }
+  await chrome.storage.local.set({ resumableTasks: tasks });
 }
 
 async function registerTabMapping(tabId, presentationId) {
@@ -87,7 +143,11 @@ async function registerTabMapping(tabId, presentationId) {
   }
 }
 
-async function registerActiveCopy(presentationId, copyId, token) {
+function registerActiveCopy(presentationId, copyId, token) {
+  return withStorageLock(() => writeActiveCopy(presentationId, copyId, token));
+}
+
+async function writeActiveCopy(presentationId, copyId, token) {
   try {
     const data = await chrome.storage.local.get('activeCopies');
     const copies = data.activeCopies || {};
@@ -98,7 +158,11 @@ async function registerActiveCopy(presentationId, copyId, token) {
   }
 }
 
-async function unregisterActiveCopy(presentationId) {
+function unregisterActiveCopy(presentationId) {
+  return withStorageLock(() => removeActiveCopy(presentationId));
+}
+
+async function removeActiveCopy(presentationId) {
   try {
     const data = await chrome.storage.local.get('activeCopies');
     const copies = data.activeCopies || {};
@@ -106,20 +170,6 @@ async function unregisterActiveCopy(presentationId) {
     await chrome.storage.local.set({ activeCopies: copies });
   } catch (e) {
     // Ignore
-  }
-}
-
-async function deleteGoogleFile(fileId, token) {
-  const url = `https://www.googleapis.com/drive/v3/files/${fileId}`;
-  const response = await googleApiFetch(url, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-  if (!response.ok && response.status !== 404) {
-    const errText = await response.text();
-    throw new Error(`Drive delete API error (${response.status}): ${errText}`);
   }
 }
 
@@ -150,6 +200,19 @@ async function saveToHistory(copyId, title, fileType, url) {
 
 let activePort = null;
 let activeViewPresentationId = null;
+
+function pushProgressToActivePort(pid, state) {
+  if (activePort && activeViewPresentationId === pid) {
+    try {
+      activePort.postMessage({
+        type: 'translationProgress',
+        ...state
+      });
+    } catch (err) {
+      logDebug(`Failed to push progress: ${err.message}`, pid);
+    }
+  }
+}
 
 // Connection port listener to keep the Service Worker alive and push updates to Side Panel
 chrome.runtime.onConnect.addListener((port) => {
@@ -191,20 +254,7 @@ chrome.runtime.onConnect.addListener((port) => {
           registerTabMapping(tabId, presentationId);
         }
         
-        const pushProgressToPort = (pid, state) => {
-          if (activePort && activeViewPresentationId === pid) {
-            try {
-              activePort.postMessage({
-                type: 'translationProgress',
-                ...state
-              });
-            } catch (err) {
-              logDebug(`Failed to push progress: ${err.message}`, pid);
-            }
-          }
-        };
-
-        requestTranslationStart(presentationId, presentationTitle, fileType, targetLang, config, pushProgressToPort);
+        requestTranslationStart(presentationId, presentationTitle, fileType, targetLang, config, pushProgressToActivePort);
       } else if (message.action === 'cancelTranslation') {
         const { presentationId } = message;
         logDebug(`Cancel request received for presentation ID: ${presentationId}`, presentationId);
@@ -254,7 +304,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         await Promise.all(list.map(async (item) => {
           try {
             const url = `https://www.googleapis.com/drive/v3/files/${item.presentationId}?fields=id,trashed`;
-            const res = await fetch(url, {
+            const res = await googleApiFetch(url, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -307,11 +357,79 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /**
+ * Hands the finished copy to the user. The tab opens in the foreground only when
+ * "auto-switch to result" is on (default); otherwise it opens behind so the side
+ * panel keeps showing the completion card. If the panel is not watching this job
+ * (closed, or on another file), a system notification announces it instead.
+ */
+async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summary, multi = null) {
+  const { autoOpenResult = true } = await chrome.storage.local.get('autoOpenResult');
+  // Lets the panel show "translated from …" when it lands on the copy.
+  await chrome.storage.local.set({ [`completedInfo_${copyId}`]: { sourceTitle, summary, at: Date.now() } });
+  // In a multi-language run only the last copy may take focus or notify;
+  // earlier copies open quietly behind it.
+  const isLast = !multi || multi.index === multi.total - 1;
+  chrome.tabs.create({ url: editUrl, active: autoOpenResult && isLast });
+  if (!isLast) return;
+
+  const panelWatching = activePort && activeViewPresentationId === presentationId;
+  if (!panelWatching || !autoOpenResult) {
+    const lang = getLanguage(summary.targetLang)?.endonym || summary.targetLang;
+    chrome.notifications.create(`done:${copyId}`, {
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: '✅ ' + (sourceTitle || 'Workspace Translator Pro'),
+      message: `→ ${lang}`,
+      priority: 1,
+    });
+    await chrome.storage.local.set({ [`notifUrl_done:${copyId}`]: editUrl });
+  }
+}
+
+chrome.notifications.onClicked.addListener(async (notificationId) => {
+  const key = `notifUrl_${notificationId}`;
+  const data = await chrome.storage.local.get(key);
+  if (data[key]) {
+    chrome.tabs.create({ url: data[key] });
+    await chrome.storage.local.remove(key);
+  }
+  chrome.notifications.clear(notificationId);
+});
+
+/**
  * Main translation workflow orchestration
  */
 async function runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
   let copyId = null;
   config.presentationId = presentationId;
+  const startedAt = Date.now();
+
+  // Per-batch progress with a remaining-time estimate from the average batch
+  // duration so far. The LLM step is the long one, so this is what users wait on.
+  let batchClockStart = null;
+  config.onBatchProgress = (done, total) => {
+    if (done === 0 || batchClockStart === null) {
+      batchClockStart = Date.now();
+      if (done === 0) return;
+    }
+    const perBatch = (Date.now() - batchClockStart) / Math.max(1, done);
+    const etaSec = Math.round((perBatch * (total - done)) / 1000);
+    const pct = 60 + Math.round((20 * done) / total);
+    const status = done >= total || etaSec <= 0
+      ? { key: 'progress.batches', params: { done, total } }
+      : etaSec >= 60
+        ? { key: 'progress.batchesEtaMin', params: { done, total, m: Math.ceil(etaSec / 60) } }
+        : { key: 'progress.batchesEtaSec', params: { done, total, s: etaSec } };
+    sendProgress('translate', pct, status);
+  };
+  const summarize = (extra = {}) => ({
+    durationMs: Date.now() - startedAt,
+    engine: config.translationEngine,
+    model: config.translationEngine === 'free' ? null : config.modelName,
+    targetLang,
+    customDropped: !!config.prefsCustomDropped,
+    ...extra,
+  });
   
   const checkCancelled = async () => {
     await checkCancelledGlobal(presentationId);
@@ -348,7 +466,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     
     // 2. Duplicate Google Workspace file (Google Drive API)
     sendProgress('copy', 25, { key: 'progress.duplicating', params: { fileType: `@fileType.${fileTypeName}` } });
-    const originalName = (presentationTitle || `New ${fileTypeName}`).replace(/\.(pptx?|docx?|xlsx?)$/i, '');
+    // Prefer Drive's name: the tab title the panel sent can be a URL (.xlsx etc.).
+    const driveName = await getDriveFileName(presentationId, token);
+    const originalName = (driveName || presentationTitle || `New ${fileTypeName}`).replace(/\.(pptx?|docx?|xlsx?)$/i, '');
     // Native language name, from the single language registry. Users scan Drive for
     // "日本語" faster than for "Japanese", so the endonym is deliberate.
     const langLabel = getLanguage(targetLang)?.endonym || targetLang;
@@ -369,8 +489,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const editUrl = await translateSpreadsheet(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'spreadsheet', editUrl);
-      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.spreadsheet' } }, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize({ columnsFitted: config.columnsFitted || 0 });
+      sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -380,8 +501,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       const editUrl = await translateForm(copyId, targetLang, config, token, sendProgress);
       await unregisterActiveCopy(presentationId);
       await saveToHistory(copyId, translatedName, 'form', editUrl);
-      sendProgress('done', 100, { key: 'progress.opening', params: { fileType: '@fileType.form' } }, null, editUrl);
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize();
+      sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
 
@@ -440,13 +562,18 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       sendProgress('extract', 40, { key: 'progress.extracting.presentation' });
       await logDebug('Fetching copy presentation slide structure...', presentationId);
       const presentation = await getPresentationDetails(copyId, token);
+      config.shapeWidthsBefore = measureShapes(presentation);
       await logDebug(`Successfully fetched presentation. Total slides: ${presentation.slides ? presentation.slides.length : 0}`, presentationId);
       
       // 4. Traverse layout and extract unique translatable texts
       const pageTextMap = new Map(); // pageId -> Set of original texts on this page
       const shapeIdsWithText = new Set();
       await logDebug('Traversing elements and extracting translatable text runs...', presentationId);
-      for (const slide of presentation.slides) {
+      // Optional slide range (1-based) from the panel; untouched slides keep their text.
+      const wanted = config.scope?.slides?.length ? new Set(config.scope.slides) : null;
+      const slidesInScope = (presentation.slides || []).filter((_, i) => !wanted || wanted.has(i + 1));
+      if (wanted) await logDebug(`Slide range applied: ${slidesInScope.length}/${presentation.slides.length} slides.`, presentationId);
+      for (const slide of slidesInScope) {
         const slideId = slide.objectId;
         extractTextFromElements(slide.pageElements, pageTextMap, slideId, uniqueTexts, shapeIdsWithText);
         
@@ -469,8 +596,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       
     if (uniqueTextsArray.length === 0) {
       await logDebug('No translatable texts found. Finalizing copying process.', presentationId);
-      sendProgress('done', 100, { key: 'progress.noTranslatableText' });
-      chrome.tabs.create({ url: editUrl });
+      const summary = summarize({ segments: 0 });
+      sendProgress('done', 100, { key: 'progress.noTranslatableText' }, null, editUrl, summary);
+      await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
       return;
     }
     
@@ -543,6 +671,25 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await logDebug('No translations needed writing back.', presentationId);
     }
 
+    // 7a. Best-effort: shrink fonts in slide text boxes the translation overflowed.
+    let overflowFixed = 0;
+    if (!isDoc && requests.length > 0 && config.shapeWidthsBefore) {
+      const { fitTextToBoxes = true } = await chrome.storage.local.get('fitTextToBoxes');
+      if (fitTextToBoxes) {
+        try {
+          const after = await getPresentationDetails(copyId, token);
+          const plan = planFontScaling(config.shapeWidthsBefore, after);
+          if (plan.requests.length > 0) {
+            await updatePresentation(copyId, plan.requests, token);
+            overflowFixed = plan.shapesAdjusted;
+            await logDebug(`Shrank fonts in ${overflowFixed} text boxes to fit longer translations.`, presentationId);
+          }
+        } catch (fitErr) {
+          await logDebug(`Font fitting skipped (non-fatal): ${fitErr.message}`, presentationId);
+        }
+      }
+    }
+
     // 7b. Best-effort: Tighten table cell padding to preserve layout (runs separately so it never blocks translation)
     if (isDoc) {
       const tables = config.tables;
@@ -582,8 +729,9 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     await logDebug('Translation process finished. Opening new tab.', presentationId);
     await unregisterActiveCopy(presentationId);
     await saveToHistory(copyId, translatedName, fileTypeName, editUrl);
-    sendProgress('done', 100, { key: 'progress.opening', params: { fileType: `@fileType.${fileTypeName}` } }, null, editUrl);
-    chrome.tabs.create({ url: editUrl });
+    const summary = summarize({ segments: uniqueTextsArray.length, overflowFixed });
+    sendProgress('done', 100, { key: 'progress.complete' }, null, editUrl, summary);
+    await deliverResult(presentationId, originalName, copyId, editUrl, summary, config.multi);
     
   } catch (err) {
     await logDebug(`Error occurred during translation workflow: ${err.message}`, presentationId);
@@ -606,983 +754,6 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     
     sendProgress('error', 0, null, err.message);
   }
-}
-
-/**
- * Retrieves OAuth token. Tries silent first, falls back to interactive login.
- */
-async function getAuthToken() {
-  const redirectUrl = chrome.identity.getRedirectURL();
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-    `client_id=${encodeURIComponent(BUNDLED_CLIENT_ID)}&` +
-    `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
-    `response_type=token&` +
-    `scope=${encodeURIComponent('https://www.googleapis.com/auth/presentations https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/forms.body https://www.googleapis.com/auth/drive')}`;
-
-  const runFlow = (interactive) => {
-    return new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow({
-        url: authUrl,
-        interactive: interactive
-      }, (redirectResultUrl) => {
-        if (chrome.runtime.lastError || !redirectResultUrl) {
-          const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : "OAuth authorization failed.";
-          reject(new Error(err));
-          return;
-        }
-        
-        try {
-          const url = new URL(redirectResultUrl);
-          const params = new URLSearchParams(url.hash.substring(1));
-          const token = params.get('access_token');
-          if (token) {
-            resolve(token);
-          } else {
-            reject(new Error("Access token not found in authentication callback."));
-          }
-        } catch (e) {
-          reject(new Error("Failed to parse authentication response."));
-        }
-      });
-    });
-  };
-
-  try {
-    // Try silently first (requires user has already authorized)
-    return await runFlow(false);
-  } catch (e) {
-    console.log('Silent auth failed, opening interactive prompt...', e);
-    // Open login dialog
-    return await runFlow(true);
-  }
-}
-
-/**
- * Copies Google Slide presentation (Google Drive API v3)
- */
-async function duplicatePresentation(presentationId, newName, token) {
-  const url = `https://www.googleapis.com/drive/v3/files/${presentationId}/copy`;
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: newName,
-      mimeType: 'application/vnd.google-apps.presentation'
-    })
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Drive copy API error (${response.status}): ${errText}`);
-  }
-  
-  const file = await response.json();
-  return file.id;
-}
-
-/**
- * Fetch Google Slide structure (Google Slides API v1)
- */
-async function getPresentationDetails(presentationId, token) {
-  const url = `https://slides.googleapis.com/v1/presentations/${presentationId}`;
-
-  const response = await googleApiFetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Slides get API error (${response.status}): ${errText}`);
-  }
-  
-  return await response.json();
-}
-
-/**
- * Send batch update requests to edit presentation (Google Slides API v1)
- */
-async function updatePresentation(presentationId, requests, token) {
-  const url = `https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`;
-
-  const response = await googleApiFetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      requests: requests
-    })
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Slides batchUpdate API error (${response.status}): ${errText}`);
-  }
-  
-  return await response.json();
-}
-
-/**
- * Recursively find all text structures in elements list
- */
-function extractTextFromElements(elements, pageTextMap, pageId, uniqueTexts, shapeIdsWithText = null) {
-  if (!elements) return;
-  
-  for (const element of elements) {
-    if (element.shape && element.shape.text) {
-      if (shapeIdsWithText && element.objectId) {
-        shapeIdsWithText.add(element.objectId);
-      }
-      processTextContent(element.shape.text, pageTextMap, pageId, uniqueTexts);
-    } else if (element.table) {
-      for (const row of element.table.tableRows) {
-        if (row.tableCells) {
-          for (const cell of row.tableCells) {
-            if (cell.text) {
-              processTextContent(cell.text, pageTextMap, pageId, uniqueTexts);
-            }
-          }
-        }
-      }
-    } else if (element.group && element.group.children) {
-      extractTextFromElements(element.group.children, pageTextMap, pageId, uniqueTexts, shapeIdsWithText);
-    }
-  }
-}
-
-/**
- * Helper to process text contents of shapes/table cells
- */
-function processTextContent(textContent, pageTextMap, pageId, uniqueTexts) {
-  if (!textContent.textElements) return;
-  
-  const hasLink = textContent.textElements.some(el => el.textRun && el.textRun.style && el.textRun.style.link);
-  
-  if (hasLink) {
-    for (const el of textContent.textElements) {
-      if (el.textRun && el.textRun.content) {
-        const content = el.textRun.content;
-        const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed && isTranslatable(trimmed)) {
-            uniqueTexts.add(trimmed);
-            if (!pageTextMap.has(pageId)) {
-              pageTextMap.set(pageId, new Set());
-            }
-            pageTextMap.get(pageId).add(trimmed);
-          }
-        }
-      }
-    }
-  } else {
-    let fullText = "";
-    for (const el of textContent.textElements) {
-      if (el.textRun && el.textRun.content) {
-        fullText += el.textRun.content;
-      }
-    }
-    
-    // Normalize carriage returns and split into separate lines (paragraphs)
-    const lines = fullText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && isTranslatable(trimmed)) {
-        uniqueTexts.add(trimmed);
-        
-        if (!pageTextMap.has(pageId)) {
-          pageTextMap.set(pageId, new Set());
-        }
-        pageTextMap.get(pageId).add(trimmed);
-      }
-    }
-  }
-}
-
-/**
- * Filter out untranslatable text runs (numbers, pure punctuation, symbols)
- */
-function isTranslatable(text) {
-  if (!text) return false;
-  const trimmed = text.trim();
-  // Skip raw URLs (e.g. http://..., https://..., www.example.com) to preserve links
-  if (/^(https?:\/\/|www\.)\S+$/i.test(trimmed)) return false;
-  // Skip email addresses
-  if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(trimmed)) return false;
-  // If it's purely digits and mathematical/date symbols, don't translate
-  if (/^[0-9\s\-\.,:\+\*\/%$=()\[\]{}""'']+(\s*[am|pm|AM|PM]*)?$/.test(trimmed)) return false;
-  // Ignore single characters that are not letters or Chinese characters
-  if (trimmed.length <= 1 && !/[\u4e00-\u9fa5a-zA-Z]/.test(trimmed)) return false;
-  return true;
-}
-
-/**
- * Generic copy function for Google Workspace files (Google Drive API v3)
- */
-async function duplicateGoogleFile(fileId, newName, mimeType, token) {
-  // Fetch original file's parents so we can copy it into the same folder
-  let parents = [];
-  try {
-    const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
-    const getRes = await googleApiFetch(getFileUrl, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (getRes.ok) {
-      const fileMeta = await getRes.json();
-      if (fileMeta.parents && fileMeta.parents.length > 0) {
-        parents = fileMeta.parents;
-      }
-    }
-  } catch (err) {
-    console.error('Failed to fetch parents of original file:', err);
-  }
-
-  const url = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
-  
-  const requestBody = {
-    name: newName
-  };
-  
-  if (parents && parents.length > 0) {
-    requestBody.parents = parents;
-  }
-  
-  // If the file is a Form, do NOT specify mimeType in the body because Google Drive copy API
-  // returns 400 Bad Request (Forms are native-only and do not support format conversion parameters).
-  if (mimeType && mimeType !== 'application/vnd.google-apps.form') {
-    requestBody.mimeType = mimeType;
-  }
-  
-  const response = await googleApiFetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestBody)
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Drive copy API error (${response.status}): ${errText}`);
-  }
-  
-  const file = await response.json();
-  return file.id;
-}
-
-/**
- * Fetch Google Document structure (Google Docs API v1)
- */
-async function getDocumentDetails(documentId, token) {
-  const url = `https://docs.googleapis.com/v1/documents/${documentId}`;
-
-  const response = await googleApiFetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Docs get API error (${response.status}): ${errText}`);
-  }
-  
-  return await response.json();
-}
-
-/**
- * Send batch update requests to edit document (Google Docs API v1)
- */
-async function updateDocument(documentId, requests, token) {
-  const url = `https://docs.googleapis.com/v1/documents/${documentId}:batchUpdate`;
-
-  const response = await googleApiFetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      requests: requests
-    })
-  });
-  
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Docs batchUpdate API error (${response.status}): ${errText}`);
-  }
-  
-  return await response.json();
-}
-
-/**
- * Recursively find all text structures in document elements list
- */
-function extractTextFromDocElements(elements, uniqueTexts) {
-  if (!elements) return;
-  
-  for (const element of elements) {
-    if (element.paragraph) {
-      processDocParagraph(element.paragraph, uniqueTexts);
-    } else if (element.table) {
-      for (const row of element.table.tableRows) {
-        if (row.tableCells) {
-          for (const cell of row.tableCells) {
-            extractTextFromDocElements(cell.content, uniqueTexts);
-          }
-        }
-      }
-    } else if (element.tableOfContents) {
-      extractTextFromDocElements(element.tableOfContents.content, uniqueTexts);
-    }
-  }
-}
-
-/**
- * Helper to process text contents of doc paragraphs
- */
-function processDocParagraph(paragraph, uniqueTexts) {
-  if (!paragraph.elements) return;
-  
-  const hasLink = paragraph.elements.some(el => el.textRun && el.textRun.textStyle && el.textRun.textStyle.link);
-  
-  if (hasLink) {
-    for (const el of paragraph.elements) {
-      if (el.textRun && el.textRun.content) {
-        const content = el.textRun.content;
-        const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed && isTranslatable(trimmed)) {
-            uniqueTexts.add(trimmed);
-          }
-        }
-      }
-    }
-  } else {
-    let fullText = "";
-    for (const el of paragraph.elements) {
-      if (el.textRun && el.textRun.content) {
-        fullText += el.textRun.content;
-      }
-    }
-    
-    // Normalize carriage returns and split into separate lines
-    const lines = fullText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && isTranslatable(trimmed)) {
-        uniqueTexts.add(trimmed);
-      }
-    }
-  }
-}
-
-/**
- * Workflow to translate a duplicated Google Spreadsheet while preserving style and formulas
- */
-async function translateSpreadsheet(copyId, targetLang, config, token, sendProgress) {
-  const presentationId = config.presentationId;
-  await checkCancelledGlobal(presentationId);
-  await logDebug('Fetching spreadsheet details with grid data...', presentationId);
-  
-  const fields = 'sheets(properties(title,sheetId,gridProperties),data(rowData(values(userEnteredValue,textFormatRuns,formattedValue,hyperlink))))';
-  const getSpreadsheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${copyId}?includeGridData=true&fields=${encodeURIComponent(fields)}`;
-  
-  const response = await googleApiFetch(getSpreadsheetUrl, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Sheets get API error (${response.status}): ${errText}`);
-  }
-  const spreadsheet = await response.json();
-  const sheets = spreadsheet.sheets || [];
-  await logDebug(`Spreadsheet fetched. Total sheets: ${sheets.length}`, presentationId);
-
-  // 1. Extract translatable strings from cells (including hyperlinked labels in formulas and cell-level rich text)
-  const uniqueTexts = new Set();
-  const hyperlinkRegex = /^=HYPERLINK\(\s*(["'])(.*?)\1\s*,\s*(["'])(.*?)\3\s*\)$/i;
-
-  for (const sheet of sheets) {
-    const title = sheet.properties.title;
-    if (isTranslatable(title.trim())) {
-      uniqueTexts.add(title.trim());
-    }
-    
-    const dataList = sheet.data || [];
-    for (const gridData of dataList) {
-      const rowData = gridData.rowData || [];
-      for (const row of rowData) {
-        const values = row.values || [];
-        for (const cell of values) {
-          const cellVal = cell.userEnteredValue;
-          if (cellVal) {
-            if (cellVal.stringValue) {
-              const trimmed = cellVal.stringValue.trim();
-              if (trimmed && isTranslatable(trimmed)) {
-                uniqueTexts.add(trimmed);
-              }
-            } else if (cellVal.formulaValue) {
-              const trimmed = cellVal.formulaValue.trim();
-              if (trimmed && trimmed.startsWith('=')) {
-                const match = trimmed.match(hyperlinkRegex);
-                if (match) {
-                  const label = match[4];
-                  if (label && isTranslatable(label)) {
-                    uniqueTexts.add(label.trim());
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  const uniqueTextsArray = Array.from(uniqueTexts);
-  await logDebug(`Extracted ${uniqueTextsArray.length} unique translatable spreadsheet texts (including titles).`, presentationId);
-
-  await checkCancelledGlobal(presentationId);
-
-  const editUrl = `https://docs.google.com/spreadsheets/d/${copyId}/edit`;
-  if (uniqueTextsArray.length === 0) {
-    await logDebug('No translatable cell texts found. Opening copy...', presentationId);
-    return editUrl;
-  }
-
-  // 2. Translate via LLM API
-  sendProgress('translate', 60, { key: 'progress.translatingCount', params: { count: uniqueTextsArray.length, engine: config.translationEngine.toUpperCase() } });
-  const translationsMap = await translateTexts(uniqueTextsArray, targetLang, config);
-
-  await checkCancelledGlobal(presentationId);
-
-  // 3. Compile cell value updates with preserved formatting/links
-  sendProgress('write', 80, { key: 'progress.preparingCells' });
-  const updateRequests = [];
-
-  for (const sheet of sheets) {
-    const sheetId = sheet.properties.sheetId;
-    const dataList = sheet.data || [];
-    
-    for (const gridData of dataList) {
-      const rowData = gridData.rowData || [];
-      for (let r = 0; r < rowData.length; r++) {
-        const row = rowData[r];
-        const values = row.values || [];
-        for (let c = 0; c < values.length; c++) {
-          const cell = values[c];
-          const cellVal = cell.userEnteredValue;
-          if (!cellVal) continue;
-          
-          let hasChanges = false;
-          let newCellData = {};
-          
-          if (cellVal.stringValue) {
-            const trimmed = cellVal.stringValue.trim();
-            if (trimmed) {
-              const translated = translationsMap.get(trimmed);
-              if (translated && translated !== trimmed) {
-                newCellData.userEnteredValue = { stringValue: translated };
-                hasChanges = true;
-                
-                // Adjust textFormatRuns to match the new translated text length
-                if (cell.textFormatRuns && cell.textFormatRuns.length > 0) {
-                  const originalTextLength = cellVal.stringValue.length;
-                  const newTextLength = translated.length;
-                  
-                  newCellData.textFormatRuns = cell.textFormatRuns
-                    .map(run => {
-                      const newRun = { ...run };
-                      if (run.startIndex > 0 && originalTextLength > 0) {
-                        newRun.startIndex = Math.min(
-                          newTextLength,
-                          Math.round((run.startIndex / originalTextLength) * newTextLength)
-                        );
-                      } else {
-                        newRun.startIndex = 0;
-                      }
-                      return newRun;
-                    })
-                    .filter(run => run.startIndex < newTextLength);
-                  
-                  if (newCellData.textFormatRuns.length === 0) {
-                    delete newCellData.textFormatRuns;
-                  }
-                } else if (cell.hyperlink) {
-                  // Fallback: If cell has a cell-level hyperlink, preserve it as a format run
-                  newCellData.textFormatRuns = [
-                    {
-                      startIndex: 0,
-                      format: {
-                        link: {
-                          uri: cell.hyperlink
-                        }
-                      }
-                    }
-                  ];
-                }
-              }
-            }
-          } else if (cellVal.formulaValue) {
-            const trimmed = cellVal.formulaValue.trim();
-            if (trimmed && trimmed.startsWith('=')) {
-              const match = trimmed.match(hyperlinkRegex);
-              if (match) {
-                const quoteUrl = match[1];
-                const url = match[2];
-                const quoteLabel = match[3];
-                const label = match[4];
-                const translatedLabel = translationsMap.get(label.trim()) || label;
-                if (translatedLabel !== label) {
-                  newCellData.userEnteredValue = {
-                    formulaValue: `=HYPERLINK(${quoteUrl}${url}${quoteUrl}, ${quoteLabel}${translatedLabel}${quoteLabel})`
-                  };
-                  hasChanges = true;
-                }
-              }
-            }
-          }
-          
-          if (hasChanges) {
-            updateRequests.push({
-              updateCells: {
-                rows: [
-                  {
-                    values: [newCellData]
-                  }
-                ],
-                fields: newCellData.textFormatRuns ? 'userEnteredValue,textFormatRuns' : 'userEnteredValue',
-                range: {
-                  sheetId: sheetId,
-                  startRowIndex: r,
-                  endRowIndex: r + 1,
-                  startColumnIndex: c,
-                  endColumnIndex: c + 1
-                }
-              }
-            });
-          }
-        }
-      }
-    }
-  }
-
-  // 4. Renaming sheet tabs & auto-resizing columns
-  sendProgress('write', 90, { key: 'progress.applyingTabs' });
-  const sheetsRequests = [];
-  for (const sheet of sheets) {
-    const oldTitle = sheet.properties.title;
-    const translatedTitle = translationsMap.get(oldTitle.trim());
-    if (translatedTitle && translatedTitle !== oldTitle) {
-      sheetsRequests.push({
-        updateSheetProperties: {
-          properties: {
-            sheetId: sheet.properties.sheetId,
-            title: translatedTitle
-          },
-          fields: 'title'
-        }
-      });
-    }
-    
-    // Auto-resize all columns to fit the new translated text neatly
-    const colCount = sheet.properties.gridProperties?.columnCount || 26;
-    sheetsRequests.push({
-      autoResizeDimensions: {
-        dimensions: {
-          sheetId: sheet.properties.sheetId,
-          dimension: 'COLUMNS',
-          startIndex: 0,
-          endIndex: colCount
-        }
-      }
-    });
-  }
-
-  const allRequests = [...updateRequests, ...sheetsRequests];
-
-  if (allRequests.length > 0) {
-    await logDebug(`Applying ${allRequests.length} spreadsheet batch update requests...`, presentationId);
-    const updateSpreadsheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${copyId}:batchUpdate`;
-    const res = await googleApiFetch(updateSpreadsheetUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ requests: allRequests })
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      await logDebug(`Error applying spreadsheet updates: ${errText}`, presentationId);
-      throw new Error(`Sheets batchUpdate API error (${res.status}): ${errText}`);
-    }
-    await logDebug('Spreadsheet batch updates completed successfully.', presentationId);
-  } else {
-    await logDebug('No spreadsheet updates needed.', presentationId);
-  }
-
-  return editUrl;
-}
-
-/**
- * Helper to normalize whitespace and newlines for reliable map lookup
- */
-function normalizeText(text) {
-  if (!text) return '';
-  return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-}
-
-/**
- * Workflow to translate a duplicated Google Form
- */
-async function translateForm(copyId, targetLang, config, token, sendProgress) {
-  const presentationId = config.presentationId;
-  await checkCancelledGlobal(presentationId);
-  await logDebug('Fetching form details...', presentationId);
-  const getFormUrl = `https://forms.googleapis.com/v1/forms/${copyId}`;
-  const response = await googleApiFetch(getFormUrl, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Forms get API error (${response.status}): ${errText}`);
-  }
-  const form = await response.json();
-  
-  // 1. Extract translatable texts
-  await logDebug('Extracting form questions & content...', presentationId);
-  const uniqueTexts = new Set();
-  
-  if (form.info) {
-    if (form.info.title && isTranslatable(normalizeText(form.info.title))) {
-      uniqueTexts.add(normalizeText(form.info.title));
-    }
-    if (form.info.description && isTranslatable(normalizeText(form.info.description))) {
-      uniqueTexts.add(normalizeText(form.info.description));
-    }
-  }
-
-  // Optimization: Extract Form Confirmation submission settings message
-  if (form.settings && form.settings.submissionSettings && form.settings.submissionSettings.confirmationMessage) {
-    const confMsg = form.settings.submissionSettings.confirmationMessage.value;
-    if (confMsg && isTranslatable(normalizeText(confMsg))) {
-      uniqueTexts.add(normalizeText(confMsg));
-    }
-  }
-
-  const items = form.items || [];
-  for (const item of items) {
-    if (item.title && isTranslatable(normalizeText(item.title))) {
-      uniqueTexts.add(normalizeText(item.title));
-    }
-    if (item.description && isTranslatable(normalizeText(item.description))) {
-      uniqueTexts.add(normalizeText(item.description));
-    }
-    
-    if (item.questionItem && item.questionItem.question) {
-      const q = item.questionItem.question;
-      if (q.choiceQuestion && q.choiceQuestion.options) {
-        for (const opt of q.choiceQuestion.options) {
-          if (opt.value && isTranslatable(normalizeText(opt.value))) {
-            uniqueTexts.add(normalizeText(opt.value));
-          }
-        }
-      }
-      if (q.scaleQuestion) {
-        if (q.scaleQuestion.lowLabel && isTranslatable(normalizeText(q.scaleQuestion.lowLabel))) {
-          uniqueTexts.add(normalizeText(q.scaleQuestion.lowLabel));
-        }
-        if (q.scaleQuestion.highLabel && isTranslatable(normalizeText(q.scaleQuestion.highLabel))) {
-          uniqueTexts.add(normalizeText(q.scaleQuestion.highLabel));
-        }
-      }
-    }
-
-    if (item.questionGroupItem) {
-      const qg = item.questionGroupItem;
-      if (qg.questions) {
-        for (const q of qg.questions) {
-          if (q.rowQuestion && q.rowQuestion.title && isTranslatable(normalizeText(q.rowQuestion.title))) {
-            uniqueTexts.add(normalizeText(q.rowQuestion.title));
-          }
-        }
-      }
-      if (qg.grid && qg.grid.columns && qg.grid.columns.options) {
-        for (const opt of qg.grid.columns.options) {
-          if (opt.value && isTranslatable(normalizeText(opt.value))) {
-            uniqueTexts.add(normalizeText(opt.value));
-          }
-        }
-      }
-    }
-  }
-
-  const uniqueTextsArray = Array.from(uniqueTexts);
-  await logDebug(`Extracted ${uniqueTextsArray.length} unique translatable form elements.`, presentationId);
-
-  await checkCancelledGlobal(presentationId);
-
-  const editUrl = `https://docs.google.com/forms/d/${copyId}/edit`;
-  if (uniqueTextsArray.length === 0) {
-    await logDebug('No translatable form elements found.', presentationId);
-    return editUrl;
-  }
-
-  // 2. Translate via LLM API
-  sendProgress('translate', 60, { key: 'progress.translatingCount', params: { count: uniqueTextsArray.length, engine: config.translationEngine.toUpperCase() } });
-  const translationsMap = await translateTexts(uniqueTextsArray, targetLang, config);
-
-  await checkCancelledGlobal(presentationId);
-
-  // 3. Generate Form Update requests
-  sendProgress('write', 80, { key: 'progress.applyingForm' });
-  const requests = [];
-
-  if (form.info) {
-    const originalTitle = form.info.title || "";
-    const originalDesc = form.info.description || "";
-    const normTitle = normalizeText(originalTitle);
-    const normDesc = normalizeText(originalDesc);
-    const translatedTitle = translationsMap.get(normTitle) || originalTitle;
-    const translatedDesc = translationsMap.get(normDesc) || originalDesc;
-    
-    if (translatedTitle !== originalTitle || translatedDesc !== originalDesc) {
-      requests.push({
-        updateFormInfo: {
-          info: {
-            title: translatedTitle,
-            description: translatedDesc
-          },
-          updateMask: 'title,description'
-        }
-      });
-    }
-  }
-
-  // Optimization: Update Form Confirmation submission settings message
-  if (form.settings && form.settings.submissionSettings && form.settings.submissionSettings.confirmationMessage) {
-    const originalMsg = form.settings.submissionSettings.confirmationMessage.value || "";
-    const normMsg = normalizeText(originalMsg);
-    const translatedMsg = translationsMap.get(normMsg) || originalMsg;
-    if (translatedMsg !== originalMsg) {
-      requests.push({
-        updateSettings: {
-          settings: {
-            submissionSettings: {
-              confirmationMessage: {
-                value: translatedMsg
-              }
-            }
-          },
-          updateMask: 'submissionSettings.confirmationMessage'
-        }
-      });
-    }
-  }
-
-  for (let idx = 0; idx < items.length; idx++) {
-    const item = items[idx];
-    const updatedItem = JSON.parse(JSON.stringify(item));
-    let itemChanged = false;
-
-    if (updatedItem.title) {
-      const norm = normalizeText(updatedItem.title);
-      const trans = translationsMap.get(norm);
-      if (trans && trans !== updatedItem.title) {
-        updatedItem.title = trans;
-        itemChanged = true;
-      }
-    }
-    if (updatedItem.description) {
-      const norm = normalizeText(updatedItem.description);
-      const trans = translationsMap.get(norm);
-      if (trans && trans !== updatedItem.description) {
-        updatedItem.description = trans;
-        itemChanged = true;
-      }
-    }
-
-    if (updatedItem.questionItem && updatedItem.questionItem.question) {
-      const q = updatedItem.questionItem.question;
-      if (q.choiceQuestion && q.choiceQuestion.options) {
-        for (let o = 0; o < q.choiceQuestion.options.length; o++) {
-          const opt = q.choiceQuestion.options[o];
-          if (opt.value) {
-            const norm = normalizeText(opt.value);
-            const trans = translationsMap.get(norm);
-            if (trans && trans !== opt.value) {
-              opt.value = trans;
-              itemChanged = true;
-            }
-          }
-        }
-      }
-      if (q.grading && q.grading.correctAnswers && q.grading.correctAnswers.answers) {
-        for (let a = 0; a < q.grading.correctAnswers.answers.length; a++) {
-          const ans = q.grading.correctAnswers.answers[a];
-          if (ans.value) {
-            const norm = normalizeText(ans.value);
-            const trans = translationsMap.get(norm);
-            if (trans && trans !== ans.value) {
-              ans.value = trans;
-              itemChanged = true;
-            }
-          }
-        }
-      }
-      if (q.scaleQuestion) {
-        if (q.scaleQuestion.lowLabel) {
-          const norm = normalizeText(q.scaleQuestion.lowLabel);
-          const trans = translationsMap.get(norm);
-          if (trans && trans !== q.scaleQuestion.lowLabel) {
-            q.scaleQuestion.lowLabel = trans;
-            itemChanged = true;
-          }
-        }
-        if (q.scaleQuestion.highLabel) {
-          const norm = normalizeText(q.scaleQuestion.highLabel);
-          const trans = translationsMap.get(norm);
-          if (trans && trans !== q.scaleQuestion.highLabel) {
-            q.scaleQuestion.highLabel = trans;
-            itemChanged = true;
-          }
-        }
-      }
-    }
-
-    if (updatedItem.questionGroupItem) {
-      const qg = updatedItem.questionGroupItem;
-      if (qg.questions) {
-        for (let qi = 0; qi < qg.questions.length; qi++) {
-          const q = qg.questions[qi];
-          if (q.rowQuestion && q.rowQuestion.title) {
-            const norm = normalizeText(q.rowQuestion.title);
-            const trans = translationsMap.get(norm);
-            if (trans && trans !== q.rowQuestion.title) {
-              q.rowQuestion.title = trans;
-              itemChanged = true;
-            }
-          }
-          if (q.grading && q.grading.correctAnswers && q.grading.correctAnswers.answers) {
-            for (let a = 0; a < q.grading.correctAnswers.answers.length; a++) {
-              const ans = q.grading.correctAnswers.answers[a];
-              if (ans.value) {
-                const norm = normalizeText(ans.value);
-                const trans = translationsMap.get(norm);
-                if (trans && trans !== ans.value) {
-                  ans.value = trans;
-                  itemChanged = true;
-                }
-              }
-            }
-          }
-        }
-      }
-      if (qg.grid && qg.grid.columns && qg.grid.columns.options) {
-        for (let o = 0; o < qg.grid.columns.options.length; o++) {
-          const opt = qg.grid.columns.options[o];
-          if (opt.value) {
-            const norm = normalizeText(opt.value);
-            const trans = translationsMap.get(norm);
-            if (trans && trans !== opt.value) {
-              opt.value = trans;
-              itemChanged = true;
-            }
-          }
-        }
-      }
-    }
-
-    if (itemChanged) {
-      // Helper to prepare 'image' fields for writing back by converting read-only contentUri
-      // to write-only sourceUri, which prevents Forms API 400 validation errors while preserving the images.
-      const prepareImageFieldsForWrite = (obj) => {
-        if (!obj || typeof obj !== 'object') return;
-        if (Array.isArray(obj)) {
-          obj.forEach(prepareImageFieldsForWrite);
-        } else {
-          if ('image' in obj && obj.image && typeof obj.image === 'object') {
-            const img = obj.image;
-            if (img.contentUri) {
-              img.sourceUri = img.contentUri;
-              delete img.contentUri;
-            } else if (!img.sourceUri) {
-              delete obj.image;
-            }
-          }
-          for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-              if (key === 'image') continue; // Already processed
-              prepareImageFieldsForWrite(obj[key]);
-            }
-          }
-        }
-      };
-      prepareImageFieldsForWrite(updatedItem);
-
-      let maskFields = ['title', 'description'];
-      if (updatedItem.questionItem) {
-        maskFields.push('questionItem.question');
-      }
-      if (updatedItem.questionGroupItem) {
-        maskFields.push('questionGroupItem.questions');
-        maskFields.push('questionGroupItem.grid');
-      }
-      
-      requests.push({
-        updateItem: {
-          item: updatedItem,
-          location: {
-            index: idx
-          },
-          updateMask: maskFields.join(',')
-        }
-      });
-    }
-  }
-
-  await checkCancelledGlobal(presentationId);
-
-  if (requests.length > 0) {
-    await logDebug(`Applying ${requests.length} batch updates to form...`, presentationId);
-    const updateFormUrl = `https://forms.googleapis.com/v1/forms/${copyId}:batchUpdate`;
-    const writeRes = await googleApiFetch(updateFormUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        requests: requests
-      })
-    });
-    if (!writeRes.ok) {
-      const errText = await writeRes.text();
-      throw new Error(`Forms batchUpdate API error (${writeRes.status}): ${errText}`);
-    }
-    await logDebug('Translated form content written back successfully.', presentationId);
-  } else {
-    await logDebug('No form updates needed.', presentationId);
-  }
-
-  return editUrl;
 }
 
 /**
@@ -1648,6 +819,7 @@ async function requestTranslationStart(presentationId, presentationTitle, fileTy
 }
 
 async function onTranslationFinished(presentationId, portMessageSender) {
+  await setResumableTask({ presentationId, config: null });
   try {
     const data = await chrome.storage.local.get('cancelledTasks');
     let cancelledTasks = data.cancelledTasks || [];
@@ -1694,10 +866,16 @@ async function onTranslationFinished(presentationId, portMessageSender) {
     triggerTranslation(nextTask.presentationId, nextTask.presentationTitle, nextTask.fileType, nextTask.targetLang, nextTask.config, portMessageSender);
   } else {
     await saveQueueState(activeTranslationIds, queuedTranslations);
+    if (activeTranslationIds.length === 0) stopKeepAlive();
   }
 }
 
 function triggerTranslation(presentationId, presentationTitle, fileType, targetLang, config, portMessageSender) {
+  // Snapshot params before the workflow mutates config (pageTextMap etc.) so a
+  // restarted service worker can rerun the job.
+  const snapshotSaved = setResumableTask({ presentationId, presentationTitle, fileType, targetLang, config: { ...config } });
+  startKeepAlive();
+
   const taskState = {
     step: 'copy',
     pct: 0,
@@ -1710,15 +888,16 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
     portMessageSender(presentationId, taskState);
   }
   
-  const sendProgress = async (step, pct, status, error = null, finalUrl = null) => {
-    const updatedState = { step, pct, status, error, finalUrl };
+  const sendProgress = async (step, pct, status, error = null, finalUrl = null, summary = null) => {
+    const updatedState = { step, pct, status, error, finalUrl, summary };
     await setTaskState(presentationId, updatedState);
     if (portMessageSender) {
       portMessageSender(presentationId, updatedState);
     }
   };
 
-  runTranslationWorkflow(presentationId, presentationTitle, fileType, targetLang, config, sendProgress)
+  snapshotSaved
+    .then(() => runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress))
     .then(() => {
       onTranslationFinished(presentationId, portMessageSender);
     })
@@ -1727,6 +906,49 @@ function triggerTranslation(presentationId, presentationTitle, fileType, targetL
       sendProgress('error', 0, null, err.message);
       onTranslationFinished(presentationId, portMessageSender);
     });
+}
+
+/**
+ * Runs the workflow once per target language (primary first), each producing its
+ * own copy. Progress is folded into one bar; only the last language reports
+ * 'done' (with every result link), earlier ones report "language i/n finished".
+ * Stops at the first error or cancel.
+ */
+async function runAllLanguages(presentationId, presentationTitle, fileType, targetLang, config, sendProgress) {
+  const langs = [targetLang, ...(config.extraLangs || []).filter((l) => l && l !== targetLang)];
+  const total = langs.length;
+  // Copies finished before a service-worker restart (see resume snapshot below).
+  const results = [...(config.priorResults || [])];
+  for (let i = 0; i < total; i++) {
+    const lang = langs[i];
+    const isLast = i === total - 1;
+    let failed = false;
+    const wrapped = async (step, pct, status, error = null, finalUrl = null, summary = null) => {
+      if (error) failed = true;
+      const overall = Math.round((i * 100 + pct) / total);
+      if (step === 'done') {
+        results.push({ lang, url: finalUrl });
+        if (!isLast) {
+          // Resume from the next language, not from the first, if the worker restarts.
+          await setResumableTask({
+            presentationId, presentationTitle, fileType, targetLang: langs[i + 1],
+            config: { ...config, extraLangs: langs.slice(i + 2), priorResults: [...results] },
+          });
+          return sendProgress('translate', overall, { key: 'progress.langDone', params: { done: i + 1, total } });
+        }
+        const multi = results.length > 1;
+        return sendProgress('done', 100, status, null, finalUrl, multi ? { ...summary, results } : summary);
+      }
+      if (error && results.length) {
+        // Keep the copies that did finish reachable from the error state.
+        return sendProgress(step, 0, status, error, null, { results });
+      }
+      return sendProgress(step, total > 1 ? overall : pct, status, error, finalUrl, summary);
+    };
+    const runConfig = { ...config, multi: { index: i, total } };
+    await runTranslationWorkflow(presentationId, presentationTitle, fileType, lang, runConfig, wrapped);
+    if (failed) break;
+  }
 }
 
 /**

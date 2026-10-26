@@ -1,8 +1,15 @@
 import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang } from './i18n/languages.js';
 import {
-  loadLocale, t, tStatus, applyI18n, formatDateTime,
+  loadLocale, t, tStatus, applyI18n, formatShortDateTime,
   getStoredUiLang, setStoredUiLang,
 } from './i18n/i18n.js';
+import { classifyApiKey, KNOWN_KEY_PREFIXES } from './lib/key-format.js';
+import { mergeGlossaries, rowsToGlossary, glossaryTextToRows, normalizeNames, NAME_CATEGORIES, NAME_MODES, CUSTOM_MAX_CHARS } from './lib/prefs.js';
+import { createTermEditor } from './lib/term-editor.js';
+import { parseSlideRange, sheetGidFromUrl } from './lib/range.js';
+
+// Demo mode (lib/demo-mode.js) supplies sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // i18n must be ready before anything renders, otherwise the user sees a flash of
@@ -52,6 +59,118 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
   const apiKeyIndicator = document.getElementById('api-key-indicator');
+  const inputAutoOpen = document.getElementById('auto-open-result');
+  const inputFitText = document.getElementById('fit-text');
+  const completionCard = document.getElementById('completion-card');
+  const completionTitle = document.getElementById('completion-title');
+  const completionSub = document.getElementById('completion-sub');
+  const completionStats = document.getElementById('completion-stats');
+  const completionActions = document.getElementById('completion-actions');
+  let completionUrl = null;
+  let completionDismissKey = null;
+  const prefsCard = document.getElementById('prefs-card');
+  const prefsFreeNote = document.getElementById('prefs-free-note');
+  const prefTone = document.getElementById('pref-tone');
+  // Name categories: one segmented control (translate / keep / annotate) each.
+  const nameModes = { ...normalizeNames({}) };
+  function renderNameModes() {
+    for (const row of document.querySelectorAll('.name-mode-row')) {
+      const cat = row.dataset.category;
+      const group = row.querySelector('.segmented');
+      group.innerHTML = '';
+      for (const mode of NAME_MODES) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', String(nameModes[cat] === mode));
+        // Label plus a concrete example of the result (e.g. 倫敦 / London / 倫敦（London）).
+        const label = document.createElement('span');
+        label.className = 'seg-label';
+        label.textContent = t(`prefs.mode.${mode}`);
+        const example = document.createElement('span');
+        example.className = 'seg-example';
+        // Example pair per locale: Asian UIs show Musk → 馬斯克, Latin-script UIs
+        // show 東京 → Tokyo, so the example is always readable.
+        const src = t(`prefs.example.${cat}.src`);
+        const dst = t(`prefs.example.${cat}`);
+        example.textContent = mode === 'keep' ? src : mode === 'translate' ? dst : t('prefs.example.annotate', { dst, src });
+        btn.append(label, example);
+        btn.title = t(`prefs.mode.${mode}.hint`);
+        btn.addEventListener('click', () => {
+          nameModes[cat] = mode;
+          renderNameModes();
+          updateRulesPreview();
+          updateUnsavedNote();
+        });
+        group.appendChild(btn);
+      }
+    }
+  }
+  const rulesPreviewList = document.getElementById('rules-preview-list');
+  const globalTerms = createTermEditor(document.getElementById('terms-global'), { t, onChange: updateRulesPreview });
+  const docTerms = createTermEditor(document.getElementById('terms-doc'), { t, onChange: saveDocTerms });
+  const prefCustom = document.getElementById('pref-custom');
+  const prefCustomCount = document.getElementById('pref-custom-count');
+  const docGlossaryBox = document.getElementById('doc-glossary-box');
+  const scopeSlides = document.getElementById('scope-slides');
+  const slideRange = document.getElementById('slide-range');
+  const slideRangeError = document.getElementById('slide-range-error');
+  const scopeSheet = document.getElementById('scope-sheet');
+  const sheetCurrentOnly = document.getElementById('sheet-current-only');
+
+  function updateScopeControls() {
+    scopeSlides.classList.toggle('hidden', currentFileType !== 'presentation');
+    scopeSheet.classList.toggle('hidden', currentFileType !== 'spreadsheet');
+    slideRange.value = '';
+    slideRangeError.classList.add('hidden');
+    sheetCurrentOnly.checked = false;
+    document.querySelectorAll('#extra-langs-grid .lang-chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
+    document.getElementById('extra-langs-box').open = false;
+    updateExtraLangsCount();
+  }
+
+  slideRange.addEventListener('input', () => {
+    let ok = true;
+    try { parseSlideRange(slideRange.value); } catch (_) { ok = false; }
+    slideRangeError.classList.toggle('hidden', ok);
+  });
+
+  /**
+   * Name of the sheet tab the user is on, read from the Sheets page. Needed for
+   * .xlsx files: the translated copy is converted to Google Sheets with new sheet
+   * ids, so only the name identifies the tab. null if it cannot be read.
+   */
+  async function readActiveSheetTitle() {
+    try {
+      const [res] = await chrome.scripting.executeScript({
+        target: { tabId: currentTabId },
+        func: () => document.querySelector('.docs-sheet-active-tab .docs-sheet-tab-name')?.textContent?.trim() || null,
+      });
+      return res?.result || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /** Reads the scope controls; returns null when the slide range is malformed. */
+  async function buildScopeForJob() {
+    if (currentFileType === 'presentation') {
+      try {
+        const set = parseSlideRange(slideRange.value);
+        return set ? { slides: [...set] } : {};
+      } catch (_) {
+        slideRangeError.classList.remove('hidden');
+        return null;
+      }
+    }
+    if (currentFileType === 'spreadsheet' && sheetCurrentOnly.checked) {
+      // Read the live URL: switching sheet tabs only changes the #gid fragment.
+      const tab = await chrome.tabs.get(currentTabId).catch(() => null);
+      const gid = sheetGidFromUrl(tab?.url);
+      return { sheetGid: gid, sheetTitle: await readActiveSheetTitle(), currentSheetOnly: true };
+    }
+    return {};
+  }
   
   // Progress Elements
   const progressSection = document.getElementById('progress-section');
@@ -79,17 +198,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     free: ''
   };
 
+  function getExtraLangs() {
+    return [...document.querySelectorAll('#extra-langs-grid .lang-chip[aria-pressed="true"]')]
+      .map((c) => c.dataset.code)
+      .filter((code) => code !== selectLang.value);
+  }
+
+  // Hides the primary target's chip and lists the picked languages next to the toggle.
+  function updateExtraLangsCount() {
+    for (const chip of document.querySelectorAll('#extra-langs-grid .lang-chip')) {
+      chip.hidden = chip.dataset.code === selectLang.value;
+    }
+    // A count stays readable at any width; the chips below show which ones.
+    const n = getExtraLangs().length;
+    document.getElementById('extra-langs-count').textContent = n ? t('multi.picked', { n }) : '';
+  }
+
   // ── Language pickers ──────────────────────────────────────────────────────
   // Both lists come from i18n/languages.js. Adding a language must never require
   // touching this file — see docs/06 §10.9.
   const selectUiLang = document.getElementById('select-ui-lang');
 
   function populateLanguagePickers() {
+    // Extra-language chips (native names only — short, never wrap awkwardly).
+    // Keep the user's selection across a UI-language switch.
+    const extraGrid = document.getElementById('extra-langs-grid');
+    const ticked = new Set(getExtraLangs());
+    extraGrid.innerHTML = '';
+    for (const lang of TARGET_LANGUAGES) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'lang-chip';
+      chip.dataset.code = lang.code;
+      chip.textContent = lang.endonym;
+      chip.setAttribute('aria-pressed', String(ticked.has(lang.code)));
+      chip.addEventListener('click', () => {
+        chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
+        updateExtraLangsCount();
+      });
+      extraGrid.appendChild(chip);
+    }
+    updateExtraLangsCount();
+
     selectLang.innerHTML = '';
     for (const lang of TARGET_LANGUAGES) {
       const opt = document.createElement('option');
       opt.value = lang.code;
-      opt.textContent = targetLabel(lang);
+      opt.textContent = lang.endonym; // native name, same as the chips
+      opt.title = lang.english;
       selectLang.appendChild(opt);
     }
     if (selectUiLang) {
@@ -120,6 +276,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     validateApiKey();
     loadHistory();
+    globalTerms.rerender();
+    docTerms.rerender();
+    renderNameModes();
+    updateRulesPreview();
   }
 
   /**
@@ -149,15 +309,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 1. Check storage for existing settings
-  chrome.storage.local.get([
+  // 1. Check storage for existing settings. Also used to revert unsaved edits.
+  const loadSettingsForm = (onLoaded) => chrome.storage.local.get([
     'translationEngine',
     'apiKey',
     'modelName',
     'customUrl',
-    'apiKeyStatus'
+    'apiKeyStatus',
+    'autoOpenResult',
+    'fitTextToBoxes',
+    'translationPrefs'
   ], (items) => {
+    if (inputFitText) inputFitText.checked = items.fitTextToBoxes !== false;
+    const prefs = items.translationPrefs || {};
+    prefTone.value = prefs.tone || 'keep';
+    // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
+    globalTerms.setRows(prefs.terms || glossaryTextToRows(prefs.glossaryText));
+    Object.assign(nameModes, normalizeNames(prefs));
+    renderNameModes();
+    prefCustom.value = prefs.custom || '';
+    updateCustomCount();
+    updateRulesPreview();
     selectEngine.value = items.translationEngine || 'gemini';
+    if (inputAutoOpen) inputAutoOpen.checked = items.autoOpenResult !== false;
     inputApiKey.value = items.apiKey || '';
     inputModelName.value = items.modelName || DEFAULT_MODELS.gemini;
     inputCustomUrl.value = items.customUrl || '';
@@ -169,10 +343,160 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       validateApiKey();
     }, 100);
+
+    markSettingsClean();
+    onLoaded?.(items);
+  });
+
+  loadSettingsForm((items) => {
+    // First run: no key yet and the user hasn't chosen the free engine.
+    chrome.storage.local.get('setupSkipped', ({ setupSkipped }) => {
+      if (!items.apiKey && (items.translationEngine || 'gemini') !== 'free' && !setupSkipped) openSetup();
+    });
+  });
+
+  // ── Unsaved-changes guard ─────────────────────────────────────────────────
+  // Settings only apply after Save. Show when the form differs from what is
+  // stored, ask before ✕ throws edits away, and make Cancel actually revert.
+  // (Interface language applies immediately and is deliberately not tracked.)
+  const unsavedNote = document.getElementById('unsaved-note');
+  let savedSnapshot = '';
+
+  function settingsSnapshot() {
+    return JSON.stringify([
+      selectEngine.value, inputApiKey.value.trim(), inputModelName.value.trim(), inputCustomUrl.value.trim(),
+      inputAutoOpen?.checked, inputFitText?.checked,
+      prefTone.value, NAME_CATEGORIES.map((k) => nameModes[k]),
+      globalTerms.getRows().filter((r) => r.src.trim()), prefCustom.value.trim(),
+    ]);
+  }
+
+  function markSettingsClean() {
+    savedSnapshot = settingsSnapshot();
+    updateUnsavedNote();
+  }
+
+  function hasUnsavedSettings() {
+    return savedSnapshot !== '' && settingsSnapshot() !== savedSnapshot;
+  }
+
+  function updateUnsavedNote() {
+    const dirty = hasUnsavedSettings();
+    unsavedNote.classList.toggle('hidden', !dirty);
+    btnSaveSettings.classList.toggle('needs-save', dirty);
+  }
+
+  settingsPanel.addEventListener('input', updateUnsavedNote);
+  settingsPanel.addEventListener('change', updateUnsavedNote);
+  settingsPanel.addEventListener('click', () => setTimeout(updateUnsavedNote));
+
+  // ── First-run setup wizard ────────────────────────────────────────────────
+  const setupPanel = document.getElementById('setup-panel');
+  const setupKey = document.getElementById('setup-key');
+  const setupResult = document.getElementById('setup-result');
+  const btnSetupDone = document.getElementById('btn-setup-done');
+  let setupTestSeq = 0;
+
+  function openSetup() {
+    settingsPanel.classList.remove('active');
+    historyPanel.classList.remove('active');
+    setupPanel.classList.add('active');
+  }
+
+  function closeSetup() {
+    setupPanel.classList.remove('active');
+  }
+
+  document.getElementById('btn-setup-getkey').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://aistudio.google.com/apikey' });
+    setupKey.focus();
+  });
+
+  // Test as soon as something key-shaped is pasted/typed — no extra button.
+  async function runSetupTest() {
+    const key = setupKey.value.trim();
+    btnSetupDone.disabled = true;
+    setupResult.className = 'test-result-msg';
+    if (key.length < 20) {
+      setupResult.textContent = '';
+      return;
+    }
+    const seq = ++setupTestSeq;
+    setupResult.textContent = t('settings.testConnection.busy');
+    const result = await testApiConnection('gemini', key, DEFAULT_MODELS.gemini, '');
+    if (seq !== setupTestSeq) return; // a newer paste superseded this test
+    if (result.success === true) {
+      setupResult.className = 'test-result-msg result-active';
+      setupResult.textContent = t('setup.ok');
+      await chrome.storage.local.set({
+        translationEngine: 'gemini',
+        apiKey: key,
+        modelName: DEFAULT_MODELS.gemini,
+        apiKeyStatus: 'active',
+      });
+      selectEngine.value = 'gemini';
+      inputApiKey.value = key;
+      inputModelName.value = DEFAULT_MODELS.gemini;
+      toggleEngineFields('gemini');
+      updateStatusBadge('active');
+      btnSetupDone.disabled = false;
+    } else {
+      setupResult.className = 'test-result-msg result-invalid';
+      setupResult.textContent = result.message;
+    }
+  }
+  setupKey.addEventListener('input', runSetupTest);
+
+  btnSetupDone.addEventListener('click', closeSetup);
+  document.getElementById('btn-close-setup').addEventListener('click', () => {
+    chrome.storage.local.set({ setupSkipped: true });
+    closeSetup();
+  });
+  document.getElementById('btn-setup-free').addEventListener('click', async () => {
+    await chrome.storage.local.set({ translationEngine: 'free', setupSkipped: true });
+    selectEngine.value = 'free';
+    toggleEngineFields('free');
+    closeSetup();
   });
 
   // Toggle visible fields based on engine
+  function updateCustomCount() {
+    prefCustomCount.textContent = `${prefCustom.value.length}/${CUSTOM_MAX_CHARS}`;
+  }
+  prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
+  prefTone.addEventListener('change', updateRulesPreview);
+
+  // Plain-language summary of the current preference rules (read-only).
+  function updateRulesPreview() {
+    const items = [];
+    if (prefTone.value !== 'keep') items.push(t('prefs.preview.tone', { tone: t(`prefs.tone.${prefTone.value}`) }));
+    // Category labels are capitalised as headings; mid-sentence they shouldn't be
+    // (German nouns stay capitalised; CJK/Thai have no case).
+    const inSentence = (label) => (['en', 'es', 'fr', 'vi'].includes(document.documentElement.lang)
+      ? label.charAt(0).toLowerCase() + label.slice(1) : label);
+    const listOf = (mode) => NAME_CATEGORIES.filter((k) => nameModes[k] === mode)
+      .map((k) => inSentence(t(`prefs.keep.${k}`))).join(t('prefs.preview.listSep'));
+    if (listOf('keep')) items.push(t('prefs.preview.keepCategories', { list: listOf('keep') }));
+    if (listOf('annotate')) items.push(t('prefs.preview.annotateCategories', { list: listOf('annotate') }));
+    for (const { src, dst } of rowsToGlossary(globalTerms.getRows())) {
+      items.push(dst ? t('prefs.preview.translate', { src, dst }) : t('prefs.preview.keep', { src }));
+    }
+    if (prefCustom.value.trim()) items.push(t('prefs.preview.custom'));
+    rulesPreviewList.innerHTML = '';
+    if (!items.length) items.push(t('prefs.preview.none'));
+    for (const text of items) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      rulesPreviewList.appendChild(li);
+    }
+  }
+
   function toggleEngineFields(engine) {
+    // Preferences are prompt instructions — the basic free engine has no prompt.
+    const isFree = engine === 'free';
+    prefsCard.classList.toggle('disabled', isFree);
+    prefsFreeNote.classList.toggle('hidden', !isFree);
+    docGlossaryBox.classList.toggle('hidden', isFree);
     const groupTestApi = document.getElementById('group-test-api');
     if (engine === 'free') {
       groupApiKey.classList.add('hidden');
@@ -250,6 +574,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (msg) { msg.textContent = ''; msg.className = 'test-result-msg'; }
   }
 
+  // Custom endpoints are not in host_permissions; each origin is granted on demand
+  // (optional_host_permissions) so the default install needs no all-sites access.
+  function customOriginPattern(url) {
+    try {
+      const u = new URL(url);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+      return `${u.protocol}//${u.host}/*`;
+    } catch (_) { return null; }
+  }
+
+  function requestCustomOriginPermission(url) {
+    const origin = customOriginPattern(url);
+    if (!origin) return Promise.resolve(false);
+    // Must run inside the click's user gesture — call before any other await.
+    return chrome.permissions.request({ origins: [origin] }).catch(() => false);
+  }
+
+  function hasCustomOriginPermission(url) {
+    const origin = customOriginPattern(url);
+    if (!origin) return Promise.resolve(false);
+    return chrome.permissions.contains({ origins: [origin] }).catch(() => false);
+  }
+
   // ── Real API Connection Test ──────────────────────────────────────────────
   async function testApiConnection(engine, apiKey, modelName, customUrl) {
     const controller = new AbortController();
@@ -298,8 +645,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const errMsg = body?.error?.message || body?.message || resp.statusText || `HTTP ${resp.status}`;
       const modelLinks = {
         gemini: 'https://ai.google.dev/gemini-api/docs/models',
-        openai: 'https://platform.openai.com/docs/models',
-        claude: 'https://docs.anthropic.com/claude/docs/models-overview',
+        openai: 'https://developers.openai.com/api/docs/models',
+        claude: 'https://platform.claude.com/docs/en/models/overview',
         custom: t('settings.test.suggest.providerDocs')
       };
 
@@ -354,19 +701,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Known key prefixes are only hints: providers change formats (e.g. Gemini AIzaSy… → AQ.…),
-    // so an unrecognized shape is never treated as an error — the real connection test decides.
-    const KNOWN_PREFIXES = {
-      gemini: ['AIzaSy', 'AQ.'],
-      openai: ['sk-'],
-      claude: ['sk-ant-'],
-    };
-    let state;
-    if (key.length < 10) state = 'bad';
-    else if ((KNOWN_PREFIXES[engine] || []).some((p) => key.startsWith(p))) state = 'ok';
-    else state = KNOWN_PREFIXES[engine] ? 'unknown' : 'ok';
-
-    const group = KNOWN_PREFIXES[engine] ? engine : 'generic';
+    const state = classifyApiKey(engine, key);
+    const group = KNOWN_KEY_PREFIXES[engine] ? engine : 'generic';
     apiKeyIndicator.className = `val-indicator ${{ ok: 'valid', bad: 'invalid', unknown: 'neutral' }[state]}`;
     apiKeyIndicator.textContent = state === 'unknown'
       ? t('settings.keyFormat.unknown')
@@ -382,6 +718,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (inputCustomUrl) inputCustomUrl.addEventListener('input', resetApiStatus);
 
   selectLang.addEventListener('change', (e) => {
+    updateExtraLangsCount();
     const langVal = e.target.value;
     console.log('[WorkspaceTranslator] Target language dropdown changed to:', langVal, 'for ID:', currentPresentationId);
     if (currentPresentationId) {
@@ -413,8 +750,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsPanel.classList.remove('active');
   };
 
-  btnCloseSettings.addEventListener('click', closeSettings);
-  btnCancelSettings.addEventListener('click', closeSettings);
+  // ✕ with unsaved edits asks first; Cancel is an explicit "discard".
+  const discardAndClose = () => loadSettingsForm(() => closeSettings());
+  btnCloseSettings.addEventListener('click', () => {
+    if (hasUnsavedSettings() && !confirm(t('settings.unsaved.confirm'))) return;
+    discardAndClose();
+  });
+  btnCancelSettings.addEventListener('click', discardAndClose);
 
   btnSaveSettings.addEventListener('click', () => {
     const translationEngine = selectEngine.value;
@@ -426,16 +768,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       translationEngine,
       apiKey,
       modelName,
-      customUrl
+      customUrl,
+      autoOpenResult: inputAutoOpen ? inputAutoOpen.checked : true,
+      fitTextToBoxes: inputFitText ? inputFitText.checked : true,
+      translationPrefs: {
+        tone: prefTone.value,
+        names: { ...nameModes },
+        terms: globalTerms.getRows().filter((r) => r.src.trim()),
+        custom: prefCustom.value.trim().slice(0, CUSTOM_MAX_CHARS),
+      }
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
+      markSettingsClean();
       closeSettings();
     });
   });
 
   // Open Help Guide
+  // "What's new" dot on the help button after an update; the click opens the
+  // guide at the version history and clears the dot.
+  function refreshWhatsNewDot() {
+    chrome.storage.local.get(['whatsNewVersion', 'whatsNewSeen'], ({ whatsNewVersion, whatsNewSeen }) => {
+      btnHelp.classList.toggle('has-news', !!whatsNewVersion && whatsNewVersion !== whatsNewSeen);
+    });
+  }
+  refreshWhatsNewDot();
+
   btnHelp.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'onboarding.html' });
+    const hasNews = btnHelp.classList.contains('has-news');
+    chrome.tabs.create({ url: hasNews ? 'onboarding.html#changelog' : 'onboarding.html' });
+    if (hasNews) {
+      chrome.storage.local.get('whatsNewVersion', ({ whatsNewVersion }) => {
+        chrome.storage.local.set({ whatsNewSeen: whatsNewVersion }, refreshWhatsNewDot);
+      });
+    }
   });
 
   // ── Test Connection Button ────────────────────────────────────────────────
@@ -448,6 +814,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const apiKey = inputApiKey.value.trim();
       const modelName = inputModelName.value.trim();
       const customUrl = inputCustomUrl.value.trim();
+      // Ask for the custom origin first, while the click still counts as a user gesture.
+      const customPermission = engine === 'custom' && customUrl
+        ? requestCustomOriginPermission(customUrl) : null;
       if (!apiKey) {
         testResultMsg.className = 'test-result-msg result-invalid';
         testResultMsg.textContent = t('settings.test.needKey');
@@ -461,6 +830,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (engine === 'custom' && !customUrl) {
         testResultMsg.className = 'test-result-msg result-invalid';
         testResultMsg.textContent = t('settings.test.needUrl');
+        return;
+      }
+      if (customPermission && !(await customPermission)) {
+        testResultMsg.className = 'test-result-msg result-invalid';
+        testResultMsg.textContent = t('settings.test.permissionDenied');
         return;
       }
       // Show loading state. Swap only the label text and spin the existing icon, so
@@ -492,8 +866,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         newStatus = 'unverified';
         testResultMsg.className = 'test-result-msg result-warning';
       }
-      testResultMsg.innerHTML = result.message +
-        (result.suggestion ? `<br><span class="test-suggestion">${result.suggestion}</span>` : '');
+      // API error text is untrusted — build with textContent, never innerHTML.
+      testResultMsg.textContent = result.message;
+      if (result.suggestion) {
+        const sugg = document.createElement('span');
+        sugg.className = 'test-suggestion';
+        sugg.textContent = result.suggestion;
+        testResultMsg.append(document.createElement('br'), sugg);
+      }
 
       chrome.storage.local.set({ apiKeyStatus: newStatus });
       updateStatusBadge(newStatus);
@@ -682,7 +1062,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       // ─────────────────────────────────────────────────────────────────────
 
 
-      const newPresentationTitle = cleanTitle || fileTypeName;
+      // .xlsx/.docx/.pptx tabs can show the URL as their title until the editor
+      // loads; treat that as "unknown" and pick up the real title on a later update.
+      const looksLikeUrl = /^(https?:\/\/)?docs\.google\.com\//i.test(cleanTitle.trim());
+      const newPresentationTitle = (!looksLikeUrl && cleanTitle) || fileTypeName;
       
       // Apply body class for dynamic theme variables
       document.body.className = `theme-${newFileType}`;
@@ -744,6 +1127,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Restore / Reset UI for this presentation
         resetUIForPresentation(currentPresentationId);
+      } else if (newPresentationTitle !== currentPresentationTitle) {
+        // Same file, title finished loading — update the name only.
+        currentPresentationTitle = newPresentationTitle;
+        slideTitleEl.textContent = currentPresentationTitle;
       }
       
       warningPanel.style.display = 'none';
@@ -852,10 +1239,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSettings.disabled = false;
     btnHelp.disabled = false;
     progressSection.style.display = 'none';
+    mainPanel.classList.remove('is-busy');
+    hideCompletion();
+    updateScopeControls();
     
     resetProgress();
     
     logConsoleContent.textContent = t('logs.waiting');
+
+    const docTermsKey = `docTerms_${presentationId}`;
+    const legacyDocKey = `docGlossary_${presentationId}`;
+    chrome.storage.local.get([docTermsKey, legacyDocKey], (data) => {
+      if (currentPresentationId !== presentationId) return;
+      const rows = data[docTermsKey] || glossaryTextToRows(data[legacyDocKey]);
+      docTerms.setRows(rows);
+      docGlossaryBox.open = rowsToGlossary(rows).length > 0;
+    });
+
+    // Landing on a freshly translated copy: say where it came from.
+    const infoKey = `completedInfo_${presentationId}`;
+    chrome.storage.local.get(infoKey, (data) => {
+      const info = data[infoKey];
+      if (info && currentPresentationId === presentationId && Date.now() - info.at < 24 * 3600 * 1000) {
+        showCompletion({
+          title: t('done.copyTitle'),
+          sub: t('done.copySub', { title: info.sourceTitle || '' }),
+          summary: info.summary,
+          url: null,
+          dismissKey: infoKey,
+        });
+      }
+    });
     
     // Start periodic log polling for this specific presentation
     lastProgressTime = Date.now();
@@ -883,62 +1297,119 @@ document.addEventListener('DOMContentLoaded', async () => {
       'apiKey',
       'modelName',
       'customUrl',
-      'apiKeyStatus'
+      'apiKeyStatus',
+      'translationPrefs'
     ], (items) => {
       const translationEngine = items.translationEngine || 'gemini';
       const apiKey = items.apiKey;
       const apiKeyStatus = items.apiKeyStatus || 'unverified';
 
       if (translationEngine !== 'free' && !apiKey) {
-        showApiWarningModal('missing');
+        openSetup();
         return;
       }
       if (translationEngine !== 'free' && apiKeyStatus !== 'active') {
         showApiWarningModal(apiKeyStatus);
         return;
       }
-
-      // Start translation UI state
-      btnTranslate.disabled = true;
-      btnSettings.disabled = true;
-      btnHelp.disabled = true;
-      progressSection.style.display = 'flex';
-      
-      resetProgress();
-
-      const key = `debugLogs_${currentPresentationId}`;
-      chrome.storage.local.set({ [key]: [] }, () => {
-        logConsoleContent.textContent = t('logs.initiating');
-        lastProgressTime = Date.now();
-        
-        // Send start translation message to service worker
-        if (port) {
-          try {
-            port.postMessage({
-              action: 'startTranslation',
-              presentationId: currentPresentationId,
-              presentationTitle: currentPresentationTitle,
-              fileType: currentFileType,
-              targetLang: selectLang.value,
-              tabId: currentTabId,
-              config: {
-                translationEngine,
-                apiKey,
-                modelName: items.modelName || DEFAULT_MODELS[translationEngine],
-                customUrl: items.customUrl
-              }
-            });
-          } catch (err) {
-            console.error('Failed to post startTranslation message:', err);
-            alert(t('alert.commFailed'));
+      if (translationEngine === 'custom') {
+        // Upgrades from <=1.4 had all-sites access; re-run the test to grant this origin.
+        hasCustomOriginPermission(items.customUrl).then((ok) => {
+          if (!ok) {
+            chrome.storage.local.set({ apiKeyStatus: 'unverified' });
+            updateStatusBadge('unverified');
+            showApiWarningModal('unverified');
+          } else {
+            startTranslation(items, translationEngine, apiKey);
           }
-        } else {
-          alert(t('alert.notConnected'));
-          connectToBackground();
-        }
-      });
+        });
+        return;
+      }
+      startTranslation(items, translationEngine, apiKey);
     });
   });
+
+  function saveDocTerms(rows) {
+    if (!currentPresentationId) return;
+    const key = `docTerms_${currentPresentationId}`;
+    const filled = rows.filter((r) => r.src.trim());
+    if (filled.length) chrome.storage.local.set({ [key]: filled });
+    else chrome.storage.local.remove(key);
+    chrome.storage.local.remove(`docGlossary_${currentPresentationId}`); // migrated
+  }
+
+  function buildPrefsForJob(stored) {
+    const p = stored || {};
+    return {
+      tone: p.tone || 'keep',
+      names: normalizeNames(p),
+      glossary: mergeGlossaries(
+        rowsToGlossary(p.terms || glossaryTextToRows(p.glossaryText)),
+        rowsToGlossary(docTerms.getRows())
+      ),
+      custom: p.custom || '',
+    };
+  }
+
+  // Back to the editable form when a job could not be started at all.
+  function resetToIdle() {
+    mainPanel.classList.remove('is-busy');
+    progressSection.style.display = 'none';
+    btnTranslate.disabled = false;
+    btnSettings.disabled = false;
+    btnHelp.disabled = false;
+  }
+
+  async function startTranslation(items, translationEngine, apiKey) {
+    const scope = await buildScopeForJob();
+    if (!scope) return;
+    hideCompletion();
+    mainPanel.classList.add('is-busy');
+    // Start translation UI state
+    btnTranslate.disabled = true;
+    btnSettings.disabled = true;
+    btnHelp.disabled = true;
+    progressSection.style.display = 'flex';
+    
+    resetProgress();
+
+    const key = `debugLogs_${currentPresentationId}`;
+    chrome.storage.local.set({ [key]: [] }, () => {
+      logConsoleContent.textContent = t('logs.initiating');
+      lastProgressTime = Date.now();
+      
+      // Send start translation message to service worker
+      if (port) {
+        try {
+          port.postMessage({
+            action: 'startTranslation',
+            presentationId: currentPresentationId,
+            presentationTitle: currentPresentationTitle,
+            fileType: currentFileType,
+            targetLang: selectLang.value,
+            tabId: currentTabId,
+            config: {
+              translationEngine,
+              apiKey,
+              modelName: items.modelName || DEFAULT_MODELS[translationEngine],
+              customUrl: items.customUrl,
+              prefs: buildPrefsForJob(items.translationPrefs),
+              scope,
+              extraLangs: getExtraLangs()
+            }
+          });
+        } catch (err) {
+          console.error('Failed to post startTranslation message:', err);
+          resetToIdle();
+          alert(t('alert.commFailed'));
+        }
+      } else {
+        resetToIdle();
+        alert(t('alert.notConnected'));
+        connectToBackground();
+      }
+    });
+  }
 
   if (btnCancelTranslation) {
     btnCancelTranslation.addEventListener('click', () => {
@@ -1000,14 +1471,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         : t('error.429.generic', { engine: engine.toUpperCase() });
     }
 
+    // Drive refused to copy: the user can only view/comment, or the owner disabled copying.
+    if (err.includes("Drive copy API error") && (err.includes("403") || err.includes("cannotCopyFile") || err.includes("insufficientFilePermissions"))) {
+      return t('error.noCopyPermission');
+    }
+
+    // The configured model was retired or misspelled.
+    if (/API Error \(404\)/.test(err) || err.includes("model_not_found")) {
+      return t('error.modelNotFound', { engine: engine.toUpperCase() });
+    }
+
+    // Google sign-in expired and could not be refreshed silently.
+    if (/(Drive|Slides|Docs|Sheets|Forms) \w+ API error \(401\)/.test(err) || err.includes("OAuth") || err.includes("Access token")) {
+      return t('error.signIn');
+    }
+
+    // Offline / DNS / blocked request.
+    if (err.includes("Failed to fetch") || err.includes("NetworkError") || err.includes("ERR_INTERNET")) {
+      return t('error.network');
+    }
+
     // 403 Forbidden / Invalid API Key / API Not Enabled
-    if (err.includes("403") || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
+    if (err.includes("403") || /API Error \(401\)/.test(err) || err.includes("key not valid") || err.includes("API_KEY_INVALID") || err.includes("USER_LIMIT_EXCEEDED")) {
       return t('error.403');
     }
 
     // 400 Bad Request
     if (err.includes("400") || err.includes("INVALID_ARGUMENT") || err.includes("Invalid value")) {
       return t('error.400');
+    }
+
+    // lib/sheets.js: "only the current sheet" but that tab no longer exists.
+    if (err.includes("Sheet tab not found")) {
+      return t('error.sheetNotFound');
     }
 
     // Our own guard in translate.js: the model returned a different array length.
@@ -1052,13 +1548,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Ensure the progress section remains visible to show the error message
       progressSection.style.display = 'flex';
       
+      mainPanel.classList.remove('is-busy');
+      // Multi-language run that failed part-way: keep the finished copies reachable.
+      if (message.summary?.results?.length) {
+        showCompletion({ title: t('done.partialTitle'), sub: '', summary: message.summary, url: null, dismissKey: null });
+      }
       const humanError = translateErrorToHuman(error, selectEngine.value);
       progressStatus.textContent = humanError;
       progressStatus.style.color = '#ff7675';
       progressStatus.style.whiteSpace = 'pre-line';
       
-      // Reset progress bar displays to 0% to prevent stuck visual indicators
-      progressPct.textContent = '0%';
+      // Reset the bar; hide the percentage so it can't run into the message text.
+      progressPct.textContent = '';
       progressBarFill.style.width = '0%';
       
       btnTranslate.disabled = false;
@@ -1091,6 +1592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     progressSection.style.display = 'flex';
+    mainPanel.classList.toggle('is-busy', step !== 'done');
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
     btnHelp.disabled = true;
@@ -1136,23 +1638,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateLogDisplay(data[key] || []);
       });
 
-      const completedId = currentPresentationId;
-
-      // Lock tab-change detection for 15 seconds so the newly opened
-      // translated file doesn't hijack the UI title display.
-      tabChangeLocked = true;
-      setTimeout(() => { tabChangeLocked = false; }, 15000);
-
-      setTimeout(() => {
-        if (currentPresentationId === completedId) {
-          progressSection.style.display = 'none';
-          btnTranslate.disabled = false;
-          btnSettings.disabled = false;
-          btnHelp.disabled = false;
-        }
-      }, 3000);
+      // Keep the result on screen until the user dismisses it or starts again —
+      // it used to vanish after 3s, often before the user ever saw it.
+      progressSection.style.display = 'none';
+      btnTranslate.disabled = false;
+      btnSettings.disabled = false;
+      btnHelp.disabled = false;
+      showCompletion({
+        title: t('done.title'),
+        sub: '',
+        summary: message.summary,
+        url: finalUrl,
+        dismissKey: `taskState_${currentPresentationId}`,
+      });
     }
   }
+
+
+  // ── Completion card ───────────────────────────────────────────────────────
+  function formatDuration(ms) {
+    const total = Math.max(1, Math.round(ms / 1000));
+    const m = Math.floor(total / 60);
+    const sec = total % 60;
+    return m > 0 ? t('done.durationMin', { m, s: sec }) : t('done.durationSec', { s: sec });
+  }
+
+  function summaryText(summary) {
+    if (!summary) return '';
+    const parts = [];
+    if (typeof summary.segments === 'number') parts.push(t('done.segments', { n: summary.segments }));
+    if (summary.durationMs) parts.push(formatDuration(summary.durationMs));
+    if (summary.engine) parts.push(summary.model ? `${summary.engine.toUpperCase()} · ${summary.model}` : summary.engine.toUpperCase());
+    if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
+    if (summary.columnsFitted) parts.push(t('done.columnsFitted', { n: summary.columnsFitted }));
+    if (summary.customDropped) parts.push(t('done.customDropped'));
+    return parts.join(' · ');
+  }
+
+  function showCompletion({ title, sub, summary, url, dismissKey }) {
+    if (!completionCard) return;
+    completionTitle.textContent = title;
+    completionSub.textContent = sub || '';
+    completionStats.textContent = summaryText(summary);
+    // Multi-language run: one link per produced copy.
+    const resultsList = document.getElementById('completion-results');
+    resultsList.innerHTML = '';
+    for (const r of summary?.results || []) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      const lang = TARGET_LANGUAGES.find((l) => l.code === r.lang);
+      const langName = lang ? lang.endonym : r.lang; // native name, as on the chips
+      a.textContent = '↗ ' + langName;
+      a.addEventListener('click', () => chrome.tabs.create({ url: r.url }));
+      li.appendChild(a);
+      resultsList.appendChild(li);
+    }
+    completionUrl = url;
+    completionDismissKey = dismissKey;
+    // Multi-language runs list one link per copy, which replaces the single button.
+    const hasResults = (summary?.results || []).length > 0;
+    completionActions.classList.toggle('hidden', !url);
+    document.getElementById('btn-open-result').hidden = hasResults;
+    completionCard.classList.remove('hidden');
+  }
+
+  function hideCompletion() {
+    if (completionCard) completionCard.classList.add('hidden');
+    completionUrl = null;
+    completionDismissKey = null;
+  }
+
+  document.getElementById('btn-open-result')?.addEventListener('click', () => {
+    if (completionUrl) chrome.tabs.create({ url: completionUrl });
+  });
+  document.getElementById('btn-translate-again')?.addEventListener('click', () => {
+    if (completionDismissKey) chrome.storage.local.remove(completionDismissKey);
+    hideCompletion();
+    selectLang.focus();
+  });
+  document.getElementById('btn-completion-close')?.addEventListener('click', () => {
+    if (completionDismissKey) chrome.storage.local.remove(completionDismissKey);
+    hideCompletion();
+  });
 
   // 5. Translation History functionality
   btnHistory.addEventListener('click', () => {
@@ -1211,7 +1778,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Formatted in the active UI locale, not the browser's.
-      const dateStr = formatDateTime(item.timestamp);
+      const dateStr = formatShortDateTime(item.timestamp);
 
       card.innerHTML = `
         <div class="history-item-info">
@@ -1220,7 +1787,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="history-item-meta">
             <div class="history-item-title" title="${escapeHtml(t('history.openTooltip'))}">${escapeHtml(item.originalTitle)}</div>
-            <div class="history-item-date">${dateStr}</div>
+            <div class="history-item-date">${escapeHtml(dateStr)}</div>
           </div>
         </div>
         <div class="history-item-actions">

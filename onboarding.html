@@ -3,232 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Setup Guide - Workspace Translator Pro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title data-i18n-guide="guide.docTitle"></title>
   <link rel="stylesheet" href="onboarding.css">
-  <script src="onboarding.js" defer></script>
+  <!-- Every text node carries a data-i18n-guide key and is rendered by onboarding.js
+       through the shared i18n layer. {placeholders} in those strings are filled
+       with the extension's real UI labels, so quoted button names always match
+       the side panel in every language. Figures are the live side panel in demo
+       mode (lib/demo-mode.js), in the guide's language. -->
+  <script src="onboarding.js" type="module"></script>
 </head>
 <body>
-  <div class="glass-bg"></div>
-  
-  <div class="container">
-    <header class="header">
-      <div class="logo-container">
-        <img src="icons/icon128.png" alt="Logo" class="logo">
-        <div class="logo-text">
-          <h1>Workspace Translator Pro</h1>
-          <p>Quick Setup Guide</p>
+  <!-- Translucent top bar, sticky -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a class="nav-brand" href="#top">
+        <img src="icons/icon48.png" alt="">
+        <span data-i18n-ignore>Workspace Translator Pro</span>
+      </a>
+      <nav class="nav-links" id="toc">
+        <a href="#start" data-i18n-guide="guide.nav.start"></a>
+        <a href="#translate" data-i18n-guide="guide.nav.translate"></a>
+        <a href="#prefs" data-i18n-guide="guide.nav.prefs"></a>
+        <a href="#engines" data-i18n-guide="guide.nav.engines"></a>
+        <a href="#faq" data-i18n-guide="guide.nav.faq"></a>
+        <a href="#changelog" data-i18n-guide="guide.nav.changelog"></a>
+      </nav>
+      <label class="nav-lang">
+        <span class="sr-only" data-i18n-guide="guide.uiLang"></span>
+        <select id="guide-lang"></select>
+      </label>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ── Hero ───────────────────────────────────────────────────────── -->
+    <section class="hero">
+      <img class="hero-icon" src="icons/icon128.png" alt="">
+      <p class="eyebrow"><span data-i18n-guide="guide.title"></span> · <span id="guide-version"></span></p>
+      <h1 data-i18n-ignore>Workspace Translator Pro</h1>
+      <p class="hero-sub" data-i18n-guide="guide.subtitle"></p>
+    </section>
+
+    <!-- ── At a glance ────────────────────────────────────────────────── -->
+    <section class="glance" aria-labelledby="ov-h">
+      <h2 id="ov-h" class="section-label" data-i18n-guide="guide.ov.h"></h2>
+      <ol class="glance-steps">
+        <li><span class="glance-num">1</span><b data-i18n-guide="guide.ov.1.h"></b><span data-i18n-guide="guide.ov.1.p"></span></li>
+        <li><span class="glance-num">2</span><b data-i18n-guide="guide.ov.2.h"></b><span data-i18n-guide="guide.ov.2.p"></span></li>
+        <li><span class="glance-num">3</span><b data-i18n-guide="guide.ov.3.h"></b><span data-i18n-guide="guide.ov.3.p"></span></li>
+        <li><span class="glance-num">4</span><b data-i18n-guide="guide.ov.4.h"></b><span data-i18n-guide="guide.ov.4.p"></span></li>
+      </ol>
+    </section>
+
+    <!-- ── Step sections: identical rhythm — label, headline, copy, stage ── -->
+    <section id="start" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="1"></p>
+      <h2 data-i18n-guide="guide.nav.start"></h2>
+      <p class="lead" data-i18n-guide="guide.start.lead"></p>
+      <ol class="numbered">
+        <li><b data-i18n-guide="guide.start.s1.h"></b> <span data-i18n-guide="guide.start.s1.p"></span></li>
+        <li><b data-i18n-guide="guide.start.s2.h"></b> <span data-i18n-guide="guide.start.s2.p"></span>
+          <a class="text-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-ignore>aistudio.google.com/apikey ›</a>
+          <p class="alt"><span data-i18n-guide="guide.start.s2.alt"></span>
+            <a class="text-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" data-i18n-ignore>OpenAI ›</a>
+            <a class="text-link" href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener" data-i18n-ignore>Claude ›</a></p></li>
+        <li><b data-i18n-guide="guide.start.s3.h"></b> <span data-i18n-guide="guide.start.s3.p"></span></li>
+      </ol>
+      <figure class="stage" data-demo="setup"></figure>
+      <p class="aside" data-i18n-guide="guide.start.free"></p>
+      <p class="aside"><b data-i18n-guide="guide.start.auth.h"></b> <span data-i18n-guide="guide.start.auth.p"></span></p>
+    </section>
+
+    <section id="translate" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="2"></p>
+      <h2 data-i18n-guide="guide.tr.h"></h2>
+      <p class="lead" data-i18n-guide="guide.tr.lead"></p>
+      <ol class="numbered">
+        <li data-i18n-guide="guide.tr.s1"></li>
+        <li data-i18n-guide="guide.tr.s2"></li>
+        <li data-i18n-guide="guide.tr.s3"></li>
+        <li data-i18n-guide="guide.tr.s4"></li>
+        <li data-i18n-guide="guide.tr.s5"></li>
+        <li data-i18n-guide="guide.tr.s6"></li>
+      </ol>
+      <figure class="stage" data-demo="main"></figure>
+      <p class="aside" data-i18n-guide="guide.tr.bg"></p>
+    </section>
+
+    <section id="after" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="3"></p>
+      <h2 data-i18n-guide="guide.after.h"></h2>
+      <p class="lead" data-i18n-guide="guide.tr.done"></p>
+      <figure class="stage" data-demo="done"></figure>
+      <p class="aside" data-i18n-guide="guide.tr.where"></p>
+      <p class="aside" data-i18n-guide="guide.tr.fit"></p>
+    </section>
+
+    <section id="prefs" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="4"></p>
+      <h2 data-i18n-guide="guide.pr.h"></h2>
+      <p class="lead" data-i18n-guide="guide.pr.lead"></p>
+      <ul class="plain">
+        <li data-i18n-guide="guide.pr.names"></li>
+        <li data-i18n-guide="guide.pr.terms"></li>
+        <li data-i18n-guide="guide.pr.tone"></li>
+        <li data-i18n-guide="guide.pr.custom"></li>
+        <li data-i18n-guide="guide.pr.preview"></li>
+      </ul>
+      <figure class="stage" data-demo="prefs"></figure>
+    </section>
+
+    <section id="engines" class="step">
+      <p class="step-label" data-i18n-guide="guide.stepLabel" data-n="5"></p>
+      <h2 data-i18n-guide="guide.en.h"></h2>
+      <p class="lead" data-i18n-guide="guide.en.lead"></p>
+      <figure class="stage" data-demo="engine"></figure>
+      <div class="engines">
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.gemini.h"></h3>
+          <p data-i18n-guide="guide.en.gemini.p"></p>
+          <p class="links">
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+            <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.openai.h"></h3>
+          <p data-i18n-guide="guide.en.openai.p"></p>
+          <p class="links">
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://developers.openai.com/api/docs/models" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.claude.h"></h3>
+          <p data-i18n-guide="guide.en.claude.p"></p>
+          <p class="links">
+            <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.key"></a>
+            <a href="https://platform.claude.com/docs/en/models/overview" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.models"></a>
+          </p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.custom.h"></h3>
+          <p data-i18n-guide="guide.en.custom.p"></p>
+        </div>
+        <div class="engine">
+          <h3 data-i18n-guide="guide.en.free.h"></h3>
+          <p data-i18n-guide="guide.en.free.p"></p>
         </div>
       </div>
-      <div class="header-badge" id="onboarding-version">v1.3.0</div>
-    </header>
+      <p class="aside" data-i18n-guide="guide.en.model"></p>
+      <p class="aside" data-i18n-guide="guide.en.privacy"></p>
+    </section>
 
-    <div class="main-layout">
-      <!-- Sidebar Navigation -->
-      <nav class="sidebar">
-        <div class="nav-item active" data-step="1">
-          <div class="step-num">1</div>
-          <div class="step-desc">
-            <h3>Get API Key</h3>
-            <p>Choose your AI engine</p>
-          </div>
-        </div>
-        <div class="nav-item" data-step="2">
-          <div class="step-num">2</div>
-          <div class="step-desc">
-            <h3>Configure Settings</h3>
-            <p>Paste key & save</p>
-          </div>
-        </div>
-        <div class="nav-item" data-step="3">
-          <div class="step-num">3</div>
-          <div class="step-desc">
-            <h3>Start Translating</h3>
-            <p>You're ready to go!</p>
-          </div>
-        </div>
-      </nav>
+    <!-- ── Reference ──────────────────────────────────────────────────── -->
+    <section id="languages" class="ref">
+      <h2 data-i18n-guide="guide.la.h"></h2>
+      <p class="lead" data-i18n-guide="guide.la.targets"></p>
+      <!-- Generated from i18n/languages.js TARGET_LANGUAGES -->
+      <ul class="lang-list" id="lang-list"></ul>
+      <p class="aside" data-i18n-guide="guide.la.ui"></p>
+      <div class="two-col">
+        <div><h3 data-i18n-guide="guide.la.files.h"></h3><p data-i18n-guide="guide.la.files.p"></p></div>
+        <div><h3 data-i18n-guide="guide.la.kept.h"></h3><p data-i18n-guide="guide.la.kept.p"></p></div>
+      </div>
+    </section>
 
-      <!-- Content Area -->
-      <main class="content">
-        <!-- Step 1: Get API Key -->
-        <section class="step-content active" id="step-1">
-          <h2>Step 1: Get Your Translation API Key</h2>
-          <p class="subtitle">Choose one of the following AI engines. If you don't want to sign up for any API, scroll down and use the free option — no key required!</p>
+    <section id="faq" class="ref">
+      <h2 data-i18n-guide="guide.faq.h"></h2>
+      <p class="lead" data-i18n-guide="guide.faq.lead"></p>
+      <dl class="faq">
+        <div><dt data-i18n-guide="guide.faq.quota.q"></dt>
+          <dd><span data-i18n-guide="guide.faq.quota.a"></span> <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener" data-i18n-guide="guide.en.link.limits"></a></dd></div>
+        <div><dt data-i18n-guide="guide.faq.model.q"></dt><dd data-i18n-guide="guide.faq.model.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.copy.q"></dt><dd data-i18n-guide="guide.faq.copy.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.signin.q"></dt><dd data-i18n-guide="guide.faq.signin.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.sheet.q"></dt><dd data-i18n-guide="guide.faq.sheet.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.word.q"></dt><dd data-i18n-guide="guide.faq.word.a"></dd></div>
+        <div><dt data-i18n-guide="guide.faq.privacy.q"></dt>
+          <dd><span data-i18n-guide="guide.faq.privacy.a"></span> <a href="privacy-policy.html" target="_blank" rel="noopener" data-i18n-guide="guide.faq.privacy.link"></a></dd></div>
+      </dl>
+    </section>
 
-          <div class="llm-grid">
-            <div class="llm-card recommended">
-              <div class="llm-header">
-                <img src="https://img.icons8.com/color/48/google-logo.png" alt="Gemini" class="llm-icon">
-                <h3>Gemini API <span class="badge">Recommended</span></h3>
-              </div>
-              <p>Best free quota: up to 1,500 requests/day free. Excellent translation quality and context preservation.</p>
-              <div class="llm-meta">
-                <span>Current Default: <code>gemini-3.1-flash-lite</code></span>
-                <a href="https://aistudio.google.com/" target="_blank" class="link">Get Free API Key &nearr;</a>
-              </div>
-              <div class="llm-steps">
-                <p>① Go to <strong>aistudio.google.com</strong> → Sign in with Google</p>
-                <p>② Click <strong>"Get API key"</strong> → <strong>"Create API key"</strong></p>
-                <p>③ Copy the key (starts with <code>AIzaSy...</code>)</p>
-              </div>
-              <div class="sunset-note">
-                ⚠️ Model names change over time. Verify current available models at
-                <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank" class="link">Google AI Docs</a>
-                and update the Model Name in Settings if needed.
-              </div>
-            </div>
+    <section id="changelog" class="ref">
+      <h2 data-i18n-guide="guide.cl.h"></h2>
+      <p class="lead" data-i18n-guide="guide.cl.lead"></p>
+      <div class="release current">
+        <div class="release-head"><span class="ver">1.6.0</span><span class="tag" data-i18n-guide="guide.cl.current"></span><span class="date" data-i18n-guide="guide.cl.160.date"></span></div>
+        <ul>
+          <li data-i18n-guide="guide.cl.160.1"></li><li data-i18n-guide="guide.cl.160.2"></li><li data-i18n-guide="guide.cl.160.3"></li>
+          <li data-i18n-guide="guide.cl.160.4"></li><li data-i18n-guide="guide.cl.160.5"></li><li data-i18n-guide="guide.cl.160.6"></li>
+          <li data-i18n-guide="guide.cl.160.7"></li>
+        </ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.5.0</span><span class="date" data-i18n-guide="guide.cl.150.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.150.1"></li><li data-i18n-guide="guide.cl.150.2"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.4.1</span><span class="date" data-i18n-guide="guide.cl.141.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.141.1"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.4.0</span><span class="date" data-i18n-guide="guide.cl.140.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.140.1"></li><li data-i18n-guide="guide.cl.140.2"></li></ul>
+      </div>
+      <div class="release">
+        <div class="release-head"><span class="ver">1.3.0</span><span class="date" data-i18n-guide="guide.cl.130.date"></span></div>
+        <ul><li data-i18n-guide="guide.cl.130.1"></li></ul>
+      </div>
+    </section>
 
-            <div class="llm-card">
-              <div class="llm-header">
-                <img src="https://img.icons8.com/color/48/openai.png" alt="OpenAI" class="llm-icon">
-                <h3>OpenAI API</h3>
-              </div>
-              <p>Highly precise translations. Excellent word layout and grammatical structures.</p>
-              <div class="llm-meta">
-                <span>Default Model: <code>gpt-4o-mini</code></span>
-                <a href="https://platform.openai.com/" target="_blank" class="link">Get API Key &nearr;</a>
-              </div>
-            </div>
-
-            <div class="llm-card">
-              <div class="llm-header">
-                <img src="https://img.icons8.com/ios-filled/48/ffffff/cloud.png" alt="Claude" class="llm-icon">
-                <h3>Claude API</h3>
-              </div>
-              <p>Sophisticated and localized style. Very natural sounding translation.</p>
-              <div class="llm-meta">
-                <span>Default Model: <code>claude-haiku-4-5</code></span>
-                <a href="https://console.anthropic.com/" target="_blank" class="link">Get API Key &nearr;</a>
-              </div>
-            </div>
-
-            <div class="llm-card free-card">
-              <div class="llm-header">
-                <img src="https://img.icons8.com/color/48/google-translate.png" alt="Free" class="llm-icon">
-                <h3>Free Google Translate <span class="badge badge-free">No Key Needed</span></h3>
-              </div>
-              <p>No API key required. Uses Google Translate for free. Great for quick translations, but may have layout limitations on complex documents.</p>
-              <div class="llm-meta">
-                <span>✓ Completely free · No signup needed</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="nav-buttons">
-            <button class="btn btn-primary btn-next" data-next="2">Next: Configure Settings &rarr;</button>
-          </div>
-        </section>
-
-        <!-- Step 2: Configure Settings -->
-        <section class="step-content" id="step-2">
-          <h2>Step 2: Configure Extension Settings</h2>
-          <p class="subtitle">Open the extension and paste your API key into Settings. This takes less than 1 minute.</p>
-
-          <div class="instruction-list">
-            <div class="instruction-item">
-              <span class="num">1</span>
-              <div>
-                <h4>Open the Extension Panel</h4>
-                <p>Click the <strong>Workspace Translator Pro</strong> icon in your Chrome toolbar to open the side panel.</p>
-              </div>
-            </div>
-            <div class="instruction-item">
-              <span class="num">2</span>
-              <div>
-                <h4>Open Settings</h4>
-                <p>Click the <strong>Settings (⚙️)</strong> gear icon in the top right corner of the panel.</p>
-              </div>
-            </div>
-            <div class="instruction-item">
-              <span class="num">3</span>
-              <div>
-                <h4>Choose Your Engine &amp; Paste API Key</h4>
-                <p>Select your translation provider from the dropdown, then paste the API key you obtained in Step 1. If using <strong>Free Google Translate</strong>, simply select it — no key needed.</p>
-              </div>
-            </div>
-            <div class="instruction-item">
-              <span class="num">4</span>
-              <div>
-                <h4>Click &ldquo;Test Connection&rdquo; to Verify</h4>
-                <p>After entering your API key and model name, click the <strong>Test Connection</strong> button. The status badge will update:
-                  <br>&bull; <strong style="color:#a0a5c0">&#9679; Unverified</strong> — not yet tested
-                  <br>&bull; <strong style="color:#00cec9">&#9679; Active</strong> — key is valid and working &#10003;
-                  <br>&bull; <strong style="color:#ff7675">&#9679; Invalid</strong> — key is incorrect or model not found
-                </p>
-                <p style="margin-top:6px">If the test fails, the result message will show the exact error and a suggestion on how to fix it.</p>
-              </div>
-            </div>
-            <div class="instruction-item">
-              <span class="num">5</span>
-              <div>
-                <h4>Click &ldquo;Save Configurations&rdquo;</h4>
-                <p>Your settings are saved locally in your browser and never sent to any external server. The extension will not allow translation to start if the API key status is not <strong>Active</strong>.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="card info-card">
-            <h3>💡 Tip: Best Free Option</h3>
-            <p>We recommend <strong>Gemini API</strong> for the best free experience — up to <strong>1,500 requests/day</strong> and <strong>30 requests/minute</strong> at no cost. This is usually enough to translate many large documents daily.</p>
-          </div>
-
-          <div class="nav-buttons">
-            <button class="btn btn-secondary btn-prev" data-prev="1">&larr; Back</button>
-            <button class="btn btn-primary btn-next" data-next="3">Next: Start Translating &rarr;</button>
-          </div>
-        </section>
-
-        <!-- Step 3: Complete -->
-        <section class="step-content" id="step-3">
-          <h2>Step 3: Translate Your First Document!</h2>
-          <p class="subtitle">You are ready! Here's how to run your first translation.</p>
-          
-          <div class="setup-completion-card">
-            <div class="checkmark-circle">
-              <svg viewBox="0 0 52 52">
-                <circle class="checkmark-circle-path" cx="26" cy="26" r="25" fill="none"/>
-                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-              </svg>
-            </div>
-            <h3>You're All Set!</h3>
-            <p>Follow these steps to translate your first file:</p>
-            <div class="completion-steps">
-              <div class="c-step">
-                <span class="dot"></span>
-                <span>Open any <strong>Google Slides, Docs, Sheets, or Forms</strong> document in a browser tab.</span>
-              </div>
-              <div class="c-step">
-                <span class="dot"></span>
-                <span>Click the <strong>Workspace Translator Pro</strong> icon to open the side panel — the document will be detected automatically.</span>
-              </div>
-              <div class="c-step">
-                <span class="dot"></span>
-                <span>Select your <strong>target language</strong> from the dropdown.</span>
-              </div>
-              <div class="c-step">
-                <span class="dot"></span>
-                <span>Click <strong>"Translate &amp; Copy"</strong>. On first use, Google will ask you to authorize access — click <strong>Allow</strong>.</span>
-              </div>
-              <div class="c-step">
-                <span class="dot"></span>
-                <span>A fully translated copy will open in a new tab automatically. Your original is <strong>never modified</strong>.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card info-card" style="margin-top: 16px;">
-            <h3>⚠️ First-Time Google Authorization</h3>
-            <p>When you translate for the first time, a Google authorization window will appear. This is normal — it grants the extension access to copy and modify files on your behalf. You may see an "unverified app" warning: click <strong>"Advanced"</strong> → <strong>"Go to Workspace Translator Pro (unsafe)"</strong> to proceed. This happens because the app is new and hasn't completed Google's verification process yet.</p>
-          </div>
-
-          <div class="nav-buttons">
-            <button class="btn btn-secondary btn-prev" data-prev="2">&larr; Back</button>
-            <button class="btn btn-primary" id="btn-done">Done &amp; Close Guide</button>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
+    <footer class="footer">
+      <button class="btn-close" id="btn-done" data-i18n-guide="guide.close"></button>
+    </footer>
+  </main>
 </body>
 </html>

@@ -98,7 +98,7 @@
     <h1>Privacy Policy</h1>
     <p class="subtitle">
       Workspace Translator Pro &nbsp;·&nbsp;
-      Last updated: June 2025
+      Last updated: October 2026
     </p>
 
     <div class="highlight-box">
@@ -107,41 +107,49 @@
     </div>
 
     <h2>What Data Is Stored Locally</h2>
-    <p>The following data is stored <strong>only in your browser's local storage</strong> (chrome.storage.local) and never leaves your device:</p>
+    <p>The following data is stored <strong>only in your browser's local storage</strong> (chrome.storage.local). It is not sent to us — we operate no servers:</p>
     <ul>
-      <li><strong>Google OAuth Client ID</strong> — entered by you in Settings</li>
-      <li><strong>LLM API Keys</strong> — entered by you (Gemini, OpenAI, Claude, or custom)</li>
-      <li><strong>Selected Model Name</strong> — your preferred AI model</li>
-      <li><strong>Translation History</strong> — Google Drive file IDs and document titles of your completed translations</li>
-      <li><strong>Debug Logs</strong> — temporary logs for the current translation session, stored per-session and not accumulated over time</li>
+      <li><strong>API key and engine settings</strong> — the key you enter (Gemini, OpenAI, Claude or a custom endpoint), the model name and endpoint address. The key is sent only to the provider you selected, to authorize translation requests.</li>
+      <li><strong>Translation preferences</strong> — tone, how names are handled, your specific terms (for all files and per file) and your custom instructions.</li>
+      <li><strong>Translation cache</strong> — pairs of original and translated text from previous translations, so repeated text is not sent for translation again. It is limited in size; the oldest entries are removed automatically.</li>
+      <li><strong>Translation history</strong> — Google Drive file IDs and titles of the copies you created.</li>
+      <li><strong>Progress and debug logs</strong> — the state of running jobs (so an interrupted job can resume) and short technical logs of the latest translation.</li>
+      <li><strong>Interface settings</strong> — interface language and display options.</li>
     </ul>
 
     <h2>What Data Is Processed</h2>
-    <p>When you initiate a translation, the extension does the following:</p>
+    <p>When you start a translation, the extension:</p>
     <ul>
-      <li>Reads your document's text content via <strong>Google Workspace APIs</strong> (Slides, Docs, Sheets, or Forms)</li>
-      <li>Sends that text to the <strong>LLM API you configured</strong> (Google Gemini, OpenAI, Anthropic Claude, or your custom endpoint) for translation</li>
-      <li>Writes the translated text back to a <strong>copy</strong> of your document on Google Drive — your original is never modified</li>
+      <li>Reads the text of the file you are translating via the <strong>Google Workspace APIs</strong> (Slides, Docs, Sheets or Forms)</li>
+      <li>Sends that text — and your translation preferences, if any — to the <strong>translation service you selected</strong> (Google Gemini, OpenAI, Anthropic Claude, your custom endpoint, or Google Translate for the basic free option)</li>
+      <li>Writes the translated text into a <strong>copy</strong> of your file in Google Drive — your original is never modified</li>
     </ul>
 
     <h2>Third-Party Services</h2>
-    <p>Depending on your settings, your document text is sent to one of these external services for translation. Please review their privacy policies:</p>
+    <p>Depending on your settings, the text of the file you translate is sent to one of these services. Please review their privacy policies:</p>
     <ul>
       <li><a href="https://ai.google.dev/gemini-api/terms" target="_blank">Google Gemini API</a></li>
       <li><a href="https://openai.com/policies/privacy-policy" target="_blank">OpenAI API</a></li>
       <li><a href="https://www.anthropic.com/legal/privacy" target="_blank">Anthropic Claude API</a></li>
-      <li>Your custom endpoint (if configured by you)</li>
+      <li>Your custom endpoint (if you configured one)</li>
+      <li><a href="https://policies.google.com/privacy" target="_blank">Google Translate</a> — used by the <strong>basic free translation</strong> option, which needs no API key</li>
     </ul>
-    <p>The <strong>Free Google Translate</strong> engine uses Google's public translation service without requiring an API key.</p>
 
-    <h2>Google Drive Access</h2>
-    <p>This extension requests Google Drive access through <strong>your own OAuth credentials</strong> (Client ID). The extension can:</p>
+    <h2>Google Account Access</h2>
+    <p>When you translate for the first time, Google asks you to sign in and allow access to Drive, Slides, Docs, Sheets and Forms. With that permission the extension can:</p>
     <ul>
-      <li>Create copies of documents you select for translation</li>
-      <li>Read and write content to those copies</li>
-      <li>Check whether previously translated files still exist in Drive (for History sync)</li>
+      <li>Read the file you choose to translate and create a copy of it</li>
+      <li>Read and write the content of that copy</li>
+      <li>Check whether previously translated copies still exist in Drive (to keep the history list current)</li>
     </ul>
-    <p>The extension does <strong>not</strong> access any files beyond those you explicitly initiate translation on.</p>
+    <p>The extension does <strong>not</strong> access any files other than those you translate and the copies it created. You can revoke access at any time in your <a href="https://myaccount.google.com/permissions" target="_blank">Google Account permissions</a>.</p>
+
+    <h2>Browser Permissions</h2>
+    <ul>
+      <li><strong>Notifications</strong> — to tell you when a translation has finished while the side panel is closed.</li>
+      <li><strong>Scripting</strong> — only on Google Sheets pages, to read the name of the sheet tab you are viewing when you choose "only translate the current sheet". Nothing else on the page is read.</li>
+      <li><strong>Optional site access</strong> — requested only if you add a custom translation endpoint, and only for that address.</li>
+    </ul>
 
     <h2>No Analytics or Tracking</h2>
     <p>This extension does not include any analytics, telemetry, crash reporting, or user tracking of any kind. We do not operate any backend servers.</p>

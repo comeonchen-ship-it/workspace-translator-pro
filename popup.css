@@ -29,6 +29,8 @@
   --font-jp:     'Outfit', -apple-system, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   --font-kr:     'Outfit', -apple-system, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-thai:   'Outfit', -apple-system, "Noto Sans Thai", "Thonburi", "Leelawadee UI", sans-serif;
+  /* Outfit has no Vietnamese glyphs; mixing fonts breaks stacked diacritics. */
+  --font-vi:     -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Roboto, sans-serif;
 }
 
 /* i18n.js stamps data-font-stack on <html> from the language registry. */
@@ -37,6 +39,7 @@ html[data-font-stack="cjk-sc"] body { font-family: var(--font-cjk-sc); }
 html[data-font-stack="jp"]     body { font-family: var(--font-jp); }
 html[data-font-stack="kr"]     body { font-family: var(--font-kr); }
 html[data-font-stack="thai"]   body { font-family: var(--font-thai); }
+html[data-font-stack="vi"]     body { font-family: var(--font-vi); }
 
 * {
   box-sizing: border-box;
@@ -198,6 +201,8 @@ body {
    stops matching and the inline display is restored. */
 .app-container:has(.settings-panel.active) .warning-panel,
 .app-container:has(.settings-panel.active) .active-panel,
+.app-container:has(.setup-panel.active) .warning-panel,
+.app-container:has(.setup-panel.active) .active-panel,
 .app-container:has(.history-panel.active) .warning-panel,
 .app-container:has(.history-panel.active) .active-panel {
   display: none !important;
@@ -238,7 +243,11 @@ body {
   gap: 16px;
   z-index: 5;
   overflow-y: auto;
-  padding-inline-end: 4px;
+  /* Symmetric inner space with the scrollbar gutter reserved on both edges, so
+     the left/right margins match whether or not the panel scrolls, and the
+     primary button's glow is not clipped into a hard edge on the right. */
+  padding-inline: 12px;
+  scrollbar-gutter: stable both-edges;
 }
 
 .active-panel::-webkit-scrollbar {
@@ -462,9 +471,12 @@ select option {
 .progress-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 8px;
 }
+.progress-header .progress-status { flex: 1; min-width: 0; }
+.progress-header .progress-pct { flex-shrink: 0; }
 
 .progress-status {
   font-size: 11px;
@@ -562,9 +574,25 @@ select option {
   color: #a0a5c0;
 }
 .progress-steps li.success .step-bullet {
+  /* Done steps get a check so they read differently from the running one. */
+  width: 12px;
+  height: 12px;
   background: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
+  box-shadow: none;
+  position: relative;
 }
+.progress-steps li.success .step-bullet::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  font-size: 9px;
+  line-height: 12px;
+  text-align: center;
+  color: #0b1020;
+  font-weight: 700;
+}
+.progress-steps li.active .step-bullet { animation: stepPulse 1.2s ease-in-out infinite; }
+@keyframes stepPulse { 50% { transform: scale(1.5); } }
 
 /* Settings Panel */
 .settings-panel {
@@ -645,9 +673,9 @@ select option {
 }
 
 .setting-group-card h4 {
-  font-size: 12px;
-  font-weight: 600;
-  color: #a29bfe;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
   margin-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   padding-bottom: 6px;
@@ -1160,8 +1188,8 @@ body.theme-form {
 .status-dot.status-unverified { background: var(--text-muted); opacity: 0.7; }
 
 .status-dot.status-active {
-  background: var(--accent);
-  box-shadow: 0 0 7px rgba(0, 206, 201, 0.7);
+  background: #2ecc71;
+  box-shadow: 0 0 7px rgba(46, 204, 113, 0.7);
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
@@ -1330,3 +1358,352 @@ body.theme-form {
 .val-indicator.neutral {
   color: var(--text-muted);
 }
+
+/* ── Completion card ───────────────────────────────────────────────────── */
+.completion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 12px;
+  padding: 12px;
+  animation: slideDown 0.3s ease-out forwards;
+}
+.completion-card.hidden { display: none; }
+.completion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.completion-title {
+  font-weight: 600;
+  color: var(--accent);
+}
+.completion-close { font-size: 18px; }
+.completion-sub {
+  font-size: 12px;
+  color: var(--text-main, #fff);
+  word-break: break-word;
+}
+.completion-sub:empty, .completion-stats:empty { display: none; }
+.completion-stats {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.completion-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+.completion-actions.hidden { display: none; }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.checkbox-row + .checkbox-row { margin-top: 8px; }
+.checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* ── First-run setup ───────────────────────────────────────────────────── */
+.setup-panel { display: none; z-index: 20; flex-direction: column; }
+.setup-panel.active { display: flex; animation: slideIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+.setup-intro { font-size: 13px; line-height: 1.5; margin: 0 0 12px; color: var(--text-main); }
+.setup-compare {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 10px; padding: 10px; margin-bottom: 14px; font-size: 12px;
+}
+.setup-compare > div { display: flex; flex-direction: column; gap: 2px; }
+.setup-compare-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+.setup-compare-row.bad span:last-child { color: #ff9f9e; }
+.setup-compare-row.good span:last-child { color: var(--accent); }
+.setup-compare-note { font-size: 10px; color: var(--text-muted); }
+.setup-steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 14px; }
+.setup-step { font-size: 12px; }
+.setup-step-title { font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+.setup-step-desc { color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
+.setup-step input { width: 100%; box-sizing: border-box; }
+
+/* ── Translation preferences ───────────────────────────────────────────── */
+#prefs-card textarea, .doc-glossary textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px;
+}
+.field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; white-space: pre-line; }
+.prefs-free-note { font-size: 11px; color: var(--text-warning, #fdcb6e); margin-bottom: 8px; }
+.prefs-free-note.hidden { display: none; }
+#prefs-card.disabled .form-group { opacity: 0.45; pointer-events: none; }
+.doc-glossary { font-size: 12px; color: var(--text-muted); }
+.doc-glossary summary { cursor: pointer; padding: 4px 0; }
+.doc-glossary textarea { margin-top: 6px; }
+
+/* ── Translation scope ─────────────────────────────────────────────────── */
+#scope-slides.hidden, #scope-sheet.hidden, .doc-glossary.hidden { display: none; }
+.scope-error { color: #ff7675; }
+.scope-error.hidden { display: none; }
+
+/* ── Multi-language ────────────────────────────────────────────────────── */
+.extra-langs { font-size: 12px; }
+.extra-langs summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.extra-langs summary::-webkit-details-marker { display: none; }
+.extra-langs-picked { color: var(--text-main); }
+.extra-langs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip, .lang-chip {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.chip:hover, .lang-chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"], .lang-chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0b1020;
+  font-weight: 600;
+}
+.chip[aria-pressed="true"]::before, .lang-chip[aria-pressed="true"]::before { content: '✓ '; }
+.lang-chip[hidden] { display: none; }
+.completion-results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.completion-results:empty { display: none; }
+.completion-results a { color: var(--accent); text-decoration: none; cursor: pointer; }
+.completion-results a:hover { text-decoration: underline; }
+
+/* ── Term editor & rules preview ───────────────────────────────────────── */
+.term-editor { display: flex; flex-direction: column; gap: 6px; }
+.term-head, .term-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1.2fr) 14px;
+  gap: 4px;
+  align-items: center;
+}
+.term-row input, .term-row select {
+  min-width: 0;
+  font-size: 12px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-main);
+}
+.term-row input[hidden] { display: block; visibility: hidden; }
+.term-head { font-size: 10px; color: var(--text-muted); padding: 0 2px; }
+.term-head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.term-del {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 13px; padding: 0;
+}
+.term-del:hover { color: #ff7675; }
+.term-add {
+  align-self: flex-start;
+  background: none; border: none; padding: 2px 0;
+  color: var(--accent); font: inherit; font-size: 12px; cursor: pointer;
+}
+.rules-preview {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  font-size: 12px;
+}
+.rules-preview-title { font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+.rules-preview ul { margin: 0; padding-left: 18px; color: var(--text-main); line-height: 1.6; }
+
+/* ── UX pass ───────────────────────────────────────────────────────────── */
+/* Disabled buttons must look disabled (the setup "Start" looked clickable). */
+.btn:disabled, .btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Job options share the panel's vertical rhythm, and step aside while a job
+   runs so progress (and then the result) is the first thing on screen. */
+.job-options { display: flex; flex-direction: column; gap: 16px; }
+.active-panel.is-busy .job-options,
+.active-panel.is-busy .action-trigger { display: none; }
+
+/* One collapsed line instead of two stacked warning boxes under the model. */
+.model-help { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+.model-help summary { cursor: pointer; color: var(--accent); list-style: none; }
+.model-help summary::-webkit-details-marker { display: none; }
+.model-help summary::before { content: 'ⓘ '; }
+.model-help p { margin: 6px 0 0; line-height: 1.5; }
+.model-help .tip-link { color: var(--accent); }
+
+/* Setup footer: one clear primary action, skip as a quiet link. */
+.setup-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 12px; }
+.link-btn {
+  background: none; border: none; padding: 4px;
+  font: inherit; font-size: 12px; color: var(--text-muted);
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.link-btn:hover { color: var(--text-main); }
+.btn[hidden] { display: none; }
+
+/* Unsaved settings: a quiet note plus a ring on Save. */
+.unsaved-note { font-size: 11px; color: var(--accent); text-align: center; padding: 6px 0 0; }
+.unsaved-note.hidden { display: none; }
+.btn-primary.needs-save { box-shadow: 0 0 0 2px var(--accent), 0 4px 15px var(--primary-glow); }
+
+/* ── Visual polish ─────────────────────────────────────────────────────── */
+/* Chips: native language names need a system font (Outfit lacks Vietnamese
+   etc.), constant weight so selecting doesn't shift the layout, and a drawn
+   check so it looks identical whatever the script. */
+.chip, .lang-chip {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans KR", "Noto Sans Thai", sans-serif;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip[aria-pressed="true"], .lang-chip[aria-pressed="true"] { font-weight: 500; }
+.chip[aria-pressed="true"]::before, .lang-chip[aria-pressed="true"]::before {
+  content: '';
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(-45deg);
+}
+
+/* Placeholders must read as hints, not as values already typed. */
+input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
+
+/* Both expanders on the main panel look and behave the same. */
+.extra-langs summary, .doc-glossary summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 0;
+}
+.extra-langs summary::-webkit-details-marker, .doc-glossary summary::-webkit-details-marker { display: none; }
+.extra-langs summary::before, .doc-glossary summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.extra-langs[open] summary::before, .doc-glossary[open] summary::before { transform: rotate(45deg); }
+.extra-langs summary:hover, .doc-glossary summary:hover { color: var(--text-main); }
+.extra-langs-picked { color: var(--accent); font-weight: 600; }
+
+/* Gradient buttons have a 1px transparent border. With the default
+   background-origin (padding-box) the gradient tiles into that border, so the
+   start colour shows as a thin light line on the right edge (and the end colour
+   on the left). Painting from the border box removes it. Must come after the
+   .btn-* rules: their `background` shorthand resets background-origin. */
+.btn { background-origin: border-box; }
+
+/* ── Name-category modes (segmented control) ───────────────────────────── */
+.name-modes { display: flex; flex-direction: column; gap: 10px; }
+.name-mode-row { display: flex; flex-direction: column; gap: 4px; }
+.name-mode-label { font-size: 12px; color: var(--text-main); }
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 2px;
+  gap: 2px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+}
+.segmented button {
+  font: inherit;
+  font-size: 11px;
+  padding: 5px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.segmented button:hover { color: var(--text-main); }
+.segmented button[aria-checked="true"] {
+  background: var(--accent);
+  color: #0b1020;
+  font-weight: 600;
+}
+
+.seg-label { font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.seg-example {
+  font-size: 10px; opacity: 0.75; font-weight: 400; max-width: 100%;
+  /* Wrap instead of truncating: 馬斯克（Musk） must be readable in full. */
+  white-space: normal; line-height: 1.25; text-align: center; overflow-wrap: anywhere;
+}
+.segmented button { justify-content: flex-start; }
+
+/* "What's new" dot on the help button after an update */
+#btn-help { position: relative; }
+#btn-help.has-news::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff7675;
+  box-shadow: 0 0 0 2px var(--bg-surface, #12131a);
+}
+
+/* ── Demo mode (lib/demo-mode.js): user-guide illustrations ─────────────── */
+.demo-highlight {
+  /* Spotlight: everything else dims, the feature stays bright with a soft
+     glow — no hard outline. One spotlight per screen (shadows would stack). */
+  position: relative; z-index: 50; border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 24px 2px color-mix(in srgb, var(--accent) 45%, transparent),
+              0 0 0 9999px rgba(6, 7, 12, 0.62);
+}
+

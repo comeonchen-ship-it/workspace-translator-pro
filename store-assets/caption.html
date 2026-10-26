@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Store photos only: the caption card pasted onto each real-photo screenshot
+     by store-assets/retouch.py. Rendered on a transparent background. -->
+<html><head><meta charset="UTF-8">
+<style>
+  html, body { margin: 0; background: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang TC",
+                 "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans", "Noto Sans Thai", sans-serif;
+    -webkit-font-smoothing: antialiased; letter-spacing: -0.01em;
+  }
+  .card {
+    position: absolute; left: 30px; bottom: 34px; width: 470px; box-sizing: border-box;
+    padding: 22px 26px 24px; border-radius: 22px; background: #ffffff;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    color: #1d1d1f;
+  }
+  .lang { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #6e6e73; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 980px;
+    font-size: 17px; font-weight: 700; color: #fff; background: var(--accent);
+  }
+  .chip::before { content: '→'; font-weight: 600; opacity: 0.85; }
+  h1 { margin: 14px 0 0; font-size: 27px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; }
+  p { margin: 8px 0 0; font-size: 16px; line-height: 1.45; color: #515154; text-wrap: balance; }
+</style></head>
+<body>
+  <div class="card" id="card">
+    <div class="lang"><span id="label"></span><span class="chip" id="chip"></span></div>
+    <h1 id="title"></h1>
+    <p id="sub"></p>
+  </div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById('label').textContent = q.get('label') || 'Translating into';
+  document.getElementById('chip').textContent = q.get('lang');
+  document.getElementById('title').textContent = q.get('title');
+  document.getElementById('sub').textContent = q.get('sub');
+  document.getElementById('card').style.setProperty('--accent', q.get('accent') || '#0071e3');
+</script>
+</body></html>

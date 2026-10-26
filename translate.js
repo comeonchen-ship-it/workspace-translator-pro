@@ -1,4 +1,5 @@
 import { getLanguage } from './i18n/languages.js';
+import { buildPrefsBlock, prefsFingerprint, normalizePrefs, postprocessTranslation } from './lib/prefs.js';
 
 /**
  * Human-readable target language name for the LLM prompt.
@@ -91,7 +92,11 @@ export async function translateTexts(texts, targetLang, config) {
   await logDebug(`Starting translation of ${texts.length} unique texts using engine: ${engine.toUpperCase()}`, presentationId);
 
   // 1. Retrieve the translation cache for the target language (segregated by engine to prevent quality collisions)
-  const cacheKey = `translationCache_${engine}_${targetLang}`;
+  // Preferences only apply to LLM engines. They are part of the cache key so a
+  // glossary/tone change never serves translations made under different rules.
+  config.activePrefs = engine === 'free' ? null : normalizePrefs(config.prefs);
+  const fp = engine === 'free' ? '' : prefsFingerprint(config.activePrefs);
+  const cacheKey = `translationCache_${engine}_${targetLang}${fp ? `_${fp}` : ''}`;
   let cache = {};
   try {
     const data = await chrome.storage.local.get(cacheKey);
@@ -107,7 +112,8 @@ export async function translateTexts(texts, targetLang, config) {
   for (const text of texts) {
     const trimmed = text.trim();
     if (cache[trimmed] !== undefined) {
-      translationsMap.set(text, cache[trimmed]);
+      // Same post-processing as fresh results — cached entries may predate it.
+      translationsMap.set(text, postprocessTranslation(text, cache[trimmed], config.activePrefs));
     } else {
       uncachedTexts.push(text);
     }
@@ -191,6 +197,17 @@ export async function translateTexts(texts, targetLang, config) {
     }
 
 
+    const translateBatch = (batch) => {
+      if (engine === 'gemini') return translateGemini(batch, targetLangName, config);
+      if (engine === 'openai') return translateOpenAI(batch, targetLangName, config);
+      if (engine === 'claude') return translateClaude(batch, targetLangName, config);
+      if (engine === 'custom') return translateCustomOpenAI(batch, targetLangName, config);
+      return Promise.resolve([]);
+    };
+
+    // done=0 starts the caller's ETA clock just before the first request.
+    if (typeof config.onBatchProgress === 'function') config.onBatchProgress(0, batches.length);
+
     // Process batches SEQUENTIALLY — guarantees only one API request is in-flight
     // at a time, preventing parallel 429 retries from competing for the rate-limiter lock.
     for (let idx = 0; idx < batches.length; idx++) {
@@ -208,15 +225,7 @@ export async function translateTexts(texts, targetLang, config) {
       await logDebug(`Translating batch ${idx + 1}/${batches.length} (size: ${batch.length} items)...`, presentationId);
       let batchTranslations = [];
       try {
-        if (engine === 'gemini') {
-          batchTranslations = await translateGemini(batch, targetLangName, config);
-        } else if (engine === 'openai') {
-          batchTranslations = await translateOpenAI(batch, targetLangName, config);
-        } else if (engine === 'claude') {
-          batchTranslations = await translateClaude(batch, targetLangName, config);
-        } else if (engine === 'custom') {
-          batchTranslations = await translateCustomOpenAI(batch, targetLangName, config);
-        }
+        batchTranslations = await translateBatch(batch);
         if (!Array.isArray(batchTranslations)) {
           throw new Error(`Translation API returned an invalid response format (expected an array).`);
         }
@@ -226,15 +235,29 @@ export async function translateTexts(texts, targetLang, config) {
         await logDebug(`Successfully translated batch ${idx + 1}/${batches.length}.`, presentationId);
       } catch (err) {
         await logDebug(`Error translating batch ${idx + 1}: ${err.message}`, presentationId);
-        throw err;
+        // A free-text instruction can derail the JSON contract. Drop only that part
+        // (tone + glossary are structured and safe) and retry this batch once.
+        const formatBroken = /Translation mismatch|invalid response format/.test(err.message);
+        if (!formatBroken || !config.activePrefs?.custom) throw err;
+        await logDebug('Retrying without the custom instructions, which may have broken the output format.', presentationId);
+        config.activePrefs = { ...config.activePrefs, custom: '' };
+        config.prefsCustomDropped = true;
+        batchTranslations = await translateBatch(batch);
+        if (!Array.isArray(batchTranslations) || batchTranslations.length !== batch.length) throw err;
       }
 
-      // Map responses and save to cache
+      if (typeof config.onBatchProgress === 'function') {
+        config.onBatchProgress(idx + 1, batches.length);
+      }
+
+      // Map responses and save to cache. After the custom-instruction fallback the
+      // results no longer match this cache key's prefs, so they are not cached.
       for (let i = 0; i < batch.length; i++) {
         const original = batch[i];
-        const translated = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
+        const raw = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
+        const translated = postprocessTranslation(original, raw, config.activePrefs);
         translationsMap.set(original, translated);
-        cache[original.trim()] = translated;
+        if (!config.prefsCustomDropped) cache[original.trim()] = translated;
       }
     }
   }
@@ -363,7 +386,7 @@ async function translateFree(texts, targetLang, config) {
  * Helper to lexically extract the first matching JSON block (object or array) from a string.
  * This ignores comments, explanations, or stray braces after the actual JSON structure.
  */
-function extractJsonBlock(str) {
+export function extractJsonBlock(str) {
   const startBrace = str.indexOf('{');
   const startBracket = str.indexOf('[');
   
@@ -429,7 +452,7 @@ function extractJsonBlock(str) {
  * path C:\newfile) is kept as the valid escape (newline/tab). That is rare in
  * slide/doc text and still far better than dropping the entire batch.
  */
-function repairJsonEscapes(s) {
+export function repairJsonEscapes(s) {
   let out = '';
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
@@ -450,7 +473,7 @@ function repairJsonEscapes(s) {
 /**
  * Helper to robustly parse JSON from LLM responses even if they have trailing markdown or text
  */
-function parseJsonRobustly(str) {
+export function parseJsonRobustly(str) {
   const trimmed = str.trim();
   try {
     return JSON.parse(trimmed);
@@ -491,7 +514,7 @@ function parseJsonRobustly(str) {
  * Claude / Custom — editing one and forgetting the others produced "works on
  * Gemini, breaks on OpenAI" bugs (see docs/05 M2). Change wording HERE only.
  */
-function buildSystemPrompt(targetLangName) {
+export function buildSystemPrompt(targetLangName, prefs = null) {
   return `You are a professional translator localizing short text fragments extracted from a business document (Google Slides, Docs, Sheets, or Forms) into ${targetLangName}.
 
 Return ONLY a JSON object of exactly this shape, and nothing else:
@@ -511,7 +534,7 @@ Keep unchanged (do NOT translate or reformat):
 - Placeholders and markup such as {name}, {{var}}, %s, <tag>, and any leading/trailing spaces.
 - Brand names, product names, and acronyms, unless a widely accepted ${targetLangName} form exists.
 
-If an item is already written in ${targetLangName}, or is a proper noun/code with no meaningful translation, return it unchanged. Never return an empty array or fewer items than you were given.`;
+If an item is already written in ${targetLangName}, or is a proper noun/code with no meaningful translation, return it unchanged. Never return an empty array or fewer items than you were given.` + buildPrefsBlock(prefs, targetLangName);
 }
 
 /**
@@ -519,7 +542,7 @@ If an item is already written in ${targetLangName}, or is a proper noun/code wit
  */
 async function translateGemini(texts, targetLangName, config) {
   const presentationId = config?.presentationId;
-  const model = config.modelName || 'gemini-2.5-flash';
+  const model = config.modelName || 'gemini-3.1-flash-lite'; // same default as the settings panel
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   await logDebug(`Sending request to Gemini API (Model: ${model})...`, presentationId);
@@ -537,7 +560,7 @@ async function translateGemini(texts, targetLangName, config) {
     systemInstruction: {
       parts: [
         {
-          text: buildSystemPrompt(targetLangName)
+          text: buildSystemPrompt(targetLangName, config.activePrefs)
         }
       ]
     },
@@ -583,7 +606,7 @@ async function translateOpenAI(texts, targetLangName, config) {
 
   await logDebug(`Sending request to OpenAI API (Model: ${model})...`, presentationId);
 
-  const systemPrompt = buildSystemPrompt(targetLangName);
+  const systemPrompt = buildSystemPrompt(targetLangName, config.activePrefs);
 
   const payload = {
     model: model,
@@ -626,7 +649,7 @@ async function translateClaude(texts, targetLangName, config) {
 
   await logDebug(`Sending request to Anthropic Claude API (Model: ${model})...`, presentationId);
 
-  const systemPrompt = buildSystemPrompt(targetLangName);
+  const systemPrompt = buildSystemPrompt(targetLangName, config.activePrefs);
 
   const prefill = '{\n  "translations": [';
   
@@ -674,7 +697,7 @@ async function translateCustomOpenAI(texts, targetLangName, config) {
 
   await logDebug(`Sending request to Custom OpenAI-compatible Endpoint: ${customUrl} (Model: ${model})...`, presentationId);
 
-  const systemPrompt = buildSystemPrompt(targetLangName);
+  const systemPrompt = buildSystemPrompt(targetLangName, config.activePrefs);
 
   const payload = {
     model: model,

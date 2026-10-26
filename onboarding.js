@@ -1,107 +1,149 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Populate version badge from manifest
-  const versionEl = document.getElementById('onboarding-version');
-  if (versionEl && chrome && chrome.runtime) {
-    const { version } = chrome.runtime.getManifest();
-    versionEl.textContent = `v${version}`;
+// User guide page. Renders every [data-i18n-guide] element through the shared i18n layer
+// (same locale files as the side panel) and fills {placeholders} with the
+// panel's own UI labels, so the button names the guide quotes are always exact.
+import { TARGET_LANGUAGES, UI_LANGUAGES, uiLabel, resolveUiLang } from './i18n/languages.js';
+import { loadLocale, t, getStoredUiLang, setStoredUiLang } from './i18n/i18n.js';
+
+// Preview tooling may supply sample APIs; otherwise this is the real `chrome`.
+const chrome = globalThis.__demoChrome ?? globalThis.chrome;
+
+// Placeholder → side-panel message key. Values are rendered as highlighted UI labels.
+const UI_LABELS = {
+  quickSetup: 'setup.title',
+  openStudio: 'setup.step1.btn',
+  start: 'setup.start',
+  useFree: 'setup.useFree',
+  target: 'main.targetLangLabel',
+  multi: 'multi.summary',
+  slides: 'scope.slides.label',
+  sheet: 'scope.sheet.currentOnly',
+  fileTerms: 'prefs.docGlossary.summary',
+  translate: 'main.btnTranslate',
+  stop: 'main.btnStop',
+  done: 'done.title',
+  after: 'settings.section.result',
+  history: 'history.title',
+  fit: 'settings.fitText',
+  section: 'settings.section.prefs',
+  save: 'settings.btnSave',
+  tone: 'prefs.tone.label',
+  toneKeep: 'prefs.tone.keep',
+  names: 'prefs.names.label',
+  mTranslate: 'prefs.mode.translate',
+  mKeep: 'prefs.mode.keep',
+  mAnnotate: 'prefs.mode.annotate',
+  terms: 'prefs.terms.label',
+  termTranslate: 'prefs.terms.mode.translate',
+  termKeep: 'prefs.terms.mode.keep',
+  custom: 'prefs.custom.label',
+  preview: 'prefs.preview.title',
+  engine: 'settings.section.engine',
+  test: 'settings.testConnection',
+  active: 'settings.status.active',
+  customUrl: 'settings.customUrl.label',
+  model: 'settings.modelName.label',
+  uiLang: 'settings.section.uiLanguage',
+};
+
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function uiLabelParams() {
+  const params = {};
+  for (const [name, key] of Object.entries(UI_LABELS)) {
+    params[name] = `<b class="ui-label">${escapeHtml(t(key))}</b>`;
+  }
+  return params;
+}
+
+function render() {
+  const params = uiLabelParams();
+  for (const el of document.querySelectorAll('[data-i18n-guide]')) {
+    // Guide strings are our own (locale files); only the UI labels are inserted,
+    // and those are escaped above.
+    const local = el.dataset.n ? { n: el.dataset.n } : {};
+    const html = escapeHtml(t(el.dataset.i18nGuide)).replace(/\{(\w+)\}/g, (m, name) => local[name] ?? params[name] ?? m);
+    if (el.tagName === 'TITLE') document.title = t(el.dataset.i18nGuide);
+    else el.innerHTML = html;
   }
 
-  // Step elements
-  const navItems = document.querySelectorAll('.nav-item');
-  const steps = document.querySelectorAll('.step-content');
-  
-  // Navigation tabs
-  function goToStep(stepNum) {
-    // Update sidebar nav items
-    navItems.forEach(item => {
-      if (parseInt(item.getAttribute('data-step')) === stepNum) {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-
-    // Update step visibility
-    steps.forEach(step => {
-      const stepId = `step-${stepNum}`;
-      if (step.id === stepId) {
-        step.classList.add('active');
-      } else {
-        step.classList.remove('active');
-      }
-    });
-  }
-
-  // Sidebar item click listeners
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const stepNum = parseInt(item.getAttribute('data-step'));
-      goToStep(stepNum);
-    });
-  });
-
-  // Next step button listeners
-  document.querySelectorAll('.btn-next').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const nextStep = parseInt(btn.getAttribute('data-next'));
-      goToStep(nextStep);
-    });
-  });
-
-  // Prev step button listeners
-  document.querySelectorAll('.btn-prev').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const prevStep = parseInt(btn.getAttribute('data-prev'));
-      goToStep(prevStep);
-    });
-  });
-
-  // Close guide button
-  const btnDone = document.getElementById('btn-done');
-  if (btnDone) {
-    btnDone.addEventListener('click', () => {
-      window.close();
-    });
-  }
-
-  // Fetch extension redirect URI
-  const redirectUriEl = document.getElementById('redirect-uri');
-  const btnCopyUri = document.getElementById('btn-copy-uri');
-  
-  if (redirectUriEl && btnCopyUri) {
-    if (chrome && chrome.identity && typeof chrome.identity.getRedirectURL === 'function') {
-      try {
-        const redirectUri = chrome.identity.getRedirectURL();
-        redirectUriEl.textContent = redirectUri;
-        
-        btnCopyUri.addEventListener('click', () => {
-          navigator.clipboard.writeText(redirectUri).then(() => {
-            btnCopyUri.textContent = 'Copied!';
-            btnCopyUri.classList.add('btn-primary');
-            btnCopyUri.classList.remove('btn-secondary');
-            setTimeout(() => {
-              btnCopyUri.textContent = 'Copy URI';
-              btnCopyUri.classList.remove('btn-primary');
-              btnCopyUri.classList.add('btn-secondary');
-            }, 2000);
-          }).catch(err => {
-            console.error('Failed to copy text: ', err);
-          });
-        });
-      } catch (e) {
-        console.error(e);
-        redirectUriEl.textContent = 'Error: Cannot retrieve redirect URI.';
-      }
-    } else {
-      // Fallback if running outside of extension context for testing
-      const extensionId = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) || 'extension-id';
-      const fallbackUri = `https://${extensionId}.chromiumapp.org/`;
-      redirectUriEl.textContent = fallbackUri;
-      btnCopyUri.addEventListener('click', () => {
-        navigator.clipboard.writeText(fallbackUri).then(() => {
-          btnCopyUri.textContent = 'Copied!';
-        });
-      });
+  const list = document.getElementById('lang-list');
+  list.innerHTML = '';
+  for (const lang of TARGET_LANGUAGES) {
+    const li = document.createElement('li');
+    const native = document.createElement('b');
+    native.textContent = lang.endonym;
+    li.append(native);
+    if (lang.english !== lang.endonym) {
+      const en = document.createElement('span');
+      en.textContent = lang.english;
+      li.append(en);
     }
+    list.appendChild(li);
+  }
+}
+
+// Live illustrations: the real side panel in demo mode (lib/demo-mode.js), in the
+// guide's language, with the button to click outlined. Not interactive.
+function renderShots(code) {
+  for (const fig of document.querySelectorAll('figure.stage')) {
+    const src = `popup.html?demo=${fig.dataset.demo}&ui=${encodeURIComponent(code)}&hl=1`;
+    let frame = fig.querySelector('iframe');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.loading = 'lazy';
+      frame.tabIndex = -1;
+      frame.setAttribute('aria-hidden', 'true');
+      const box = document.createElement('div');
+      box.className = 'stage-frame';
+      box.append(frame);
+      const cap = document.createElement('figcaption');
+      cap.dataset.i18nGuide = 'guide.shot.caption';
+      fig.append(box, cap);
+    }
+    if (frame.getAttribute('src') !== src) frame.src = src;
+  }
+}
+
+function highlightToc() {
+  const links = [...document.querySelectorAll('#toc a')];
+  const current = [...document.querySelectorAll('main section')]
+    .filter((s) => s.getBoundingClientRect().top < window.innerHeight * 0.35)
+    .pop();
+  for (const a of links) a.classList.toggle('active', current && a.getAttribute('href') === `#${current.id}`);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const code = resolveUiLang(await getStoredUiLang(), navigator.language);
+  await loadLocale(code);
+
+  const version = chrome?.runtime?.getManifest?.().version;
+  if (version) document.getElementById('guide-version').textContent = `v${version}`;
+
+  const picker = document.getElementById('guide-lang');
+  for (const lang of UI_LANGUAGES) {
+    const opt = document.createElement('option');
+    opt.value = lang.code;
+    opt.textContent = uiLabel(lang);
+    picker.appendChild(opt);
+  }
+  picker.value = code;
+  // Same setting as the side panel: switching here switches both.
+  picker.addEventListener('change', async () => {
+    await setStoredUiLang(picker.value);
+    await loadLocale(picker.value);
+    renderShots(picker.value);
+    render();
+  });
+
+  renderShots(code);
+  render();
+  highlightToc();
+  window.addEventListener('scroll', highlightToc, { passive: true });
+
+  document.getElementById('btn-done').addEventListener('click', () => window.close());
+
+  // Opened from the "what's new" badge: mark this version as seen.
+  if (location.hash === '#changelog' && version) {
+    chrome.storage?.local?.set({ whatsNewSeen: version });
   }
 });

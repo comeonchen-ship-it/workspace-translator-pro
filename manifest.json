@@ -1,13 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Workspace Translator Pro",
-  "version": "1.4.1",
+  "version": "1.6.0",
   "description": "Translate Google Slides, Docs, Sheets, and Forms while preserving layouts. Supports Gemini, OpenAI, Claude, and custom LLM APIs.",
   "permissions": [
     "activeTab",
     "identity",
     "storage",
-    "sidePanel"
+    "sidePanel",
+    "notifications",
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js",
@@ -36,8 +38,11 @@
     "https://www.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://api.openai.com/*",
-    "https://api.anthropic.com/*",
-    "https://*/*"
+    "https://api.anthropic.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
   ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtKgAxZxHy29KYO9eMy9w0MHeyAWhX4jus5IUtoUwG6CJZ1kw7aRJejumpvXM9LOIUIaSbp12nYBiCfRhjKmgAPRRHRqX3ZWILZtmuSOjDI0fyh4DC+3VBqYw8oxe0KzSpn8nVo+Drq8olzBF7bus85HOi1v3CagcGugUO3Xewswugqs5zihaD+xJ49s7VWFTuP1rFUcowto4xTWbr/K2iYdzt2BoJhXMk3p9TNW+q/Phwewi2DRvhiwx2s4+PNExU8YUKE+wVDPNN8Tim4Zc8NEEYHo8SOnDOISih2kuvZnzkzClzROCXc8odbfEPqloMAPHgg+A2ACxKGPcwG7fBwIDAQAB"
 }
