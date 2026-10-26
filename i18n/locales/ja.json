@@ -263,8 +263,8 @@
   "guide.start.lead": "所要時間は約 1 分です。無料の Gemini キーならクレジットカード不要で、自然で高品質な翻訳が得られます。",
   "guide.start.s1.h": "サイドパネルを開く",
   "guide.start.s1.p": "Google スライド、ドキュメント、スプレッドシート、フォームのファイルを開き、Chrome ツールバーの Workspace Translator Pro アイコンをクリックします。見当たらない場合は、パズルのピースのアイコンをクリックして固定してください。",
-  "guide.start.s2.h": "無料の Gemini キーを作成する",
-  "guide.start.s2.p": "初回はパネルに {quickSetup} が表示されます。{openStudio} をクリックし、Google アカウントでログインして「Create API key」（API キーを作成）をクリックし、キーをコピーします。",
+  "guide.start.s2.h": "API キーを取得（おすすめは Gemini）",
+  "guide.start.s2.p": "おすすめは Gemini です。無料枠があり、クレジットカードも不要なので、最も低コストで始められます。初回はパネルに{quickSetup}が表示されます。{openStudio} を押して Google アカウントでログインし、「Create API key」（API キーを作成）を押してキーをコピーします。",
   "guide.start.s3.h": "キーを貼り付けて完了",
   "guide.start.s3.p": "キーを入力欄に貼り付けます。自動で確認・保存され、緑色の確認メッセージが表示されたら {start} をクリックします。",
   "guide.start.free": "キーを使いたくない場合は、{quickSetup} の下部にある {useFree} を選んでください。キーなしで使えますが、翻訳品質は下がり、翻訳の設定は適用されません。",
@@ -364,5 +364,6 @@
   "guide.after.h": "翻訳が終わったら",
   "guide.group.steps": "使い方",
   "guide.group.reference": "リファレンス",
-  "guide.stepLabel": "ステップ {n}"
+  "guide.stepLabel": "ステップ {n}",
+  "guide.start.s2.alt": "OpenAI や Claude を使いたい場合は、各サイトでキーを作成し（有料 API）、設定 →{engine}でエンジンを選んでキーを貼り付け、{test} を押してください。"
 }

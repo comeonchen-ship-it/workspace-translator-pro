@@ -263,8 +263,8 @@
   "guide.start.lead": "Takes about a minute. A free Gemini key needs no credit card and gives natural, high-quality translations.",
   "guide.start.s1.h": "Open the side panel",
   "guide.start.s1.p": "Open a Google Slides, Docs, Sheets or Forms file, then click the Workspace Translator Pro icon in the Chrome toolbar. Don't see it? Click the puzzle-piece icon and pin it.",
-  "guide.start.s2.h": "Create a free Gemini key",
-  "guide.start.s2.p": "The first time, {quickSetup} opens in the panel. Click {openStudio}, sign in with your Google account, click “Create API key” and copy the key.",
+  "guide.start.s2.h": "Get an API key — Gemini recommended",
+  "guide.start.s2.p": "We recommend Gemini: it has a free tier with no credit card, so it costs the least to get started. The first time, {quickSetup} opens in the panel. Click {openStudio}, sign in with your Google account, click “Create API key” and copy the key.",
   "guide.start.s3.h": "Paste the key — done",
   "guide.start.s3.p": "Paste the key into the box. It is checked and saved automatically; when the green confirmation appears, click {start}.",
   "guide.start.free": "Don't want a key? Choose {useFree} at the bottom of {quickSetup}. It works without a key, but the quality is lower and translation preferences don't apply.",
@@ -364,5 +364,6 @@
   "guide.after.h": "After translation",
   "guide.group.steps": "Step by step",
   "guide.group.reference": "Reference",
-  "guide.stepLabel": "Step {n}"
+  "guide.stepLabel": "Step {n}",
+  "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site (paid API), then in Settings → {engine} choose the engine, paste the key and click {test}."
 }

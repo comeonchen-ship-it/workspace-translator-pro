@@ -263,8 +263,8 @@
   "guide.start.lead": "Dauert etwa eine Minute. Ein kostenloser Gemini-Schlüssel braucht keine Kreditkarte und liefert natürliche, hochwertige Übersetzungen.",
   "guide.start.s1.h": "Seitenleiste öffnen",
   "guide.start.s1.p": "Öffne eine Google Slides-, Docs-, Sheets- oder Forms-Datei und klicke dann in der Chrome-Symbolleiste auf das Symbol von Workspace Translator Pro. Du siehst es nicht? Klicke auf das Puzzleteil-Symbol und hefte es an.",
-  "guide.start.s2.h": "Kostenlosen Gemini-Schlüssel erstellen",
-  "guide.start.s2.p": "Beim ersten Mal öffnet sich {quickSetup} in der Seitenleiste. Klicke auf {openStudio}, melde dich mit deinem Google-Konto an, klicke auf „Create API key“ (API-Schlüssel erstellen) und kopiere den Schlüssel.",
+  "guide.start.s2.h": "API-Schlüssel holen (Gemini empfohlen)",
+  "guide.start.s2.p": "Wir empfehlen Gemini: Es gibt ein kostenloses Kontingent ohne Kreditkarte – der günstigste Einstieg. Beim ersten Mal öffnet sich {quickSetup} in der Seitenleiste. Klicke auf {openStudio}, melde dich mit deinem Google-Konto an, klicke auf „Create API key“ (API-Schlüssel erstellen) und kopiere den Schlüssel.",
   "guide.start.s3.h": "Schlüssel einfügen — fertig",
   "guide.start.s3.p": "Füge den Schlüssel in das Feld ein. Er wird automatisch geprüft und gespeichert; sobald die grüne Bestätigung erscheint, klicke auf {start}.",
   "guide.start.free": "Du möchtest keinen Schlüssel? Wähle {useFree} unten in {quickSetup}. Das funktioniert ohne Schlüssel, aber die Qualität ist geringer und die Übersetzungseinstellungen gelten nicht.",
@@ -364,5 +364,6 @@
   "guide.after.h": "Nach der Übersetzung",
   "guide.group.steps": "Schritt für Schritt",
   "guide.group.reference": "Nachschlagen",
-  "guide.stepLabel": "Schritt {n}"
+  "guide.stepLabel": "Schritt {n}",
+  "guide.start.s2.alt": "Lieber OpenAI oder Claude? Erstelle dort einen Schlüssel (kostenpflichtige API), wähle dann unter Einstellungen → {engine} die Engine, füge den Schlüssel ein und klicke auf {test}."
 }

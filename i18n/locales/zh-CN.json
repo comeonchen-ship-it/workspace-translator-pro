@@ -263,8 +263,8 @@
   "guide.start.lead": "大约只需一分钟。免费的 Gemini 密钥无需信用卡，翻译自然、质量高。",
   "guide.start.s1.h": "打开侧边栏",
   "guide.start.s1.p": "打开一个 Google 幻灯片、文档、表格或表单文件，然后点击 Chrome 工具栏中的 Workspace Translator Pro 图标。没看到图标？点击拼图图标并将其固定。",
-  "guide.start.s2.h": "创建免费的 Gemini 密钥",
-  "guide.start.s2.p": "首次使用时，侧边栏会打开 {quickSetup}。点击 {openStudio}，用 Google 账号登录，点击“Create API key”（创建 API 密钥）并复制密钥。",
+  "guide.start.s2.h": "获取 API 密钥（推荐 Gemini）",
+  "guide.start.s2.p": "推荐使用 Gemini：有免费额度、无需信用卡，是入门成本最低的选择。第一次使用时，侧边栏会出现{quickSetup}。点击 {openStudio}，用你的 Google 账号登录，点击「Create API key」，再复制密钥。",
   "guide.start.s3.h": "粘贴密钥，大功告成",
   "guide.start.s3.p": "将密钥粘贴到输入框中。系统会自动验证并保存；出现绿色确认提示后，点击 {start}。",
   "guide.start.free": "不想使用密钥？在 {quickSetup} 底部选择 {useFree}。无需密钥即可使用，但翻译质量较低，且翻译偏好不会生效。",
@@ -364,5 +364,6 @@
   "guide.after.h": "翻译完成后",
   "guide.group.steps": "操作步骤",
   "guide.group.reference": "参考资料",
-  "guide.stepLabel": "步骤 {n}"
+  "guide.stepLabel": "步骤 {n}",
+  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到对方网站创建密钥（付费 API），再到设置 →{engine}选择引擎、粘贴密钥并点击 {test}。"
 }

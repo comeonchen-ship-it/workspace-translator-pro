@@ -263,8 +263,8 @@
   "guide.start.lead": "Chỉ mất khoảng một phút. Khóa Gemini miễn phí không cần thẻ tín dụng và cho bản dịch tự nhiên, chất lượng cao.",
   "guide.start.s1.h": "Mở bảng điều khiển bên",
   "guide.start.s1.p": "Mở một tệp Google Slides, Docs, Sheets hoặc Forms, rồi nhấp vào biểu tượng Workspace Translator Pro trên thanh công cụ Chrome. Không thấy biểu tượng? Nhấp vào biểu tượng mảnh ghép và ghim nó.",
-  "guide.start.s2.h": "Tạo khóa Gemini miễn phí",
-  "guide.start.s2.p": "Lần đầu tiên, {quickSetup} sẽ mở trong bảng điều khiển. Nhấp {openStudio}, đăng nhập bằng tài khoản Google, nhấp “Create API key” (Tạo khóa API) và sao chép khóa.",
+  "guide.start.s2.h": "Lấy khóa API (khuyên dùng Gemini)",
+  "guide.start.s2.p": "Chúng tôi khuyên dùng Gemini: có hạn mức miễn phí, không cần thẻ tín dụng, nên là cách bắt đầu tiết kiệm nhất. Lần đầu, {quickSetup} sẽ mở trong bảng bên. Nhấn {openStudio}, đăng nhập bằng tài khoản Google, nhấn “Create API key” (Tạo khóa API) rồi sao chép khóa.",
   "guide.start.s3.h": "Dán khóa — xong",
   "guide.start.s3.p": "Dán khóa vào ô. Khóa được kiểm tra và lưu tự động; khi thấy thông báo xác nhận màu xanh lá, nhấp {start}.",
   "guide.start.free": "Không muốn dùng khóa? Chọn {useFree} ở cuối {quickSetup}. Cách này hoạt động không cần khóa, nhưng chất lượng thấp hơn và tùy chọn dịch không được áp dụng.",
@@ -364,5 +364,6 @@
   "guide.after.h": "Sau khi dịch xong",
   "guide.group.steps": "Từng bước",
   "guide.group.reference": "Tham khảo",
-  "guide.stepLabel": "Bước {n}"
+  "guide.stepLabel": "Bước {n}",
+  "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ (API trả phí), rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}."
 }

@@ -263,8 +263,8 @@
   "guide.start.lead": "1분 정도면 됩니다. 무료 Gemini 키는 신용카드가 필요 없고 자연스럽고 품질 높은 번역을 제공합니다.",
   "guide.start.s1.h": "사이드 패널 열기",
   "guide.start.s1.p": "Google 프레젠테이션, 문서, 스프레드시트 또는 설문지 파일을 연 다음 Chrome 툴바에서 Workspace Translator Pro 아이콘을 클릭하세요. 아이콘이 보이지 않나요? 퍼즐 조각 아이콘을 클릭해 고정하세요.",
-  "guide.start.s2.h": "무료 Gemini 키 만들기",
-  "guide.start.s2.p": "처음 사용할 때 패널에 {quickSetup}이 열립니다. {openStudio}을 클릭하고 Google 계정으로 로그인한 뒤 “Create API key”(API 키 만들기)를 클릭하고 키를 복사하세요.",
+  "guide.start.s2.h": "API 키 받기 (Gemini 추천)",
+  "guide.start.s2.p": "Gemini를 추천합니다. 무료 사용량이 있고 신용카드가 필요 없어 가장 적은 비용으로 시작할 수 있습니다. 처음 사용할 때 패널에 {quickSetup}이(가) 열립니다. {openStudio}을(를) 눌러 Google 계정으로 로그인하고 ‘Create API key’(API 키 만들기)를 누른 뒤 키를 복사하세요.",
   "guide.start.s3.h": "키 붙여넣기 — 끝",
   "guide.start.s3.p": "키를 입력란에 붙여넣으세요. 자동으로 확인되고 저장됩니다. 녹색 확인 메시지가 나타나면 {start}을 클릭하세요.",
   "guide.start.free": "키를 사용하고 싶지 않으신가요? {quickSetup} 하단에서 {useFree}을 선택하세요. 키 없이 작동하지만 품질이 낮고 번역 환경설정이 적용되지 않습니다.",
@@ -364,5 +364,6 @@
   "guide.after.h": "번역이 끝나면",
   "guide.group.steps": "단계별 안내",
   "guide.group.reference": "참고 자료",
-  "guide.stepLabel": "{n}단계"
+  "guide.stepLabel": "{n}단계",
+  "guide.start.s2.alt": "OpenAI나 Claude를 쓰고 싶다면 해당 사이트에서 키를 만든 뒤(유료 API) 설정 →{engine}에서 엔진을 선택하고 키를 붙여넣은 다음 {test}을(를) 누르세요."
 }

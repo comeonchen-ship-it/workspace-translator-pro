@@ -263,8 +263,8 @@
   "guide.start.lead": "約 1 分鐘完成。免費的 Gemini 金鑰不需要信用卡，翻譯自然、品質高。",
   "guide.start.s1.h": "打開側邊欄",
   "guide.start.s1.p": "打開一份 Google 簡報、文件、試算表或表單，再按 Chrome 工具列上的 Workspace Translator Pro 圖示。找不到圖示？按拼圖圖示，把它釘選出來。",
-  "guide.start.s2.h": "建立免費的 Gemini 金鑰",
-  "guide.start.s2.p": "第一次使用時，側邊欄會出現{quickSetup}。按 {openStudio}，用你的 Google 帳號登入，按「Create API key」，再複製金鑰。",
+  "guide.start.s2.h": "取得 API 金鑰（推薦 Gemini）",
+  "guide.start.s2.p": "推薦使用 Gemini：有免費額度、不需要信用卡，是入門成本最低的選擇。第一次使用時，側邊欄會出現{quickSetup}。按 {openStudio}，用你的 Google 帳號登入，按「Create API key」，再複製金鑰。",
   "guide.start.s3.h": "貼上金鑰，完成",
   "guide.start.s3.p": "把金鑰貼進輸入框，系統會自動檢查並儲存；出現綠色的確認訊息後，按 {start}。",
   "guide.start.free": "不想申請金鑰？在{quickSetup}底部選 {useFree}。不需要金鑰也能用，但翻譯品質較普通，翻譯偏好也不會套用。",
@@ -364,5 +364,6 @@
   "guide.after.h": "翻譯完成後",
   "guide.group.steps": "操作步驟",
   "guide.group.reference": "參考資料",
-  "guide.stepLabel": "步驟 {n}"
+  "guide.stepLabel": "步驟 {n}",
+  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到對方網站建立金鑰（付費 API），再到設定 →{engine}選擇引擎、貼上金鑰並按 {test}。"
 }
