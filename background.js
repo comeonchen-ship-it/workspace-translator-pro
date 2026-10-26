@@ -7,8 +7,8 @@ import { getTaskState, setTaskState, checkCancelledGlobal } from './lib/task-sta
 import { extractTextFromElements, extractTextFromDocElements } from './lib/text-extract.js';
 import { translateSpreadsheet } from './lib/sheets.js';
 import { translateForm } from './lib/forms.js';
-import { measureShapes, planFontScaling } from './lib/overflow.js';
-import { collectStyledParagraphs, buildStyledRequests, slidesWithOverlappingText } from './lib/styled-runs.js';
+import { measureShapes, measureFitBefore, planFontScaling } from './lib/overflow.js';
+import { collectStyledParagraphs, buildStyledRequests } from './lib/styled-runs.js';
 import { getLanguage } from './i18n/languages.js';
 
 // Enable opening of Side Panel when clicking the extension action icon
@@ -567,6 +567,7 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
       await logDebug('Fetching copy presentation slide structure...', presentationId);
       const presentation = await getPresentationDetails(copyId, token);
       config.shapeWidthsBefore = measureShapes(presentation);
+      config.shapeFitBefore = measureFitBefore(presentation);
       await logDebug(`Successfully fetched presentation. Total slides: ${presentation.slides ? presentation.slides.length : 0}`, presentationId);
       
       // 4. Traverse layout and extract unique translatable texts
@@ -634,8 +635,6 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
         config.styledParagraphs = styled;
         if (styled.length) await logDebug(`Mixed-format paragraphs to rebuild: ${styled.length}.`, presentationId);
       }
-      const slideNumbers = slidesInScope.map((sl) => presentation.slides.indexOf(sl) + 1);
-      config.overlapSlides = slidesWithOverlappingText(slidesInScope, (i) => slideNumbers[i]);
       // Keep a reference to pageTextMap in the config so we can access it below
       config.pageTextMap = pageTextMap;
       config.shapeIdsWithText = shapeIdsWithText;
@@ -756,18 +755,19 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
     let overflowFixed = 0;
     if (!isDoc && requests.length > 0 && config.shapeWidthsBefore) {
       const { fitTextToBoxes = true } = await chrome.storage.local.get('fitTextToBoxes');
-      if (fitTextToBoxes) {
-        try {
-          const after = await getPresentationDetails(copyId, token);
-          const plan = planFontScaling(config.shapeWidthsBefore, after);
-          if (plan.requests.length > 0) {
-            await updatePresentation(copyId, plan.requests, token);
-            overflowFixed = plan.shapesAdjusted;
-            await logDebug(`Shrank fonts in ${overflowFixed} text boxes to fit longer translations.`, presentationId);
-          }
-        } catch (fitErr) {
-          await logDebug(`Font fitting skipped (non-fatal): ${fitErr.message}`, presentationId);
+      try {
+        const after = await getPresentationDetails(copyId, token);
+        const plan = planFontScaling(config.shapeWidthsBefore, after, config.shapeFitBefore, fitTextToBoxes);
+        // Slides whose translation is likely still bigger than its box, after shrinking.
+        config.overlapSlides = plan.overflowSlides;
+        if (plan.overflowSlides.length) await logDebug(`Text may still overflow on slides: ${plan.overflowSlides.join(', ')}.`, presentationId);
+        if (plan.requests.length > 0) {
+          await updatePresentation(copyId, plan.requests, token);
+          overflowFixed = plan.shapesAdjusted;
+          await logDebug(`Shrank fonts in ${overflowFixed} text boxes to fit longer translations.`, presentationId);
         }
+      } catch (fitErr) {
+        await logDebug(`Font fitting skipped (non-fatal): ${fitErr.message}`, presentationId);
       }
     }
 

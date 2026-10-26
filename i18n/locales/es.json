@@ -367,9 +367,9 @@
   "guide.stepLabel": "Paso {n}",
   "guide.start.s2.alt": "¿Prefieres OpenAI o Claude? Crea una clave en su web y luego, en Ajustes → {engine}, elige el motor, pega la clave y pulsa {test}.",
   "done.unusedTerms": "términos no encontrados en este archivo: {list} (revisa la ortografía)",
-  "done.overlapSlides": "las diapositivas {list} tienen cuadros de texto superpuestos; revísalas",
+  "done.overlapSlides": "diapositivas {list}: puede que el texto no quepa en su cuadro; revísalas",
   "guide.cl.170.date": "Octubre de 2026",
   "guide.cl.170.1": "Diapositivas: las palabras de otro color o estilo dentro de una frase ahora se mueven con su traducción en lugar de quedar superpuestas.",
-  "guide.cl.170.2": "La tarjeta de resultado indica las diapositivas con cuadros de texto superpuestos.",
+  "guide.cl.170.2": "Las traducciones largas se reducen más para caber en su cuadro, y la tarjeta de resultado indica las diapositivas donde el texto aún puede desbordarse.",
   "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo"
 }

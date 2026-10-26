@@ -29,10 +29,10 @@ test('shrinks explicit sizes proportionally, keeps inherited sizes', () => {
   assert.equal(shapesAdjusted, 1);
   assert.equal(requests.length, 1); // only the run with an explicit size
   const size = requests[0].updateTextStyle.style.fontSize.magnitude;
-  assert.ok(size < 20 && size >= 14, `size ${size}`);
+  assert.ok(size < 20 && size >= 12, `size ${size}`);
 });
 
-test('never shrinks below 70% or 8pt', () => {
+test('never shrinks below 60% or 8pt', () => {
   const before = measureShapes(pres([run('Hi\n', 0, 10)]));
   const { requests } = planFontScaling(before, pres([run('A very very long translated sentence here\n', 0, 10)]));
   assert.equal(requests[0].updateTextStyle.style.fontSize.magnitude, 8);

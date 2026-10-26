@@ -334,15 +334,18 @@ test('slides: mixed-format sentence is rebuilt with its coloured words (v1.7)', 
   assert.deepEqual(reqs[3].updateTextStyle.style, BLUE);
 });
 
-test('slides: overlapping text boxes are reported on the completion card', async () => {
-  const shape = (id, x, y, w, h, text) => ({ objectId: id, size: { width: { magnitude: w }, height: { magnitude: h } },
-    transform: { translateX: x, translateY: y, scaleX: 1, scaleY: 1 },
-    shape: { text: { textElements: [{ startIndex: 0, endIndex: text.length, textRun: { content: text, style: {} } }] } } });
+test('slides: a box whose translation no longer fits is reported on the completion card', async () => {
+  const EMU = 12700;
+  const shape = (id, text) => ({ objectId: id, size: { width: { magnitude: 150 * EMU, unit: 'EMU' }, height: { magnitude: 40 * EMU, unit: 'EMU' } },
+    transform: { scaleX: 1, scaleY: 1 },
+    shape: { text: { textElements: [{ startIndex: 0, endIndex: text.length, textRun: { content: text, style: { fontSize: { magnitude: 14, unit: 'PT' } } } }] } } });
   api.files.p17 = { slides: [
-    { objectId: 'a', pageElements: [shape('x', 0, 0, 100, 50, 'Alone\n')] },
-    { objectId: 'b', pageElements: [shape('y', 0, 0, 400, 300, 'Big text\n'), shape('z', 20, 100, 200, 40, 'Overlay\n')] },
+    { objectId: 'a', pageElements: [shape('x', 'Short\n')] },
+    { objectId: 'b', pageElements: [shape('y', 'Grows\n')] },
   ] };
+  api.llm.translate = (t) => (t === 'Grows' ? '非常に長い翻訳文'.repeat(15) : `TR(${t})`);
   const state = await run('p17', 'presentation');
+  api.llm.translate = (t) => `TR(${t})`;
   assert.equal(state.step, 'done', state.error);
   assert.deepEqual(state.summary.overlapSlides, [2]);
 });
