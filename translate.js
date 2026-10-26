@@ -211,7 +211,7 @@ export async function translateTexts(texts, targetLang, config) {
       return Promise.resolve([]);
     };
 
-    const isFormatError = (err) => /Translation mismatch|invalid response format/.test(err?.message || '');
+    const isFormatError = (err) => err instanceof SyntaxError || /Translation mismatch|invalid response format|in JSON at position|Unexpected token|Unexpected end of JSON/.test(err?.message || '');
     const checked = async (items) => {
       const out = await translateBatch(items);
       if (!Array.isArray(out)) throw new Error('Translation API returned an invalid response format (expected an array).');
@@ -480,8 +480,13 @@ export function extractJsonBlock(str) {
  */
 export function repairJsonEscapes(s) {
   let out = '';
+  let inString = false;
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
+    if (c === '"') inString = !inString;
+    // Raw control characters (a real newline/tab/vertical tab copied from a
+    // slide's line break) are illegal inside JSON strings: escape them.
+    if (inString && c < ' ') { out += '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'); continue; }
     if (c !== '\\') { out += c; continue; }
     const next = s[i + 1];
     if (next === '"' || next === '\\' || next === '/' || next === 'b' ||

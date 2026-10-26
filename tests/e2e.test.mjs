@@ -383,3 +383,20 @@ test('an item that never comes back right is kept as is; the job still completes
   assert.deepEqual(written, ['TR(Fine text)']);
   assert.equal(state.summary.untranslated, 1);
 });
+
+test('slides: the user\'s slide 4 (one sentence over five paragraphs, one blue) is rebuilt as one sentence', async () => {
+  const WHITE = { foregroundColor: { opaqueColor: { rgbColor: { red: 1, green: 1, blue: 1 } } } };
+  const BLUE = { foregroundColor: { opaqueColor: { rgbColor: { blue: 1 } } } };
+  const lines = [['Google Cloud is\n', WHITE], ['the only provider\n', BLUE], ['to offer first-party\n', WHITE], ['solutions across\n', WHITE], ['the entire AI stack.\n', WHITE]];
+  let i = 0;
+  const textElements = lines.map(([content, style]) => { const e = { startIndex: i, endIndex: i + content.length, textRun: { content, style } }; i += content.length; return e; });
+  api.files.p21 = { slides: [{ objectId: 's4', pageElements: [{ objectId: 'box', shape: { text: { textElements } } }] }] };
+  const before = api.llm.calls.length;
+  api.llm.translate = (t) => (t.includes('⟦1⟧') ? 'Google Cloud 是⟦1⟧唯一⟦/1⟧在整个 AI 技术栈中提供第一方解决方案的供应商。' : `TR(${t})`);
+  const state = await run('p21', 'presentation');
+  api.llm.translate = (t) => `TR(${t})`;
+  assert.equal(state.step, 'done', state.error);
+  assert.deepEqual(api.llm.calls.slice(before).flatMap((c) => c.texts), ['Google Cloud is ⟦1⟧the only provider⟦/1⟧ to offer first-party solutions across the entire AI stack.']);
+  const all = api.batchUpdates.filter((b) => b.api === 'slides').flatMap((b) => b.requests);
+  assert.deepEqual(all.filter((r) => r.replaceAllText).map((r) => r.replaceAllText.containsText.text), []);
+});

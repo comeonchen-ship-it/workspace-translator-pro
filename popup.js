@@ -1245,9 +1245,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const logConsoleContent = document.getElementById('log-console-content');
   const btnToggleLogs = document.getElementById('btn-toggle-logs');
 
+  function refreshLogs() {
+    if (!currentPresentationId) return;
+    const logKey = `debugLogs_${currentPresentationId}`;
+    chrome.storage.local.get(logKey, (data) => updateLogDisplay(data[logKey] || []));
+  }
+
   btnToggleLogs.addEventListener('click', () => {
     const isHidden = logConsoleContent.classList.contains('hidden');
     if (isHidden) {
+      refreshLogs();
       logConsoleContent.classList.remove('hidden');
       btnToggleLogs.textContent = t('logs.hide');
     } else {
@@ -1618,7 +1625,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       logConsoleContent.classList.remove('hidden');
       btnToggleLogs.textContent = t('logs.hide');
-      
+      refreshLogs(); // polling just stopped — load the log once so the cause is visible
+
       if (step === 'copy') {
         stepCopy.className = 'active';
       } else if (step === 'extract') {

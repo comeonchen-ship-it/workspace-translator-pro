@@ -104,3 +104,31 @@ test('marksIntact gates caching', () => {
   assert.equal(marksIntact('a ⟦1⟧b⟦/1⟧', 'x y'), false);
   assert.equal(marksIntact('plain', 'anything'), true);
 });
+
+import { mergeContinuedParagraphs } from '../lib/styled-runs.js';
+
+// Slide 4 of the user's deck: each line is its own paragraph, line 2 in blue.
+const slide4 = () => {
+  const lines = [['Google Cloud is\n', WHITE], ['the only provider\n', BLUE], ['to offer first-party\n', WHITE], ['solutions across\n', WHITE], ['the entire AI stack.\n', WHITE]];
+  let i = 0;
+  return lines.map(([content, style]) => { const e = { startIndex: i, endIndex: i + content.length, textRun: { content, style } }; i += content.length; return e; });
+};
+
+test('a sentence broken into separate paragraphs is merged and rebuilt as one', () => {
+  const merged = mergeContinuedParagraphs(paragraphsOf(slide4()));
+  assert.equal(merged.length, 1);
+  const [p] = collectStyledParagraphs([{ objectId: 's', pageElements: [{ objectId: 'b', shape: { text: { textElements: slide4() } } }] }]);
+  assert.equal(p.tagged, 'Google Cloud is ⟦1⟧the only provider⟦/1⟧ to offer first-party solutions across the entire AI stack.');
+  assert.deepEqual(p.raws, ['Google Cloud is', 'the only provider', 'to offer first-party', 'solutions across', 'the entire AI stack.']);
+  assert.equal(p.start, 0);
+  assert.equal(p.end, 'Google Cloud is\nthe only provider\nto offer first-party\nsolutions across\nthe entire AI stack.'.length);
+  const { requests } = buildStyledRequests([p], new Map([[p.tagged, 'Google Cloud 是⟦1⟧唯一⟧在整个 AI 技术栈中提供第一方解决方案的供应商。'.replace('⟦1⟧唯一⟧', '⟦1⟧唯一⟦/1⟧')]]));
+  assert.equal(requests[0].deleteText.textRange.endIndex, p.end);
+  assert.equal(requests[1].insertText.text, 'Google Cloud 是唯一在整个 AI 技术栈中提供第一方解决方案的供应商。');
+});
+
+test('separate sentences / headings are not merged', () => {
+  const t = [{ startIndex: 0, textRun: { content: 'Agenda\n', style: WHITE } }, { startIndex: 7, textRun: { content: 'Overview of results.\n', style: BLUE } },
+    { startIndex: 28, textRun: { content: 'Next steps\n', style: WHITE } }];
+  assert.equal(mergeContinuedParagraphs(paragraphsOf(t)).length, 3);
+});

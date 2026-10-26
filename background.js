@@ -617,16 +617,20 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
         const styledCounts = new Map();
         for (const sp of styled) {
           uniqueTexts.add(sp.tagged);
-          const k = sp.pageId + '\u0000' + sp.raw;
-          styledCounts.set(k, (styledCounts.get(k) || 0) + 1);
+          for (const line of sp.raws) {
+            const k = sp.pageId + '\u0000' + line;
+            styledCounts.set(k, (styledCounts.get(k) || 0) + 1);
+          }
         }
         for (const sp of styled) {
-          const k = sp.pageId + '\u0000' + sp.raw;
-          if ((plainCounts.get(k) || 0) <= styledCounts.get(k)) pageTextMap.get(sp.pageId)?.delete(sp.raw);
+          for (const line of sp.raws) {
+            const k = sp.pageId + '\u0000' + line;
+            if ((plainCounts.get(k) || 0) <= styledCounts.get(k)) pageTextMap.get(sp.pageId)?.delete(line);
+          }
         }
         // Lines now handled only by the styled path need no plain translation.
         const stillUsed = new Set([...pageTextMap.values()].flatMap((set) => [...set]));
-        for (const sp of styled) if (!stillUsed.has(sp.raw)) uniqueTexts.delete(sp.raw);
+        for (const sp of styled) for (const line of sp.raws) if (!stillUsed.has(line)) uniqueTexts.delete(line);
         config.styledParagraphs = styled;
         if (styled.length) await logDebug(`Mixed-format paragraphs to rebuild: ${styled.length}.`, presentationId);
       }
@@ -696,14 +700,14 @@ async function runTranslationWorkflow(presentationId, presentationTitle, fileTyp
           await logDebug(`Rebuilt ${styledPlan.rebuilt + styledPlan.fallbacks} mixed-format paragraph(s).`, presentationId);
         } catch (styledErr) {
           await logDebug(`Mixed-format rebuild failed, using plain replacement instead: ${styledErr.message}`, presentationId);
-          const missing = (config.styledParagraphs || []).filter((sp) => !translationsMap.has(sp.raw));
-          if (missing.length) {
-            const extra = await translateTexts([...new Set(missing.map((sp) => sp.raw))], targetLang, config);
+          const missingLines = [...new Set((config.styledParagraphs || []).flatMap((sp) => sp.raws))].filter((l) => !translationsMap.has(l));
+          if (missingLines.length) {
+            const extra = await translateTexts(missingLines, targetLang, config);
             for (const [k, v] of extra) translationsMap.set(k, v);
           }
           for (const sp of config.styledParagraphs || []) {
             if (!config.pageTextMap.has(sp.pageId)) config.pageTextMap.set(sp.pageId, new Set());
-            config.pageTextMap.get(sp.pageId).add(sp.raw);
+            for (const line of sp.raws) config.pageTextMap.get(sp.pageId).add(line);
           }
           styledPlan.rebuilt = 0;
         }
