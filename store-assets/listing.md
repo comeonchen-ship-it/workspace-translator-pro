@@ -63,8 +63,8 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 | `storage` | Stores the user's settings (API key, engine, translation preferences), translation history, a local translation cache and job progress in chrome.storage.local. |
 | `sidePanel` | The extension's whole interface is a side panel shown next to the open Google file. |
 | `activeTab` | Detects which Google Slides/Docs/Sheets/Forms file is open in the current tab, so the user can translate it. |
-| `notifications` | Tells the user that a translation has finished when the side panel is closed. |
-| `scripting` | When the user chooses "only translate the current sheet", reads the name of the active sheet tab on the Google Sheets page (needed for .xlsx files, whose sheet IDs change when copied). Nothing else is read. |
+| `notifications` | Shows one notification when a translation finishes, so the user knows the translated copy is ready even if they closed the side panel. Clicking the notification opens the translated file. No other notifications are sent. |
+| `scripting` | Used only when the user ticks "Only translate the sheet tab I'm on" in Google Sheets: it reads the name of the active sheet tab on the current Google Sheets page, because the tab ID changes when an .xlsx file is copied. Nothing else on the page is read or changed, and no remote code is run. |
 | Host permissions (docs.google.com, googleapis.com, the Gemini/OpenAI/Anthropic APIs) | Read and write the user's Google files through Google's APIs and send text to the translation service the user selected. |
 | Optional host permissions | Requested only when the user adds a custom OpenAI-compatible endpoint, and only for that address. |
 | Remote code | No — all code is in the package. |
