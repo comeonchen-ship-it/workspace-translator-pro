@@ -46,8 +46,8 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 ```
 
 **Screenshots** (max 5, upload in this order): `screenshot-overview.png` (all features at a glance), `photo-slide.png`, `photo-doc.png`, `photo-sheets.png`, `photo-form.png` — the photos are real Google Slides/Docs/Sheets/Forms with the current side panel (rebuild with `python3 store-assets/retouch.py`; the rest with `python3 store-assets/build.py`).
-**Small promo tile**: `small-tile-440x280.png` · **Marquee**: `marquee-1400x560.png`
-**Localized promo images** (Store listing → choose the language at the top): 繁體中文 `-zh-TW`, 日本語 `-ja`, Español `-es` versions of the marquee and small tile. Every other language shows the English ones.
+**Small promo tile**: `small-tile-440x280-en.png` · **Marquee**: `marquee-1400x560-en.png`
+**Localized promo images** (Store listing → choose the language at the top): 繁體中文 `-zh-TW`, 日本語 `-ja`, Español `-es` versions of the marquee and small tile. Every other language shows the English (`-en`) ones.
 
 ## Privacy practices tab
 

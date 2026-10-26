@@ -60,11 +60,13 @@ def main():
         only = set(sys.argv[1:])
         for shot, w, h, name in SHOTS:
             if not only or shot in only:
-                render(shot, w, h, name)
-                # Localized store listings: marquee and tile also in 繁中, 日本語 and Español.
+                # Localized store listings: marquee and tile come in one file per
+                # language, always with a language suffix (…-en.png is the default).
                 if shot in ('marquee', 'tile'):
-                    for lang in ('zh-TW', 'ja', 'es'):
+                    for lang in ('en', 'zh-TW', 'ja', 'es'):
                         render(shot, w, h, name.replace('.png', f'-{lang}.png'), lang)
+                else:
+                    render(shot, w, h, name)
     finally:
         httpd.shutdown()
 
