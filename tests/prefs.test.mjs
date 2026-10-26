@@ -140,7 +140,7 @@ test('concise option: off by default, adds a length rule and changes the cache f
   const { buildPrefsBlock, prefsFingerprint, normalizePrefs } = await import('../lib/prefs.js');
   assert.equal(normalizePrefs({}).concise, false);
   const block = buildPrefsBlock({ concise: true }, 'Japanese');
-  assert.match(block, /Length: .*never drop information/);
+  assert.match(block, /Length \(important\): .*never drop information/);
   assert.notEqual(prefsFingerprint({ concise: true }), prefsFingerprint({ tone: 'formal' }));
   assert.notEqual(prefsFingerprint({ concise: true }), '');
 });

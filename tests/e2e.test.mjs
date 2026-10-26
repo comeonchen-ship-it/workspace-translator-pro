@@ -406,3 +406,15 @@ test('slides: the user\'s slide 4 (one sentence over five paragraphs, one blue) 
   const lines5 = ['Google Cloud is', 'the only provider', 'to offer first-party', 'solutions across', 'the entire AI stack.'];
   assert.deepEqual(all.filter((r) => lines5.includes(r.replaceAllText?.containsText?.text)), []);
 });
+
+test('slides: the concise preference reaches the AI prompt; off by default', async () => {
+  const shape = (id, text) => ({ objectId: id, shape: { text: { textElements: [{ startIndex: 0, endIndex: text.length, textRun: { content: text, style: {} } }] } } });
+  api.files.p31 = { slides: [{ objectId: 's', pageElements: [shape('a', 'Concise check one\n')] }] };
+  api.files.p32 = { slides: [{ objectId: 's', pageElements: [shape('a', 'Concise check two\n')] }] };
+  let before = api.llm.calls.length;
+  assert.equal((await run('p31', 'presentation', { config: { prefs: { concise: true } } })).step, 'done');
+  assert.ok(api.llm.calls.slice(before).some((c) => /Length \(important\)/.test(c.system)), 'concise rule sent');
+  before = api.llm.calls.length;
+  assert.equal((await run('p32', 'presentation')).step, 'done');
+  assert.ok(!api.llm.calls.slice(before).some((c) => /Length \(important\)/.test(c.system)), 'no concise rule by default');
+});

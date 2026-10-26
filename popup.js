@@ -157,11 +157,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!currentPresentationId) return;
     chrome.storage.local.get(['translationPrefs', conciseKey()], (items) => {
       const own = items[conciseKey()];
-      jobConcise.checked = typeof own === 'boolean' ? own : items.translationPrefs?.concise === true;
+      const global = items.translationPrefs?.concise === true;
+      // A stored choice equal to the default is no override; drop it.
+      if (own === global) chrome.storage.local.remove(conciseKey());
+      jobConcise.checked = typeof own === 'boolean' ? own : global;
     });
   }
+  // Only a choice that differs from the Settings default is stored for the file;
+  // matching it again clears the override, so later Settings changes apply again.
   jobConcise.addEventListener('change', () => {
-    if (currentPresentationId) chrome.storage.local.set({ [conciseKey()]: jobConcise.checked });
+    if (!currentPresentationId) return;
+    const key = conciseKey();
+    const on = jobConcise.checked;
+    chrome.storage.local.get('translationPrefs', (items) => {
+      if (on === (items.translationPrefs?.concise === true)) chrome.storage.local.remove(key);
+      else chrome.storage.local.set({ [key]: on });
+    });
   });
 
   function updateScopeControls() {
@@ -1404,6 +1415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Check storage configurations before running
     chrome.storage.local.get([
+      `concise_${currentPresentationId}`,
       'translationEngine',
       'apiKey',
       'modelName',
@@ -1506,8 +1518,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               customUrl: items.customUrl,
               prefs: {
                 ...buildPrefsForJob(items.translationPrefs),
-                // Slides: the main-screen box holds this file's own choice.
-                ...(currentFileType === 'presentation' ? { concise: jobConcise.checked } : {}),
+                // Slides: this file's own choice, if any, else the Settings default.
+                ...(currentFileType === 'presentation' && typeof items[`concise_${currentPresentationId}`] === 'boolean'
+                  ? { concise: items[`concise_${currentPresentationId}`] } : {}),
               },
               scope,
               extraLangs: getExtraLangs()
