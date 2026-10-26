@@ -370,6 +370,11 @@
   "done.overlapSlides": "trang {list}: chữ có thể tràn khỏi khung — vui lòng kiểm tra",
   "guide.cl.170.date": "Tháng 10 năm 2026",
   "guide.cl.170.1": "Trang chiếu: các từ có màu hoặc định dạng khác trong câu giờ di chuyển theo bản dịch, không còn bị chồng lên nhau.",
-  "guide.cl.170.2": "Bản dịch dài sẽ được thu nhỏ thêm cho vừa khung; thẻ kết quả liệt kê các trang có chữ vẫn có thể bị tràn.",
-  "done.untranslated": "{n} đoạn văn bản không dịch được và được giữ nguyên — hãy thử lại hoặc dùng mô hình khác"
+  "guide.cl.170.2": "Bản dịch dài được thu nhỏ thêm cho vừa khung, thêm tùy chọn dịch ngắn gọn (mặc định tắt). Thẻ kết quả sẽ nhắc bạn xem nhanh lại.",
+  "done.untranslated": "{n} đoạn văn bản không dịch được và được giữ nguyên — hãy thử lại hoặc dùng mô hình khác",
+  "prefs.concise.label": "Dịch ngắn gọn để chữ vừa với bố cục",
+  "prefs.concise.hint": "AI sẽ chọn cách diễn đạt ngắn hơn, giữ độ dài gần với bản gốc. Nội dung không bị lược bỏ, nhưng câu chữ có thể gọn hơn. Nên tắt với văn bản cần chính xác từng chữ, như hợp đồng.",
+  "prefs.preview.concise": "Bản dịch được giữ ngắn gọn, gần độ dài bản gốc.",
+  "done.fitCheck": "Đã tự động thu nhỏ chữ trong {n} khung văn bản để vừa bản dịch dài hơn. Một số chữ vẫn có thể tràn khỏi khung — bạn nên mở tệp và xem nhanh một lượt",
+  "guide.pr.concise": "Dịch ngắn gọn — tùy chọn, mặc định tắt. AI chọn cách diễn đạt ngắn hơn để chữ dễ vừa với trang chiếu. Nội dung không bị lược bỏ, nhưng câu chữ có thể gọn hơn; nên tắt với hợp đồng và văn bản cần dịch sát từng chữ."
 }

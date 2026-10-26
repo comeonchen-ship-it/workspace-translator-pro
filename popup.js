@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prefsCard = document.getElementById('prefs-card');
   const prefsFreeNote = document.getElementById('prefs-free-note');
   const prefTone = document.getElementById('pref-tone');
+  const prefConcise = document.getElementById('pref-concise');
   // Name categories: one segmented control (translate / keep / annotate) each.
   const nameModes = { ...normalizeNames({}) };
   function renderNameModes() {
@@ -323,6 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputFitText) inputFitText.checked = items.fitTextToBoxes !== false;
     const prefs = items.translationPrefs || {};
     prefTone.value = prefs.tone || 'keep';
+    prefConcise.checked = prefs.concise === true;
     // ≤ v1.6.0 stored the glossary as "term = translation" text; migrate it.
     globalTerms.setRows(prefs.terms || glossaryTextToRows(prefs.glossaryText));
     Object.assign(nameModes, normalizeNames(prefs));
@@ -366,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return JSON.stringify([
       selectEngine.value, inputApiKey.value.trim(), inputModelName.value.trim(), inputCustomUrl.value.trim(),
       inputAutoOpen?.checked, inputFitText?.checked,
-      prefTone.value, NAME_CATEGORIES.map((k) => nameModes[k]),
+      prefTone.value, prefConcise.checked, NAME_CATEGORIES.map((k) => nameModes[k]),
       globalTerms.getRows().filter((r) => r.src.trim()), prefCustom.value.trim(),
     ]);
   }
@@ -465,11 +467,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   prefCustom.addEventListener('input', () => { updateCustomCount(); updateRulesPreview(); });
   prefTone.addEventListener('change', updateRulesPreview);
+  prefConcise.addEventListener('change', updateRulesPreview);
 
   // Plain-language summary of the current preference rules (read-only).
   function updateRulesPreview() {
     const items = [];
     if (prefTone.value !== 'keep') items.push(t('prefs.preview.tone', { tone: t(`prefs.tone.${prefTone.value}`) }));
+    if (prefConcise.checked) items.push(t('prefs.preview.concise'));
     // Category labels are capitalised as headings; mid-sentence they shouldn't be
     // (German nouns stay capitalised; CJK/Thai have no case).
     const inSentence = (label) => (['en', 'es', 'fr', 'vi'].includes(document.documentElement.lang)
@@ -802,6 +806,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       fitTextToBoxes: inputFitText ? inputFitText.checked : true,
       translationPrefs: {
         tone: prefTone.value,
+        concise: prefConcise.checked,
         names: { ...nameModes },
         terms: globalTerms.getRows().filter((r) => r.src.trim()),
         custom: prefCustom.value.trim().slice(0, CUSTOM_MAX_CHARS),
@@ -1395,6 +1400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const p = stored || {};
     return {
       tone: p.tone || 'keep',
+      concise: p.concise === true,
       names: normalizeNames(p),
       glossary: mergeGlossaries(
         rowsToGlossary(p.terms || glossaryTextToRows(p.glossaryText)),
@@ -1721,13 +1727,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof summary.segments === 'number') parts.push(t('done.segments', { n: summary.segments }));
     if (summary.durationMs) parts.push(formatDuration(summary.durationMs));
     if (summary.engine) parts.push(summary.model ? `${summary.engine.toUpperCase()} · ${summary.model}` : summary.engine.toUpperCase());
-    if (summary.overflowFixed) parts.push(t('done.overflowFixed', { n: summary.overflowFixed }));
     if (summary.columnsFitted) parts.push(t('done.columnsFitted', { n: summary.columnsFitted }));
     if (summary.customDropped) parts.push(t('done.customDropped'));
     if (summary.untranslated) parts.push(t('done.untranslated', { n: summary.untranslated }));
-    if (summary.overlapSlides?.length) {
-      parts.push(t('done.overlapSlides', { list: summary.overlapSlides.join(t('prefs.preview.listSep')) }));
-    }
+    // Fonts were shrunk: the API cannot see the rendered layout, so ask for a quick look
+    // instead of listing slide numbers that may be wrong.
+    if (summary.overflowFixed) parts.push(t('done.fitCheck', { n: summary.overflowFixed }));
     if (summary.unusedTerms?.length) {
       parts.push(t('done.unusedTerms', { list: summary.unusedTerms.join(t('prefs.preview.listSep')) }));
     }

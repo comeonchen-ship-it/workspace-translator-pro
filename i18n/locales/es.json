@@ -370,6 +370,11 @@
   "done.overlapSlides": "diapositivas {list}: puede que el texto no quepa en su cuadro; revísalas",
   "guide.cl.170.date": "Octubre de 2026",
   "guide.cl.170.1": "Diapositivas: las palabras de otro color o estilo dentro de una frase ahora se mueven con su traducción en lugar de quedar superpuestas.",
-  "guide.cl.170.2": "Las traducciones largas se reducen más para caber en su cuadro, y la tarjeta de resultado indica las diapositivas donde el texto aún puede desbordarse.",
-  "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo"
+  "guide.cl.170.2": "Las traducciones largas se reducen un poco más para caber en su cuadro, y una nueva opción hace las traducciones más concisas. La tarjeta de resultado te recuerda echar un vistazo.",
+  "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo",
+  "prefs.concise.label": "Traducciones concisas para que quepan en el diseño",
+  "prefs.concise.hint": "La IA elige expresiones más cortas, cercanas a la longitud original. No se omite contenido, pero la redacción puede resultar más compacta. Déjalo desactivado en textos que deban ser exactos palabra por palabra, como contratos.",
+  "prefs.preview.concise": "Las traducciones se mantienen concisas, cerca de la longitud original.",
+  "done.fitCheck": "Se redujo el tamaño de letra en {n} cuadros de texto para que quepan las traducciones más largas. Algún texto aún puede salirse de su cuadro: conviene echar un vistazo rápido al archivo",
+  "guide.pr.concise": "Traducciones concisas — opcional, desactivado por defecto. La IA elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, aunque la redacción puede ser más compacta; déjalo desactivado para contratos y textos que deban ser literales."
 }

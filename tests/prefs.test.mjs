@@ -135,3 +135,12 @@ test('unusedGlossaryTerms flags terms absent from the file (typo DESK vs deck)',
   const texts = ['Gemini Enterprise app technical pitch deck', 'Technical Pitch Deck'];
   assert.deepEqual(unusedGlossaryTerms(texts, [{ src: 'DESK', dst: '' }, { src: 'pitch', dst: 'beach' }]), ['DESK']);
 });
+
+test('concise option: off by default, adds a length rule and changes the cache fingerprint', async () => {
+  const { buildPrefsBlock, prefsFingerprint, normalizePrefs } = await import('../lib/prefs.js');
+  assert.equal(normalizePrefs({}).concise, false);
+  const block = buildPrefsBlock({ concise: true }, 'Japanese');
+  assert.match(block, /Length: .*never drop information/);
+  assert.notEqual(prefsFingerprint({ concise: true }), prefsFingerprint({ tone: 'formal' }));
+  assert.notEqual(prefsFingerprint({ concise: true }), '');
+});

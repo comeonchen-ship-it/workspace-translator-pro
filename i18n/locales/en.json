@@ -370,6 +370,11 @@
   "done.overlapSlides": "slides {list}: some text may not fit its box — please check them",
   "guide.cl.170.date": "October 2026",
   "guide.cl.170.1": "Slides: words in a different colour or style inside a sentence now move with their translation instead of being left behind on top of it.",
-  "guide.cl.170.2": "Translations that run long shrink further to fit their boxes, and the result card lists any slides where text may still overflow.",
-  "done.untranslated": "{n} text segments could not be translated and were left as is — try again or another model"
+  "guide.cl.170.2": "Long translations shrink a little more to fit their boxes, and a new optional setting keeps translations concise. The result card reminds you to take a quick look.",
+  "done.untranslated": "{n} text segments could not be translated and were left as is — try again or another model",
+  "prefs.concise.label": "Keep translations concise so they fit the layout",
+  "prefs.concise.hint": "The AI picks shorter wording, close to the original length. No content is left out, but the phrasing may feel more compact. Leave it off for text that must be precise word for word, such as contracts.",
+  "prefs.preview.concise": "Translations are kept concise, close to the original length.",
+  "done.fitCheck": "Font size reduced in {n} text boxes so longer translations fit. Some text may still run past its box — a quick look through the file is worth it",
+  "guide.pr.concise": "Keep translations concise — optional, off by default. The AI chooses shorter wording so text fits slides more easily. Nothing is left out, though phrasing may become more compact; leave it off for contracts and other word-for-word text."
 }
