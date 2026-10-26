@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} tóm tắt mọi quy tắc đang bật bằng lời lẽ đơn giản, để bạn kiểm tra trước khi dịch.",
   "guide.en.h": "Công cụ AI & khóa API",
   "guide.en.lead": "Chọn công cụ trong Cài đặt → {engine}. Sau khi nhập khóa, nhấp {test}. Việc dịch chỉ bắt đầu khi trạng thái hiển thị {active}.",
-  "guide.en.gemini.h": "Gemini (khuyên dùng)",
-  "guide.en.gemini.p": "Có gói miễn phí — không cần thẻ tín dụng. Khóa bắt đầu bằng “AIza…” hoặc “AQ.…”. Mô hình mặc định: gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (khuyên dùng · tiết kiệm nhất)",
+  "guide.en.gemini.p": "Lựa chọn tiết kiệm nhất: có hạn mức miễn phí, không cần thẻ tín dụng. Khóa bắt đầu bằng “AIza…” hoặc “AQ.…”. Mô hình mặc định: gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "API trả phí. Mô hình mặc định: gpt-5.4-mini.",
+  "guide.en.openai.p": "Mô hình mặc định: gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "API trả phí. Mô hình mặc định: claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "Mô hình mặc định: claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "Tùy chỉnh (tương thích OpenAI)",
   "guide.en.custom.p": "Bất kỳ dịch vụ nào tương thích OpenAI, chẳng hạn cổng kết nối của công ty hoặc mô hình chạy trên máy tính của bạn. Nhập địa chỉ của nó tại {customUrl}; Chrome sẽ xin phép truy cập một lần khi bạn nhấp {test}.",
   "guide.en.free.h": "Dịch miễn phí cơ bản",
@@ -365,5 +365,5 @@
   "guide.group.steps": "Từng bước",
   "guide.group.reference": "Tham khảo",
   "guide.stepLabel": "Bước {n}",
-  "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ (API trả phí), rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}."
+  "guide.start.s2.alt": "Muốn dùng OpenAI hoặc Claude? Tạo khóa trên trang của họ, rồi vào Cài đặt → {engine}, chọn công cụ, dán khóa và nhấn {test}."
 }

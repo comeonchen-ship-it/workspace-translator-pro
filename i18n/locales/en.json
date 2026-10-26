@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} sums up every active rule in plain language, so you can check before translating.",
   "guide.en.h": "AI engines & API keys",
   "guide.en.lead": "Choose the engine in Settings → {engine}. After entering a key, click {test}. Translation starts only when the status shows {active}.",
-  "guide.en.gemini.h": "Gemini (recommended)",
-  "guide.en.gemini.p": "Has a free tier — no credit card. Keys start with “AIza…” or “AQ.…”. Default model: gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (recommended · most affordable)",
+  "guide.en.gemini.p": "The most affordable choice: a free tier with no credit card. Keys start with “AIza…” or “AQ.…”. Default model: gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "Paid API. Default model: gpt-5.4-mini.",
+  "guide.en.openai.p": "Default model: gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "Paid API. Default model: claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "Default model: claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "Custom (OpenAI-compatible)",
   "guide.en.custom.p": "Any OpenAI-compatible service, such as a company gateway or a model running on your own computer. Enter its address under {customUrl}; Chrome asks once for permission to reach it when you click {test}.",
   "guide.en.free.h": "Basic free translation",
@@ -365,5 +365,5 @@
   "guide.group.steps": "Step by step",
   "guide.group.reference": "Reference",
   "guide.stepLabel": "Step {n}",
-  "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site (paid API), then in Settings → {engine} choose the engine, paste the key and click {test}."
+  "guide.start.s2.alt": "Prefer OpenAI or Claude? Create a key on their site, then in Settings → {engine} choose the engine, paste the key and click {test}."
 }

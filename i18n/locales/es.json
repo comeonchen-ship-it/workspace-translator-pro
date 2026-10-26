@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} resume todas las reglas activas en lenguaje sencillo, para que puedas revisarlas antes de traducir.",
   "guide.en.h": "Motores de IA y claves de API",
   "guide.en.lead": "Elige el motor en Configuración → {engine}. Después de introducir una clave, haz clic en {test}. La traducción solo empieza cuando el estado muestra {active}.",
-  "guide.en.gemini.h": "Gemini (recomendado)",
-  "guide.en.gemini.p": "Tiene un nivel gratuito, sin tarjeta de crédito. Las claves empiezan por «AIza…» o «AQ.…». Modelo predeterminado: gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (recomendado · el más económico)",
+  "guide.en.gemini.p": "La opción más económica: nivel gratuito, sin tarjeta de crédito. Las claves empiezan por «AIza…» o «AQ.…». Modelo predeterminado: gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "API de pago. Modelo predeterminado: gpt-5.4-mini.",
+  "guide.en.openai.p": "Modelo predeterminado: gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "API de pago. Modelo predeterminado: claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "Modelo predeterminado: claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "Personalizado (compatible con OpenAI)",
   "guide.en.custom.p": "Cualquier servicio compatible con OpenAI, como una pasarela de empresa o un modelo que se ejecuta en tu propio ordenador. Introduce su dirección en {customUrl}; Chrome pide permiso una sola vez para acceder a ella cuando haces clic en {test}.",
   "guide.en.free.h": "Traducción gratuita básica",
@@ -365,5 +365,5 @@
   "guide.group.steps": "Paso a paso",
   "guide.group.reference": "Referencia",
   "guide.stepLabel": "Paso {n}",
-  "guide.start.s2.alt": "¿Prefieres OpenAI o Claude? Crea una clave en su web (API de pago) y luego, en Ajustes → {engine}, elige el motor, pega la clave y pulsa {test}."
+  "guide.start.s2.alt": "¿Prefieres OpenAI o Claude? Crea una clave en su web y luego, en Ajustes → {engine}, elige el motor, pega la clave y pulsa {test}."
 }

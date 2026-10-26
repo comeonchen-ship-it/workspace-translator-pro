@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} 会用简单易懂的语言汇总所有生效的规则，方便你在翻译前检查。",
   "guide.en.h": "AI 引擎与 API 密钥",
   "guide.en.lead": "在“设置”→ {engine} 中选择引擎。输入密钥后，点击 {test}。只有当状态显示为 {active} 时才能开始翻译。",
-  "guide.en.gemini.h": "Gemini（推荐）",
-  "guide.en.gemini.p": "提供免费额度——无需信用卡。密钥以“AIza…”或“AQ.…”开头。默认模型：gemini-3.1-flash-lite。",
+  "guide.en.gemini.h": "Gemini（推荐・最实惠）",
+  "guide.en.gemini.p": "最实惠的选择：有免费额度，无需信用卡。密钥以「AIza…」或「AQ.…」开头。默认模型：gemini-3.1-flash-lite。",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "付费 API。默认模型：gpt-5.4-mini。",
+  "guide.en.openai.p": "默认模型：gpt-5.4-mini。",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "付费 API。默认模型：claude-haiku-4-5-20251001。",
+  "guide.en.claude.p": "默认模型：claude-haiku-4-5-20251001。",
   "guide.en.custom.h": "自定义（兼容 OpenAI）",
   "guide.en.custom.p": "任何兼容 OpenAI 的服务，例如公司网关或在你自己电脑上运行的模型。在 {customUrl} 中输入其地址；点击 {test} 时，Chrome 会询问一次是否允许访问该地址。",
   "guide.en.free.h": "基础免费翻译",
@@ -365,5 +365,5 @@
   "guide.group.steps": "操作步骤",
   "guide.group.reference": "参考资料",
   "guide.stepLabel": "步骤 {n}",
-  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到对方网站创建密钥（付费 API），再到设置 →{engine}选择引擎、粘贴密钥并点击 {test}。"
+  "guide.start.s2.alt": "想用 OpenAI 或 Claude？到对方网站创建密钥，再到设置 →{engine}选择引擎、粘贴密钥并点击 {test}。"
 }

@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview}에서 적용 중인 모든 규칙을 쉬운 말로 요약해 보여 주므로 번역 전에 확인할 수 있습니다.",
   "guide.en.h": "AI 엔진 및 API 키",
   "guide.en.lead": "설정 → {engine}에서 엔진을 선택하세요. 키를 입력한 후 {test}을 클릭하세요. 상태가 {active}으로 표시되어야 번역을 시작할 수 있습니다.",
-  "guide.en.gemini.h": "Gemini(추천)",
-  "guide.en.gemini.p": "무료 등급이 있으며 신용카드가 필요 없습니다. 키는 “AIza…” 또는 “AQ.…”로 시작합니다. 기본 모델: gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (추천 · 가장 경제적)",
+  "guide.en.gemini.p": "가장 경제적인 선택: 무료 사용량이 있고 신용카드가 필요 없습니다. 키는 “AIza…” 또는 “AQ.…”로 시작합니다. 기본 모델: gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "유료 API. 기본 모델: gpt-5.4-mini.",
+  "guide.en.openai.p": "기본 모델: gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "유료 API. 기본 모델: claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "기본 모델: claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "사용자 지정(OpenAI 호환)",
   "guide.en.custom.p": "회사 게이트웨이나 내 컴퓨터에서 실행 중인 모델 등 OpenAI와 호환되는 모든 서비스를 사용할 수 있습니다. {customUrl}에 주소를 입력하세요. {test}을 클릭하면 Chrome에서 해당 주소에 접속할 권한을 한 번 요청합니다.",
   "guide.en.free.h": "기본 무료 번역",
@@ -365,5 +365,5 @@
   "guide.group.steps": "단계별 안내",
   "guide.group.reference": "참고 자료",
   "guide.stepLabel": "{n}단계",
-  "guide.start.s2.alt": "OpenAI나 Claude를 쓰고 싶다면 해당 사이트에서 키를 만든 뒤(유료 API) 설정 →{engine}에서 엔진을 선택하고 키를 붙여넣은 다음 {test}을(를) 누르세요."
+  "guide.start.s2.alt": "OpenAI나 Claude를 쓰고 싶다면 해당 사이트에서 키를 만든 뒤 설정 →{engine}에서 엔진을 선택하고 키를 붙여넣은 다음 {test}을(를) 누르세요."
 }

@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} fasst alle aktiven Regeln in einfachen Worten zusammen, damit du sie vor dem Übersetzen prüfen kannst.",
   "guide.en.h": "KI-Engines & API-Schlüssel",
   "guide.en.lead": "Wähle die Engine unter Einstellungen → {engine}. Nachdem du einen Schlüssel eingegeben hast, klicke auf {test}. Die Übersetzung startet erst, wenn der Status {active} anzeigt.",
-  "guide.en.gemini.h": "Gemini (empfohlen)",
-  "guide.en.gemini.p": "Mit kostenloser Stufe — keine Kreditkarte nötig. Schlüssel beginnen mit „AIza…“ oder „AQ.…“. Standardmodell: gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (empfohlen · am günstigsten)",
+  "guide.en.gemini.p": "Die günstigste Wahl: kostenloses Kontingent, keine Kreditkarte nötig. Schlüssel beginnen mit „AIza…“ oder „AQ.…“. Standardmodell: gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "Kostenpflichtige API. Standardmodell: gpt-5.4-mini.",
+  "guide.en.openai.p": "Standardmodell: gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "Kostenpflichtige API. Standardmodell: claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "Standardmodell: claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "Benutzerdefiniert (OpenAI-kompatibel)",
   "guide.en.custom.p": "Jeder OpenAI-kompatible Dienst, etwa ein Firmen-Gateway oder ein Modell, das auf deinem eigenen Computer läuft. Gib seine Adresse unter {customUrl} ein; Chrome fragt einmalig um Erlaubnis, darauf zuzugreifen, wenn du auf {test} klickst.",
   "guide.en.free.h": "Einfache kostenlose Übersetzung",
@@ -365,5 +365,5 @@
   "guide.group.steps": "Schritt für Schritt",
   "guide.group.reference": "Nachschlagen",
   "guide.stepLabel": "Schritt {n}",
-  "guide.start.s2.alt": "Lieber OpenAI oder Claude? Erstelle dort einen Schlüssel (kostenpflichtige API), wähle dann unter Einstellungen → {engine} die Engine, füge den Schlüssel ein und klicke auf {test}."
+  "guide.start.s2.alt": "Lieber OpenAI oder Claude? Erstelle dort einen Schlüssel, wähle dann unter Einstellungen → {engine} die Engine, füge den Schlüssel ein und klicke auf {test}."
 }

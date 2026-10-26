@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} สรุปกฎทั้งหมดที่ใช้งานอยู่ด้วยภาษาที่เข้าใจง่าย เพื่อให้คุณตรวจสอบได้ก่อนแปล",
   "guide.en.h": "เอนจิน AI และคีย์ API",
   "guide.en.lead": "เลือกเอนจินที่ การตั้งค่า → {engine} หลังจากใส่คีย์แล้ว ให้คลิก {test} การแปลจะเริ่มได้ก็ต่อเมื่อสถานะแสดง {active}",
-  "guide.en.gemini.h": "Gemini (แนะนำ)",
-  "guide.en.gemini.p": "มีแพ็กเกจฟรี — ไม่ต้องใช้บัตรเครดิต คีย์ขึ้นต้นด้วย “AIza…” หรือ “AQ.…” โมเดลเริ่มต้น: gemini-3.1-flash-lite",
+  "guide.en.gemini.h": "Gemini (แนะนำ · คุ้มค่าที่สุด)",
+  "guide.en.gemini.p": "ตัวเลือกที่คุ้มค่าที่สุด: มีโควตาฟรีและไม่ต้องใช้บัตรเครดิต คีย์ขึ้นต้นด้วย “AIza…” หรือ “AQ.…” โมเดลเริ่มต้น: gemini-3.1-flash-lite",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "API แบบเสียเงิน โมเดลเริ่มต้น: gpt-5.4-mini",
+  "guide.en.openai.p": "โมเดลเริ่มต้น: gpt-5.4-mini",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "API แบบเสียเงิน โมเดลเริ่มต้น: claude-haiku-4-5-20251001",
+  "guide.en.claude.p": "โมเดลเริ่มต้น: claude-haiku-4-5-20251001",
   "guide.en.custom.h": "กำหนดเอง (เข้ากันได้กับ OpenAI)",
   "guide.en.custom.p": "บริการใดก็ได้ที่เข้ากันได้กับ OpenAI เช่น เกตเวย์ของบริษัท หรือโมเดลที่ทำงานบนคอมพิวเตอร์ของคุณเอง ใส่ที่อยู่ใน {customUrl} เมื่อคุณคลิก {test} Chrome จะขอสิทธิ์เข้าถึงที่อยู่นั้นหนึ่งครั้ง",
   "guide.en.free.h": "การแปลฟรีพื้นฐาน",
@@ -365,5 +365,5 @@
   "guide.group.steps": "ทีละขั้นตอน",
   "guide.group.reference": "ข้อมูลอ้างอิง",
   "guide.stepLabel": "ขั้นตอนที่ {n}",
-  "guide.start.s2.alt": "อยากใช้ OpenAI หรือ Claude? สร้างคีย์ที่เว็บไซต์ของผู้ให้บริการ (API แบบเสียค่าใช้จ่าย) แล้วไปที่การตั้งค่า →{engine} เลือกเอนจิน วางคีย์ และกด {test}"
+  "guide.start.s2.alt": "อยากใช้ OpenAI หรือ Claude? สร้างคีย์ที่เว็บไซต์ของผู้ให้บริการ แล้วไปที่การตั้งค่า →{engine} เลือกเอนจิน วางคีย์ และกด {test}"
 }

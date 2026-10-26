@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} résume toutes les règles actives en langage simple, pour que vous puissiez vérifier avant de traduire.",
   "guide.en.h": "Moteurs d'IA et clés API",
   "guide.en.lead": "Choisissez le moteur dans Paramètres → {engine}. Après avoir saisi une clé, cliquez sur {test}. La traduction ne démarre que lorsque l'état affiche {active}.",
-  "guide.en.gemini.h": "Gemini (recommandé)",
-  "guide.en.gemini.p": "Offre un niveau gratuit — sans carte bancaire. Les clés commencent par « AIza… » ou « AQ.… ». Modèle par défaut : gemini-3.1-flash-lite.",
+  "guide.en.gemini.h": "Gemini (recommandé · le plus économique)",
+  "guide.en.gemini.p": "Le choix le plus économique : une offre gratuite, sans carte bancaire. Les clés commencent par « AIza… » ou « AQ.… ». Modèle par défaut : gemini-3.1-flash-lite.",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "API payante. Modèle par défaut : gpt-5.4-mini.",
+  "guide.en.openai.p": "Modèle par défaut : gpt-5.4-mini.",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "API payante. Modèle par défaut : claude-haiku-4-5-20251001.",
+  "guide.en.claude.p": "Modèle par défaut : claude-haiku-4-5-20251001.",
   "guide.en.custom.h": "Personnalisé (compatible OpenAI)",
   "guide.en.custom.p": "Tout service compatible OpenAI, comme une passerelle d'entreprise ou un modèle qui tourne sur votre propre ordinateur. Saisissez son adresse sous {customUrl} ; Chrome demande une seule fois l'autorisation d'y accéder lorsque vous cliquez sur {test}.",
   "guide.en.free.h": "Traduction gratuite de base",
@@ -365,5 +365,5 @@
   "guide.group.steps": "Pas à pas",
   "guide.group.reference": "Référence",
   "guide.stepLabel": "Étape {n}",
-  "guide.start.s2.alt": "Vous préférez OpenAI ou Claude ? Créez une clé sur leur site (API payante), puis dans Paramètres → {engine}, choisissez le moteur, collez la clé et cliquez sur {test}."
+  "guide.start.s2.alt": "Vous préférez OpenAI ou Claude ? Créez une clé sur leur site, puis dans Paramètres → {engine}, choisissez le moteur, collez la clé et cliquez sur {test}."
 }

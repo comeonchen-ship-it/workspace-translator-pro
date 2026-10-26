@@ -291,12 +291,12 @@
   "guide.pr.preview": "{preview} では、有効なルールをすべてわかりやすくまとめて表示するので、翻訳前に確認できます。",
   "guide.en.h": "AI エンジンと API キー",
   "guide.en.lead": "「設定」→ {engine} でエンジンを選びます。キーを入力したら {test} をクリックします。状態が {active} になると翻訳を開始できます。",
-  "guide.en.gemini.h": "Gemini（おすすめ）",
-  "guide.en.gemini.p": "無料枠あり、クレジットカード不要です。キーは「AIza…」または「AQ.…」で始まります。既定のモデル：gemini-3.1-flash-lite。",
+  "guide.en.gemini.h": "Gemini（おすすめ・最もお得）",
+  "guide.en.gemini.p": "最もお得な選択肢：無料枠があり、クレジットカードも不要です。キーは「AIza…」または「AQ.…」で始まります。既定のモデル：gemini-3.1-flash-lite。",
   "guide.en.openai.h": "OpenAI",
-  "guide.en.openai.p": "有料 API。既定のモデル：gpt-5.4-mini。",
+  "guide.en.openai.p": "既定のモデル：gpt-5.4-mini。",
   "guide.en.claude.h": "Claude",
-  "guide.en.claude.p": "有料 API。既定のモデル：claude-haiku-4-5-20251001。",
+  "guide.en.claude.p": "既定のモデル：claude-haiku-4-5-20251001。",
   "guide.en.custom.h": "カスタム（OpenAI 互換）",
   "guide.en.custom.p": "社内ゲートウェイや自分のパソコンで動かしているモデルなど、OpenAI 互換のサービスなら使えます。{customUrl} にアドレスを入力してください。{test} をクリックすると、Chrome がそのアドレスへの接続許可を一度だけ求めます。",
   "guide.en.free.h": "基本の無料翻訳",
@@ -365,5 +365,5 @@
   "guide.group.steps": "使い方",
   "guide.group.reference": "リファレンス",
   "guide.stepLabel": "ステップ {n}",
-  "guide.start.s2.alt": "OpenAI や Claude を使いたい場合は、各サイトでキーを作成し（有料 API）、設定 →{engine}でエンジンを選んでキーを貼り付け、{test} を押してください。"
+  "guide.start.s2.alt": "OpenAI や Claude を使いたい場合は、各サイトでキーを作成し、設定 →{engine}でエンジンを選んでキーを貼り付け、{test} を押してください。"
 }
