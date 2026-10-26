@@ -120,18 +120,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (version) document.getElementById('guide-version').textContent = `v${version}`;
 
   const picker = document.getElementById('guide-lang');
-  for (const lang of UI_LANGUAGES) {
-    const opt = document.createElement('option');
-    opt.value = lang.code;
-    opt.textContent = uiLabel(lang, document.documentElement.lang);
-    picker.appendChild(opt);
-  }
-  picker.value = code;
+  // Rebuilt after every switch: the names are written in the interface language.
+  const fillPicker = (current) => {
+    picker.innerHTML = '';
+    for (const lang of UI_LANGUAGES) {
+      const opt = document.createElement('option');
+      opt.value = lang.code;
+      opt.textContent = uiLabel(lang, current);
+      picker.appendChild(opt);
+    }
+    picker.value = current;
+  };
+  fillPicker(code);
   // Same setting as the side panel: switching here switches both.
   picker.addEventListener('change', async () => {
     await setStoredUiLang(picker.value);
-    await loadLocale(picker.value);
-    renderShots(picker.value);
+    const next = picker.value;
+    await loadLocale(next);
+    fillPicker(next);
+    renderShots(next);
     render();
   });
 

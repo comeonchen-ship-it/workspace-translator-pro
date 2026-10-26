@@ -14,8 +14,16 @@ import { TARGET_LANGUAGES, targetOptionLabel } from '../i18n/languages.js';
 test('target languages are named in the interface language, with the native name', () => {
   const ja = TARGET_LANGUAGES.find((l) => l.code === 'ja');
   const zhTW = TARGET_LANGUAGES.find((l) => l.code === 'zh-TW');
-  assert.equal(targetOptionLabel(ja, 'en'), 'Japanese — 日本語');
-  assert.equal(targetOptionLabel(zhTW, 'en'), 'Traditional Chinese — 繁體中文');
+  assert.equal(targetOptionLabel(ja, 'en'), 'Japanese (日本語)');
+  assert.equal(targetOptionLabel(zhTW, 'en'), 'Traditional Chinese (繁體中文)');
   assert.equal(targetOptionLabel(zhTW, 'zh-TW'), '繁體中文');
-  assert.equal(targetOptionLabel(ja, 'zh-TW'), '日文 — 日本語');
+  assert.equal(targetOptionLabel(ja, 'zh-TW'), '日文 (日本語)');
+});
+
+test('interface-language picker puts the native name first, local name in brackets', async () => {
+  const { UI_LANGUAGES, uiLabel } = await import('../i18n/languages.js');
+  const ja = UI_LANGUAGES.find((l) => l.code === 'ja');
+  assert.equal(uiLabel(ja, 'en'), '日本語 (Japanese)');
+  assert.equal(uiLabel(ja, 'ja'), '日本語');
+  assert.equal(uiLabel(ja), '日本語');
 });

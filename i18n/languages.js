@@ -73,24 +73,24 @@ export function localLangName(lang, uiCode = ROOT_LOCALE) {
 
 /**
  * Label for the target-language dropdown: the name in the interface language,
- * then the native name — "Japanese — 日本語". Just one name when they match
+ * then the native name in brackets — "Japanese (日本語)". Just one name when they match
  * ("English" in an English UI, "繁體中文" in a Traditional Chinese UI).
  */
 export function targetOptionLabel(lang, uiCode = ROOT_LOCALE) {
   const local = localLangName(lang, uiCode);
-  return local === lang.endonym ? lang.endonym : `${local} — ${lang.endonym}`;
+  return local === lang.endonym ? lang.endonym : `${local} (${lang.endonym})`;
 }
 
 /**
  * Label for the INTERFACE language picker: the native name first, then (given
- * uiCode) the name in the current interface language, e.g. "日本語 — Japanese".
+ * uiCode) the name in the current interface language, e.g. "日本語 (Japanese)".
  */
 export function uiLabel(lang, uiCode) {
   // Native name always first, so a user who picked a script they can't read can
   // still find their own language; the current interface's name follows.
   if (!uiCode) return lang.endonym;
   const local = localLangName(lang, uiCode);
-  return local === lang.endonym ? lang.endonym : `${lang.endonym} — ${local}`;
+  return local === lang.endonym ? lang.endonym : `${lang.endonym} (${local})`;
 }
 
 /**

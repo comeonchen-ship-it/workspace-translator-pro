@@ -326,11 +326,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateExtraLangsCount();
 
+    const keepTarget = selectLang.value;
     selectLang.innerHTML = '';
     for (const lang of TARGET_LANGUAGES) {
       const opt = document.createElement('option');
       opt.value = lang.code;
-      // "Japanese — 日本語": readable for the user, recognisable for a native reader.
+      // "Japanese (日本語)": readable for the user, recognisable for a native reader.
       opt.textContent = targetOptionLabel(lang, document.documentElement.lang);
       selectLang.appendChild(opt);
     }
@@ -340,12 +341,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const opt = document.createElement('option');
         opt.value = lang.code;
         // Native name first (a way back from a script you can't read), then the
-        // name in the current interface language: "日本語 — Japanese".
+        // name in the current interface language: "日本語 (Japanese)".
         opt.textContent = uiLabel(lang, document.documentElement.lang);
         selectUiLang.appendChild(opt);
       }
-      selectUiLang.value = uiLang;
+      selectUiLang.value = document.documentElement.lang || uiLang;
     }
+    if (keepTarget) selectLang.value = keepTarget;
   }
   populateLanguagePickers();
 
@@ -356,6 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function refreshDynamicTexts() {
     applyI18n();
+    populateLanguagePickers(); // language names are written in the interface language
     refreshFileTypeTexts();
     chrome.storage.local.get('apiKeyStatus', (items) => {
       updateStatusBadge(items.apiKeyStatus || 'unverified');

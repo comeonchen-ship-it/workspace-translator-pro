@@ -75,7 +75,7 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 
 ## What's new (for the release notes / description footer)
 
-> v1.7.1 — Language names in your interface language with the native name beside them (e.g. “Japanese — 日本語”).
+> v1.7.1 — Language names in your interface language with the native name beside them (e.g. “Japanese (日本語)”).
 >
 > v1.7.0 — Coloured or bold words inside a sentence move with the translation · optional "Concise" translation length · slide text shrinks further to fit, with a reminder to take a quick look · Sheets dropdowns translated with the cells · an unusual AI reply no longer stops the job · interface and target language follow your browser (Traditional/Simplified Chinese by region).
 >
