@@ -135,7 +135,7 @@
   /* Marquee: two mini slides with the same layout, different language */
   .ms { position: absolute; top: 140px; width: 300px; height: 240px; border-radius: 12px; background: #fff; color: #1d1d1f; overflow: hidden;
         box-shadow: 0 28px 64px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06); text-align: left; }
-  .ms.a { left: 752px; } .ms.b { left: 1080px; }
+  .ms.a { left: 690px; } .ms.b { left: 1030px; }
   .ms .hd { height: 46px; padding: 0 16px; display: flex; align-items: center; font-size: 17px; font-weight: 700; color: #fff; background: #1a3a6b; letter-spacing: -0.01em; }
   .ms .bd { display: grid; grid-template-columns: 1fr 104px; gap: 12px; padding: 14px 16px; }
   .mq .ms ul { list-style: none; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; line-height: 1.35; color: #1d1d1f; }
@@ -149,6 +149,12 @@
   .ms-lbl { position: absolute; top: 396px; width: 300px; text-align: center; font-size: 15px; font-weight: 600; color: #c7c7d1; }
   .ms-arrow { position: absolute; left: 1058px; top: 246px; width: 20px; text-align: center; font-size: 22px; color: #b18cff; }
   .kept { position: absolute; left: 1196px; top: 102px; padding: 7px 14px; border-radius: 980px; font-size: 14px; font-weight: 700; color: #0b5c2e; background: #c8f2d8; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+  /* Stack of translated copies behind the front one (one per language) */
+  .stack { position: absolute; width: 300px; height: 240px; border-radius: 12px; background: #fff; overflow: hidden;
+           box-shadow: 0 18px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06); }
+  .stack .hd { height: 40px; padding: 0 14px; display: flex; align-items: center; font-size: 15px; font-weight: 700; color: #fff; background: #1a3a6b; }
+  .multi { position: absolute; top: 406px; left: 1010px; width: 340px; text-align: center; font-size: 15px; font-weight: 600; color: #c7c7d1; }
+  .multi b { color: #fff; }
 </style>
 </head>
 <body>
@@ -161,19 +167,19 @@ const mini = (cls, d) => `<div class="ms ${cls}"><div class="hd">${d.title}</div
   <div class="ft"><span>Google Cloud</span><span>${d.conf}</span></div><div class="strip"></div></div>`;
 const SRC = { title: 'Q3 Product Roadmap', items: ['Launch <em>beta</em> in September', 'Customer pilots in 5 regions', 'General availability in January'], conf: 'Confidential' };
 const T = {
-  en: { html: 'en', h1: 'Translate Google files.', h2: 'Keep the layout.', kept: 'Layout kept',
+  en: { back: ['Hoja de ruta del 3.er trimestre', 'Roadmap für das 3. Quartal', '第三季產品路線圖'], multi: '<b>10 languages</b> · one copy each', html: 'en', h1: 'Translate Google files.', h2: 'Keep the layout.', kept: 'Layout kept',
         pts: ['Slides, Docs, Sheets &amp; Forms · 10 languages', 'Formatting follows every word', 'Your original stays untouched'],
         types: ['Slides', 'Docs', 'Sheets', 'Forms'], tile: 'AI translation · 10 languages · layout kept',
         slide: { name: '日本語', title: '第3四半期 製品ロードマップ', items: ['9月に<em>ベータ版</em>を公開', '5 地域で顧客パイロット', '1月に一般提供を開始'], conf: '社外秘' } },
-  'zh-TW': { html: 'zh-Hant', h1: '翻譯 Google 檔案，', h2: '版面完全不跑。', kept: '版面保留',
+  'zh-TW': { back: ['第3四半期 製品ロードマップ', 'Hoja de ruta del 3.er trimestre', 'Roadmap für das 3. Quartal'], multi: '<b>10 種語言</b> · 每種各一份副本', html: 'zh-Hant', h1: '翻譯 Google 檔案，', h2: '版面完全不跑。', kept: '版面保留',
         pts: ['簡報、文件、試算表、表單 · 10 種語言', '格式跟著每個字走', '原始檔案絕不修改'],
         types: ['簡報', '文件', '試算表', '表單'], tile: 'AI 翻譯 · 10 種語言 · 版面不跑',
         slide: { name: '繁體中文', title: '第三季產品路線圖', items: ['9 月推出 <em>Beta 版</em>', '在 5 個地區進行客戶試行', '1 月正式上市'], conf: '機密' } },
-  ja: { html: 'ja', h1: 'Google ファイルを翻訳。', h2: 'レイアウトはそのまま。', kept: 'レイアウト保持',
+  ja: { back: ['第三季產品路線圖', 'Hoja de ruta del 3.er trimestre', 'Roadmap für das 3. Quartal'], multi: '<b>10 言語</b> · 言語ごとにコピーを作成', html: 'ja', h1: 'Google ファイルを翻訳。', h2: 'レイアウトはそのまま。', kept: 'レイアウト保持',
         pts: ['スライド・ドキュメント・スプレッドシート・フォーム · 10 言語', '書式は訳文についていく', '元のファイルは変更しません'],
         types: ['スライド', 'ドキュメント', 'シート', 'フォーム'], tile: 'AI 翻訳 · 10 言語 · レイアウト保持',
         slide: { name: '日本語', title: '第3四半期 製品ロードマップ', items: ['9月に<em>ベータ版</em>を公開', '5 地域で顧客パイロット', '1月に一般提供を開始'], conf: '社外秘' } },
-  es: { html: 'es', h1: 'Traduce archivos de Google.', h2: 'Conserva el diseño.', kept: 'Diseño intacto',
+  es: { back: ['第3四半期 製品ロードマップ', 'Roadmap für das 3. Quartal', '第三季產品路線圖'], multi: '<b>10 idiomas</b> · una copia por idioma', html: 'es', h1: 'Traduce archivos de Google.', h2: 'Conserva el diseño.', kept: 'Diseño intacto',
         pts: ['Presentaciones, Documentos, Hojas y Formularios · 10 idiomas', 'El formato sigue a cada palabra', 'Tu original queda intacto'],
         types: ['Slides', 'Docs', 'Sheets', 'Forms'], tile: 'Traducción con IA · 10 idiomas · diseño intacto',
         slide: { name: 'Español', title: 'Hoja de ruta del 3.er trimestre', items: ['Lanzamiento de la <em>beta</em> en septiembre', 'Pilotos con clientes en 5 regiones', 'Disponibilidad general en enero'], conf: 'Confidencial' } },
@@ -228,9 +234,12 @@ const shots = {
           <div class="ftype" style="background:#0f9d58"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 10h16M4 14.5h16M10 5v14"/></svg></div>
           <div class="ftype" style="background:#7248b9"><svg viewBox="0 0 24 24"><circle cx="6.5" cy="7" r="1.2"/><circle cx="6.5" cy="12" r="1.2"/><circle cx="6.5" cy="17" r="1.2"/><path d="M10 7h8M10 12h8M10 17h8"/></svg></div>
         </div></div>
-      ${mini('a', SRC)}<div class="ms-arrow">→</div>${mini('b', L.slide)}
-      <div class="ms-lbl" style="left:752px">English</div><div class="ms-lbl" style="left:1080px">${L.slide.name}</div>
-      <div class="kept">✓ ${L.kept}</div></div>`; })(),
+      ${mini('a', SRC).replace('class="ms a"', 'class="ms a" style="top:150px"')}<div class="ms-arrow" style="top:256px; left:1000px">→</div>
+      ${L.back.map((t, i) => `<div class="stack" style="left:${1030 + (3 - i) * 16}px; top:${150 - (3 - i) * 26}px; opacity:${0.55 + i * 0.15}"><div class="hd">${t}</div></div>`).join('')}
+      ${mini('b', L.slide).replace('class="ms b"', 'class="ms b" style="top:150px"')}
+      <div class="ms-lbl" style="left:690px; top:406px">English</div>
+      <div class="multi">${L.multi}</div>
+      <div class="kept" style="left:1200px; top:30px">✓ ${L.kept}</div></div>`; })(),
   tile: (() => { const L = T[lang] || T.en; return `<div class="tl dark" lang="${L.html}"><img src="../icons/icon128.png" alt=""><h1>Workspace Translator Pro</h1>
         <div class="types">${L.types.map((t, i) => `<span style="background:${['#f4b400', '#4285f4', '#0f9d58', '#7248b9'][i]}">${t}</span>`).join('')}</div>
         <p>${L.tile}</p></div>`; })(),
