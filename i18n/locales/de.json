@@ -373,7 +373,7 @@
   "guide.cl.170.2": "Lange Übersetzungen werden etwas stärker verkleinert, und eine neue optionale Einstellung hält Übersetzungen knapp. Die Ergebniskarte erinnert an einen kurzen Blick.",
   "done.untranslated": "{n} Textabschnitte konnten nicht übersetzt werden und bleiben unverändert – erneut versuchen oder anderes Modell wählen",
   "prefs.concise.label": "Knappe Übersetzungen, damit der Text ins Layout passt",
-  "prefs.concise.hint": "„Knapp“ wählt kürzere Formulierungen, damit Text besser auf Folien passt. Es fällt nichts weg, nur die Sprache wird knapper – für Verträge und wortgenaue Texte die Standardeinstellung behalten.",
+  "prefs.concise.hint": "Knapp formuliert kürzer, ohne etwas wegzulassen. Für Verträge den Standard behalten.",
   "prefs.preview.concise": "Übersetzungen bleiben knapp, nahe an der Originallänge.",
   "done.fitCheck": "Schriftgröße in {n} Textfeldern verkleinert, damit längere Übersetzungen passen. Einzelne Texte können trotzdem überstehen – ein kurzer Blick durch die Datei lohnt sich",
   "guide.pr.concise": "Übersetzungslänge – „Wie im Original“ (Standard) oder „Knapp, passt ins Layout“. Knapp wählt kürzere Formulierungen, damit Text besser auf Folien passt; es fällt nichts weg, nur die Sprache wird knapper. Das ist der Standard für alle Dateien; bei Präsentationen lässt er sich im Hauptbildschirm nur für diese Präsentation ändern. Für Verträge und wortgenaue Texte die Standardeinstellung behalten.",

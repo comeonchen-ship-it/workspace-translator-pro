@@ -1708,3 +1708,8 @@ input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.28); }
               0 0 0 9999px rgba(6, 7, 12, 0.62);
 }
 
+
+/* Translation preferences: separate the items clearly, and keep a hint tight
+   under the control it explains so it isn't read as the next item's intro. */
+#prefs-card > .form-group { margin-bottom: 18px; }
+.pref-length .field-hint { margin-top: -2px; font-size: 10.5px; opacity: 0.8; }

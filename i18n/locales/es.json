@@ -373,7 +373,7 @@
   "guide.cl.170.2": "Las traducciones largas se reducen un poco más para caber en su cuadro, y una nueva opción hace las traducciones más concisas. La tarjeta de resultado te recuerda echar un vistazo.",
   "done.untranslated": "{n} fragmentos no se pudieron traducir y se dejaron igual; vuelve a intentarlo o usa otro modelo",
   "prefs.concise.label": "Traducciones concisas para que quepan en el diseño",
-  "prefs.concise.hint": "«Concisa» elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, solo la redacción es más compacta; para contratos y textos literales, mantén el valor predeterminado.",
+  "prefs.concise.hint": "Concisa usa frases más cortas sin omitir nada. Para contratos, mantén el predeterminado.",
   "prefs.preview.concise": "Las traducciones se mantienen concisas, cerca de la longitud original.",
   "done.fitCheck": "Se redujo el tamaño de letra en {n} cuadros de texto para que quepan las traducciones más largas. Algún texto aún puede salirse de su cuadro: conviene echar un vistazo rápido al archivo",
   "guide.pr.concise": "Longitud de la traducción: «Como el original» (predeterminado) o «Concisa, cabe en el diseño». Concisa elige expresiones más cortas para que el texto quepa mejor en las diapositivas; no se omite contenido, solo la redacción es más compacta. Es el valor predeterminado para todos los archivos; en Slides puedes cambiarlo solo para esa presentación en la pantalla principal. Para contratos y textos literales, mantén el valor predeterminado.",

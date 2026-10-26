@@ -373,7 +373,7 @@
   "guide.cl.170.2": "Bản dịch dài được thu nhỏ thêm cho vừa khung, thêm tùy chọn dịch ngắn gọn (mặc định tắt). Thẻ kết quả sẽ nhắc bạn xem nhanh lại.",
   "done.untranslated": "{n} đoạn văn bản không dịch được và được giữ nguyên — hãy thử lại hoặc dùng mô hình khác",
   "prefs.concise.label": "Dịch ngắn gọn để chữ vừa với bố cục",
-  "prefs.concise.hint": "\"Ngắn gọn\" chọn cách diễn đạt ngắn hơn để chữ dễ vừa trang chiếu. Nội dung không bị lược bỏ, chỉ câu chữ gọn hơn — với hợp đồng hay văn bản cần sát từng chữ, nên giữ mặc định.",
+  "prefs.concise.hint": "Ngắn gọn dùng câu chữ ngắn hơn, không lược nội dung. Với hợp đồng nên giữ mặc định.",
   "prefs.preview.concise": "Bản dịch được giữ ngắn gọn, gần độ dài bản gốc.",
   "done.fitCheck": "Đã tự động thu nhỏ chữ trong {n} khung văn bản để vừa bản dịch dài hơn. Một số chữ vẫn có thể tràn khỏi khung — bạn nên mở tệp và xem nhanh một lượt",
   "guide.pr.concise": "Độ dài bản dịch — \"Theo bản gốc\" (mặc định) hoặc \"Ngắn gọn, vừa bố cục\". Ngắn gọn chọn cách diễn đạt ngắn hơn để chữ dễ vừa trang chiếu; nội dung không bị lược bỏ, chỉ câu chữ gọn hơn. Đây là mặc định cho mọi tệp; khi dịch Slides, bạn có thể đổi riêng cho bản trình bày đó ở màn hình chính. Với hợp đồng và văn bản cần sát từng chữ, nên giữ mặc định.",

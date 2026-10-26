@@ -373,7 +373,7 @@
   "guide.cl.170.2": "Les traductions longues sont un peu plus réduites pour tenir dans leur cadre, et une nouvelle option facultative rend les traductions concises. La carte de résultat vous invite à jeter un coup d'œil.",
   "done.untranslated": "{n} segments n'ont pas pu être traduits et restent tels quels — réessayez ou changez de modèle",
   "prefs.concise.label": "Traductions concises, pour mieux tenir dans la mise en page",
-  "prefs.concise.hint": "« Concise » choisit des formulations plus courtes pour mieux tenir dans les diapositives. Rien n'est omis, seul le style est plus compact — gardez le réglage par défaut pour les contrats et textes littéraux.",
+  "prefs.concise.hint": "Concise raccourcit la formulation sans rien omettre. Gardez le défaut pour les contrats.",
   "prefs.preview.concise": "Les traductions restent concises, proches de la longueur d'origine.",
   "done.fitCheck": "Taille de police réduite dans {n} zones de texte pour faire tenir les traductions plus longues. Un peu de texte peut encore déborder : un rapide coup d'œil au fichier est conseillé",
   "guide.pr.concise": "Longueur de la traduction — « Fidèle » (par défaut) ou « Concise, tient en page ». Concise choisit des formulations plus courtes pour mieux tenir dans les diapositives ; rien n'est omis, seul le style est plus compact. C'est la valeur par défaut pour tous les fichiers ; pour Slides, vous pouvez la changer pour cette seule présentation sur l'écran principal. Gardez le réglage par défaut pour les contrats et textes littéraux.",
