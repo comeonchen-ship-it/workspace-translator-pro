@@ -1,4 +1,4 @@
-import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang } from './i18n/languages.js';
+import { TARGET_LANGUAGES, UI_LANGUAGES, targetLabel, uiLabel, resolveUiLang, matchLocale } from './i18n/languages.js';
 import {
   loadLocale, t, tStatus, applyI18n, formatShortDateTime,
   getStoredUiLang, setStoredUiLang,
@@ -1283,7 +1283,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Restore saved target language for this presentation/document
     const langKey = `targetLang_${presentationId}`;
     chrome.storage.local.get([langKey, 'lastSelectedLang'], (items) => {
-      const savedLang = items[langKey] || items['lastSelectedLang'] || 'zh-TW';
+      // First use: translate into the language of the user's browser.
+      const isTarget = (code) => TARGET_LANGUAGES.some((l) => l.code === code);
+      let browserLang = 'zh-TW';
+      try { browserLang = matchLocale(chrome.i18n.getUILanguage(), isTarget); } catch (_) { /* keep default */ }
+      const savedLang = items[langKey] || items['lastSelectedLang'] || browserLang;
       console.log('[WorkspaceTranslator] resetUIForPresentation - ID:', presentationId, 'savedLang:', savedLang, 'langKeyExists:', !!items[langKey]);
       selectLang.value = savedLang;
       // Pin this language for the specific document if not already explicitly saved

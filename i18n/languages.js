@@ -97,7 +97,22 @@ export function resolveUiLang(stored) {
     // Not in an extension context (e.g. running under Node for validation)
   }
 
+  return matchLocale(browser, isAvailable);
+}
+
+/**
+ * Maps a browser locale to one of ours. Chinese goes by script/region:
+ * Simplified for zh-CN / zh-SG / zh-MY / zh-Hans, Traditional for everything
+ * else (zh-TW, zh-HK, zh-MO, zh-Hant).
+ */
+export function matchLocale(browser, isAvailable = (code) => UI_LANGUAGES.some((l) => l.code === code)) {
+  browser = String(browser || ROOT_LOCALE).replace('_', '-');
   if (isAvailable(browser)) return browser;
+  if (/^zh\b/i.test(browser)) {
+    const simplified = /-(hans|cn|sg|my)\b/i.test(browser) && !/-hant\b/i.test(browser);
+    const code = simplified ? 'zh-CN' : 'zh-TW';
+    if (isAvailable(code)) return code;
+  }
 
   const primary = browser.split('-')[0];
   const near = UI_LANGUAGES.find((l) => l.code.split('-')[0] === primary);
