@@ -1421,7 +1421,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Start translation UI state
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
-    btnHelp.disabled = true;
     progressSection.style.display = 'flex';
     
     resetProgress();
@@ -1649,7 +1648,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     mainPanel.classList.toggle('is-busy', step !== 'done');
     btnTranslate.disabled = true;
     btnSettings.disabled = true;
-    btnHelp.disabled = true;
 
     progressStatus.style.color = 'var(--text-muted)';
     // status is {key, params} from the service worker; plain strings still work
