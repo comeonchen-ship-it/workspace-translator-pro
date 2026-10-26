@@ -400,5 +400,7 @@
   "prefs.toneSeg.keep.example": "原文の口調のまま",
   "prefs.toneSeg.formal.example": "ご査収ください",
   "prefs.toneSeg.neutral.example": "添付をご確認ください",
-  "prefs.toneSeg.casual.example": "添付見てね"
+  "prefs.toneSeg.casual.example": "添付見てね",
+  "guide.cl.171.date": "2026 年 10 月",
+  "guide.cl.171.1": "言語名をインターフェースの言語で表示し、原語の表記も併記するようにしました（例：「英語 — English」）。どの言語も見つけやすくなります。"
 }

@@ -400,5 +400,7 @@
   "prefs.toneSeg.keep.example": "same tone as the source",
   "prefs.toneSeg.formal.example": "please find attached",
   "prefs.toneSeg.neutral.example": "see the attachment",
-  "prefs.toneSeg.casual.example": "check the attachment"
+  "prefs.toneSeg.casual.example": "check the attachment",
+  "guide.cl.171.date": "October 2026",
+  "guide.cl.171.1": "Language names now appear in your interface language, with the native name beside them (e.g. “Japanese — 日本語”), so every language is easy to find."
 }

@@ -400,5 +400,7 @@
   "prefs.toneSeg.keep.example": "保留原文语气",
   "prefs.toneSeg.formal.example": "敬请参阅附件",
   "prefs.toneSeg.neutral.example": "请参阅附件",
-  "prefs.toneSeg.casual.example": "附件看一下"
+  "prefs.toneSeg.casual.example": "附件看一下",
+  "guide.cl.171.date": "2026 年 10 月",
+  "guide.cl.171.1": "语言名称改用你的界面语言显示，并附上原文写法（例如“日语 — 日本語”），每种语言都更容易找到。"
 }

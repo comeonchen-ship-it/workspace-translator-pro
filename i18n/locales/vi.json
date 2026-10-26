@@ -400,5 +400,7 @@
   "prefs.toneSeg.keep.example": "giữ giọng văn gốc",
   "prefs.toneSeg.formal.example": "xin vui lòng xem tệp đính kèm",
   "prefs.toneSeg.neutral.example": "xem tệp đính kèm",
-  "prefs.toneSeg.casual.example": "xem file đính kèm nhé"
+  "prefs.toneSeg.casual.example": "xem file đính kèm nhé",
+  "guide.cl.171.date": "Tháng 10 năm 2026",
+  "guide.cl.171.1": "Tên ngôn ngữ nay hiển thị bằng ngôn ngữ giao diện, kèm tên gốc bên cạnh (ví dụ “Tiếng Nhật — 日本語”), giúp dễ tìm từng ngôn ngữ."
 }

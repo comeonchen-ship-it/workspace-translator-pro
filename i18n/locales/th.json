@@ -400,5 +400,7 @@
   "prefs.toneSeg.keep.example": "คงน้ำเสียงต้นฉบับ",
   "prefs.toneSeg.formal.example": "โปรดดูเอกสารแนบ",
   "prefs.toneSeg.neutral.example": "ดูไฟล์แนบ",
-  "prefs.toneSeg.casual.example": "ดูไฟล์แนบหน่อยนะ"
+  "prefs.toneSeg.casual.example": "ดูไฟล์แนบหน่อยนะ",
+  "guide.cl.171.date": "ตุลาคม 2026",
+  "guide.cl.171.1": "ชื่อภาษาแสดงเป็นภาษาของหน้าจอ พร้อมชื่อดั้งเดิมกำกับ (เช่น \"ญี่ปุ่น — 日本語\") ทำให้หาแต่ละภาษาได้ง่ายขึ้น"
 }

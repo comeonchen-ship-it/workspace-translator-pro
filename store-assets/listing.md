@@ -1,6 +1,6 @@
-# Chrome Web Store — v1.7.0 submission
+# Chrome Web Store — v1.7.1 submission
 
-Upload package: `dist/workspace-translator-pro-1.7.0.zip` (build with `python3 store-assets/package.py`).
+Upload package: `dist/workspace-translator-pro-1.7.1.zip` (build with `python3 store-assets/package.py`).
 Images: `上架宣傳圖片/v1.7/` (rebuild with `python3 store-assets/build.py`).
 
 ## Store listing tab
@@ -75,6 +75,8 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 
 ## What's new (for the release notes / description footer)
 
+> v1.7.1 — Language names in your interface language with the native name beside them (e.g. “Japanese — 日本語”).
+>
 > v1.7.0 — Coloured or bold words inside a sentence move with the translation · optional "Concise" translation length · slide text shrinks further to fit, with a reminder to take a quick look · Sheets dropdowns translated with the cells · an unusual AI reply no longer stops the job · interface and target language follow your browser (Traditional/Simplified Chinese by region).
 >
 > v1.6.0 — Quick setup with a free Gemini key · translation preferences (names, terms, tone) · several languages in one run · translate selected slides or the current sheet · progress with time left and a completion notification · longer text fits better · copies named after the real file · clearer messages in 10 languages.
