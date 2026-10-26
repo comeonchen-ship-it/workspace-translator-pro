@@ -376,11 +376,13 @@
   "prefs.concise.hint": "„Knapp“ wählt kürzere Formulierungen, damit Text besser auf Folien passt. Es fällt nichts weg, nur die Sprache wird knapper – für Verträge und wortgenaue Texte die Standardeinstellung behalten.",
   "prefs.preview.concise": "Übersetzungen bleiben knapp, nahe an der Originallänge.",
   "done.fitCheck": "Schriftgröße in {n} Textfeldern verkleinert, damit längere Übersetzungen passen. Einzelne Texte können trotzdem überstehen – ein kurzer Blick durch die Datei lohnt sich",
-  "guide.pr.concise": "Knappe Übersetzungen – optional, standardmäßig aus. Die KI wählt kürzere Formulierungen, damit Text besser auf Folien passt. Es fällt nichts weg, die Sprache kann aber knapper wirken; für Verträge und wortgenaue Texte ausgeschaltet lassen.",
+  "guide.pr.concise": "Übersetzungslänge – „Wie im Original“ (Standard) oder „Knapp, passt ins Layout“. Knapp wählt kürzere Formulierungen, damit Text besser auf Folien passt; es fällt nichts weg, nur die Sprache wird knapper. Bei Präsentationen gibt es denselben Schalter auch im Hauptbildschirm. Für Verträge und wortgenaue Texte die Standardeinstellung behalten.",
   "scope.concise.hint": "Knappere Formulierungen, es fällt nichts weg. Für Verträge besser aus lassen.",
   "prefs.length.label": "Übersetzungslänge",
   "prefs.length.full": "Wie im Original (Standard)",
   "prefs.length.concise": "Knapp, passt ins Layout",
   "prefs.length.full.example": "wir freuen uns, mitzuteilen",
-  "prefs.length.concise.example": "wir melden"
+  "prefs.length.concise.example": "wir melden",
+  "guide.cl.170.3": "Tabellen: Auswahllisten werden zusammen mit den Zellen übersetzt, übersetzte Werte gelten nicht mehr als ungültig.",
+  "guide.cl.170.4": "Zuverlässiger: eine ungewöhnliche KI-Antwort stoppt nicht mehr den ganzen Auftrag, bei Fehlern erscheint das Protokoll, die Anleitung bleibt während der Übersetzung offen, und Oberfläche sowie Zielsprache folgen der Browsersprache (Chinesisch traditionell oder vereinfacht je nach Region)."
 }

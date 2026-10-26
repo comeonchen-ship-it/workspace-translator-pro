@@ -376,11 +376,13 @@
   "prefs.concise.hint": "«Concisa» elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, solo la redacción es más compacta; para contratos y textos literales, mantén el valor predeterminado.",
   "prefs.preview.concise": "Las traducciones se mantienen concisas, cerca de la longitud original.",
   "done.fitCheck": "Se redujo el tamaño de letra en {n} cuadros de texto para que quepan las traducciones más largas. Algún texto aún puede salirse de su cuadro: conviene echar un vistazo rápido al archivo",
-  "guide.pr.concise": "Traducciones concisas — opcional, desactivado por defecto. La IA elige expresiones más cortas para que el texto quepa mejor en las diapositivas. No se omite contenido, aunque la redacción puede ser más compacta; déjalo desactivado para contratos y textos que deban ser literales.",
+  "guide.pr.concise": "Longitud de la traducción: «Como el original» (predeterminado) o «Concisa, cabe en el diseño». Concisa elige expresiones más cortas para que el texto quepa mejor en las diapositivas; no se omite contenido, solo la redacción es más compacta. En Slides, el mismo interruptor aparece también en la pantalla principal. Para contratos y textos literales, mantén el valor predeterminado.",
   "scope.concise.hint": "Redacción más compacta, sin omitir contenido. Mejor desactivado para contratos.",
   "prefs.length.label": "Longitud de la traducción",
   "prefs.length.full": "Como el original (predet.)",
   "prefs.length.concise": "Concisa, cabe en el diseño",
   "prefs.length.full.example": "nos complace anunciar",
-  "prefs.length.concise.example": "anunciamos"
+  "prefs.length.concise.example": "anunciamos",
+  "guide.cl.170.3": "Hojas de cálculo: las opciones de los desplegables se traducen junto con las celdas, así que los valores traducidos ya no se marcan como no válidos.",
+  "guide.cl.170.4": "Más fiable: una respuesta inusual de la IA ya no detiene todo el trabajo, el registro se muestra si hay un error, la guía sigue disponible durante la traducción, y la interfaz y el idioma de destino siguen el idioma del navegador (chino tradicional o simplificado según la región)."
 }

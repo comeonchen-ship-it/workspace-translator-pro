@@ -376,11 +376,13 @@
   "prefs.concise.hint": "\"Concise\" picks shorter wording so text fits slides more easily. Nothing is left out, but phrasing becomes more compact — keep the default for contracts and other word-for-word text.",
   "prefs.preview.concise": "Translations are kept concise, close to the original length.",
   "done.fitCheck": "Font size reduced in {n} text boxes so longer translations fit. Some text may still run past its box — a quick look through the file is worth it",
-  "guide.pr.concise": "Keep translations concise — optional, off by default. The AI chooses shorter wording so text fits slides more easily. Nothing is left out, though phrasing may become more compact; leave it off for contracts and other word-for-word text.",
+  "guide.pr.concise": "Translation length — “As in the original” (default) or “Concise, fits the layout”. Concise picks shorter wording so text fits slides more easily; nothing is left out, but phrasing becomes more compact. For Slides the same switch also appears on the main screen. Keep the default for contracts and other word-for-word text.",
   "scope.concise.hint": "Wording becomes more compact; nothing is left out. Best left off for contracts.",
   "prefs.length.label": "Translation length",
   "prefs.length.full": "As in the original (default)",
   "prefs.length.concise": "Concise, fits the layout",
   "prefs.length.full.example": "we're delighted to announce",
-  "prefs.length.concise.example": "we announce"
+  "prefs.length.concise.example": "we announce",
+  "guide.cl.170.3": "Sheets: dropdown choices are translated together with the cells, so translated values are no longer marked invalid.",
+  "guide.cl.170.4": "More dependable: an unusual AI reply no longer stops the whole job, the log shows what happened, the guide stays open while translating, and the interface and target language follow your browser's language (Traditional or Simplified Chinese by region)."
 }

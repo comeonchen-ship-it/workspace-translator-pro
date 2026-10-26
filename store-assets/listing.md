@@ -1,6 +1,6 @@
-# Chrome Web Store — v1.6.0 submission
+# Chrome Web Store — v1.7.0 submission
 
-Upload package: `dist/workspace-translator-pro-1.6.0.zip` (build with `python3 store-assets/package.py`).
+Upload package: `dist/workspace-translator-pro-1.7.0.zip` (build with `python3 store-assets/package.py`).
 Images: `上架宣傳圖片/v1.6/` (rebuild with `python3 store-assets/build.py`).
 
 ## Store listing tab
@@ -28,15 +28,18 @@ YOUR WORDS, YOUR RULES
 • Names: for people, brands and places choose translate, keep the original, or both — e.g. 蘋果公司（Apple Inc.）. The AI recognises names by itself.
 • Specific terms: fixed translations for your own words, for all files or a single file.
 • Tone: keep the original's tone, or go formal, neutral or casual. Add custom instructions in any language.
+• Length: as in the original, or concise to fit the layout — your choice, off by default.
 
 BUILT FOR REAL DOCUMENTS
+• Formatting follows the words: a coloured or bold phrase inside a sentence moves with its translation instead of being left behind.
+• Longer translations still fit: slide fonts shrink to fit, sheet columns widen or wrap — and an optional "Concise" mode keeps translations close to the original length.
+• Sheets dropdowns are translated together with the cells, so values stay valid.
 • Several target languages in one run — one copy per language.
 • Translate only some slides, or only the current sheet tab.
-• Longer translations still fit: slide fonts shrink slightly, sheet columns widen or wrap.
 • Keeps working when you close the side panel; notifies you when the copy is ready.
 
 10 LANGUAGES
-English, 繁體中文, 简体中文, 日本語, 한국어, Español, Français, Deutsch, Tiếng Việt, ไทย — for translation and for the extension's own interface.
+English, 繁體中文, 简体中文, 日本語, 한국어, Español, Français, Deutsch, Tiếng Việt, ไทย — for translation and for the extension's own interface, which opens in your browser's language automatically.
 
 PRIVACY
 No servers, no tracking. Your API key and settings stay in your browser; the text is sent only to the translation service you choose.
@@ -71,4 +74,6 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 
 ## What's new (for the release notes / description footer)
 
+> v1.7.0 — Coloured or bold words inside a sentence move with the translation · optional "Concise" translation length · slide text shrinks further to fit, with a reminder to take a quick look · Sheets dropdowns translated with the cells · an unusual AI reply no longer stops the job · interface and target language follow your browser (Traditional/Simplified Chinese by region).
+>
 > v1.6.0 — Quick setup with a free Gemini key · translation preferences (names, terms, tone) · several languages in one run · translate selected slides or the current sheet · progress with time left and a completion notification · longer text fits better · copies named after the real file · clearer messages in 10 languages.

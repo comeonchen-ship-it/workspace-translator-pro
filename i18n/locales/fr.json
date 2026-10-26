@@ -376,11 +376,13 @@
   "prefs.concise.hint": "« Concise » choisit des formulations plus courtes pour mieux tenir dans les diapositives. Rien n'est omis, seul le style est plus compact — gardez le réglage par défaut pour les contrats et textes littéraux.",
   "prefs.preview.concise": "Les traductions restent concises, proches de la longueur d'origine.",
   "done.fitCheck": "Taille de police réduite dans {n} zones de texte pour faire tenir les traductions plus longues. Un peu de texte peut encore déborder : un rapide coup d'œil au fichier est conseillé",
-  "guide.pr.concise": "Traductions concises — facultatif, désactivé par défaut. L'IA choisit des formulations plus courtes pour que le texte tienne mieux dans les diapositives. Rien n'est omis, mais le style peut être plus compact ; laissez désactivé pour les contrats et textes à traduire mot pour mot.",
+  "guide.pr.concise": "Longueur de la traduction — « Fidèle » (par défaut) ou « Concise, tient en page ». Concise choisit des formulations plus courtes pour mieux tenir dans les diapositives ; rien n'est omis, seul le style est plus compact. Pour Slides, le même interrupteur figure aussi sur l'écran principal. Gardez le réglage par défaut pour les contrats et textes littéraux.",
   "scope.concise.hint": "Formulation plus compacte, sans rien omettre. À laisser désactivé pour les contrats.",
   "prefs.length.label": "Longueur de la traduction",
   "prefs.length.full": "Fidèle (par défaut)",
   "prefs.length.concise": "Concise, tient en page",
   "prefs.length.full.example": "nous sommes ravis d'annoncer",
-  "prefs.length.concise.example": "nous annonçons"
+  "prefs.length.concise.example": "nous annonçons",
+  "guide.cl.170.3": "Sheets : les choix des listes déroulantes sont traduits avec les cellules ; les valeurs traduites ne sont plus signalées comme non valides.",
+  "guide.cl.170.4": "Plus fiable : une réponse inhabituelle de l'IA n'arrête plus tout le travail, le journal s'affiche en cas d'erreur, le guide reste accessible pendant la traduction, et l'interface comme la langue cible suivent la langue du navigateur (chinois traditionnel ou simplifié selon la région)."
 }
