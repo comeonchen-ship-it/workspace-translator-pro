@@ -650,7 +650,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         custom: t('settings.test.suggest.providerDocs')
       };
 
-      if (resp.status === 401 || resp.status === 403) {
+      // Gemini answers a bad key with 400 + API_KEY_INVALID, not 401.
+      const keyRejected = resp.status === 400 && /API[_ ]KEY|api key/i.test(errMsg + JSON.stringify(body?.error?.details || ''));
+      if (resp.status === 401 || resp.status === 403 || keyRejected) {
         return { success: false, message: t('settings.test.invalidKey', { error: errMsg }), suggestion: t(`settings.test.keyHint.${engine}`) };
       } else if (resp.status === 404) {
         return {
@@ -709,12 +711,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       : t(`settings.keyFormat.${state === 'bad' ? 'generic' : group}.${state}`);
   }
 
-  inputApiKey.addEventListener('input', () => { validateApiKey(); resetApiStatus(); });
+  // Test automatically ~1 s after the key / model / engine changes, so pasting a
+  // key is enough. Custom endpoints still need a click: Chrome only grants the
+  // site permission inside a user gesture.
+  let autoTestTimer = null;
+  function scheduleAutoTest() {
+    clearTimeout(autoTestTimer);
+    autoTestTimer = setTimeout(() => {
+      const engine = selectEngine.value;
+      if (engine === 'free' || engine === 'custom') return;
+      if (inputApiKey.value.trim().length < 10 || !inputModelName.value.trim()) return;
+      runConnectionTest();
+    }, 900);
+  }
+  inputApiKey.addEventListener('input', () => { validateApiKey(); resetApiStatus(); scheduleAutoTest(); });
   selectEngine.addEventListener('change', () => {
     setTimeout(validateApiKey, 50);
     resetApiStatus();
+    scheduleAutoTest();
   });
-  if (inputModelName) inputModelName.addEventListener('input', resetApiStatus);
+  if (inputModelName) inputModelName.addEventListener('input', () => { resetApiStatus(); scheduleAutoTest(); });
   if (inputCustomUrl) inputCustomUrl.addEventListener('input', resetApiStatus);
 
   selectLang.addEventListener('change', (e) => {
@@ -758,7 +774,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   btnCancelSettings.addEventListener('click', discardAndClose);
 
-  btnSaveSettings.addEventListener('click', () => {
+  btnSaveSettings.addEventListener('click', async () => {
+    // Not verified yet? Test before saving (except custom: needs the button).
+    let testFailed = false;
+    const eng = selectEngine.value;
+    if (eng !== 'free' && eng !== 'custom' && inputApiKey.value.trim()) {
+      clearTimeout(autoTestTimer);
+      const { apiKeyStatus } = await chrome.storage.local.get('apiKeyStatus');
+      if (apiKeyStatus !== 'active') {
+        btnSaveSettings.disabled = true;
+        await runConnectionTest();
+        btnSaveSettings.disabled = false;
+        testFailed = (await chrome.storage.local.get('apiKeyStatus')).apiKeyStatus !== 'active';
+      }
+    }
     const translationEngine = selectEngine.value;
     const apiKey = inputApiKey.value.trim();
     const modelName = inputModelName.value.trim();
@@ -780,7 +809,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, () => {
       chrome.runtime.sendMessage({ action: 'settingsUpdated' });
       markSettingsClean();
-      closeSettings();
+      // Saved, but keep the panel open so the failed test's message stays visible.
+      if (!testFailed) closeSettings();
     });
   });
 
@@ -808,7 +838,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnTestApi = document.getElementById('btn-test-api');
   const testResultMsg = document.getElementById('test-result-msg');
   if (btnTestApi) {
-    btnTestApi.addEventListener('click', async () => {
+    btnTestApi.addEventListener('click', () => runConnectionTest());
+  }
+
+  // Shared by the button, auto-test after editing, and Save.
+  // One test at a time; edits made during a test trigger one more test after it,
+  // so the badge always reflects the latest key.
+  let testInFlight = null;
+  let testAgain = false;
+  async function runConnectionTest() {
+    if (testInFlight) { testAgain = true; return testInFlight; }
+    testInFlight = runConnectionTestOnce();
+    try { await testInFlight; } finally { testInFlight = null; }
+    if (testAgain) { testAgain = false; await runConnectionTest(); }
+  }
+
+  async function runConnectionTestOnce() {
+    {
       const engine = selectEngine.value;
       if (engine === 'free') return;
       const apiKey = inputApiKey.value.trim();
@@ -877,7 +923,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       chrome.storage.local.set({ apiKeyStatus: newStatus });
       updateStatusBadge(newStatus);
-    });
+    }
   }
 
   // ── Modal Button Handlers ─────────────────────────────────────────────────
