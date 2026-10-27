@@ -252,30 +252,37 @@ export async function translateTexts(texts, targetLang, config) {
     // done=0 starts the caller's ETA clock just before the first request.
     if (typeof config.onBatchProgress === 'function') config.onBatchProgress(0, batches.length);
 
-    // Process batches SEQUENTIALLY — guarantees only one API request is in-flight
-    // at a time, preventing parallel 429 retries from competing for the rate-limiter lock.
+    // Up to BATCH_CONCURRENCY batches are in flight at once. Request starts are
+    // still spaced by the global rate limiter (cooldownMs), so the per-minute
+    // request rate is unchanged; only the waiting on each reply overlaps.
+    const BATCH_CONCURRENCY = 3;
+    const results = new Array(batches.length);
+    let nextIdx = 0;
+    let doneCount = 0;
+    let failed = null;
+    const worker = async () => {
+      while (!failed && nextIdx < batches.length) {
+        const idx = nextIdx++;
+        const batch = batches[idx];
+        const cancelData = await chrome.storage.local.get('cancelledTasks').catch(() => ({}));
+        if ((cancelData.cancelledTasks || []).includes(presentationId)) throw new Error('Translation stopped by user.');
+
+        await logDebug(`Translating batch ${idx + 1}/${batches.length} (size: ${batch.length} items)...`, presentationId);
+        results[idx] = await translateResilient(batch, idx + 1);
+        await logDebug(`Successfully translated batch ${idx + 1}/${batches.length}.`, presentationId);
+        doneCount++;
+        if (typeof config.onBatchProgress === 'function') config.onBatchProgress(doneCount, batches.length);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(BATCH_CONCURRENCY, batches.length) }, () =>
+      worker().catch((err) => { failed ||= err; })));
+    if (failed) throw failed;
+
+    // Map responses and save to cache. After the custom-instruction fallback the
+    // results no longer match this cache key's prefs, so they are not cached.
     for (let idx = 0; idx < batches.length; idx++) {
       const batch = batches[idx];
-      try {
-        const cancelData = await chrome.storage.local.get('cancelledTasks');
-        const cancelledTasks = cancelData.cancelledTasks || [];
-        if (cancelledTasks.includes(presentationId)) {
-          throw new Error('Translation stopped by user.');
-        }
-      } catch (e) {
-        if (e.message === 'Translation stopped by user.') throw e;
-      }
-
-      await logDebug(`Translating batch ${idx + 1}/${batches.length} (size: ${batch.length} items)...`, presentationId);
-      let batchTranslations = await translateResilient(batch, idx + 1);
-      await logDebug(`Successfully translated batch ${idx + 1}/${batches.length}.`, presentationId);
-
-      if (typeof config.onBatchProgress === 'function') {
-        config.onBatchProgress(idx + 1, batches.length);
-      }
-
-      // Map responses and save to cache. After the custom-instruction fallback the
-      // results no longer match this cache key's prefs, so they are not cached.
+      const batchTranslations = results[idx];
       for (let i = 0; i < batch.length; i++) {
         const original = batch[i];
         const raw = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
@@ -332,6 +339,11 @@ export async function fetchWithRetryAndTimeout(url, options = {}, timeoutMs = 60
         if (attempt < maxRetries) {
           attempt++;
           const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          // A 429 pauses every queued request, not just this one, so batches
+          // running side by side don't keep hitting the limit.
+          if (response.status === 429 && useLock) {
+            lastApiRequestTime = Math.max(lastApiRequestTime, Date.now() + delay - cooldownMs);
+          }
           await logDebug(`Rate limit/Server error (${response.status}) hit. Retrying in ${Math.round(delay)}ms... (Attempt ${attempt}/${maxRetries})`, presentationId);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
@@ -584,7 +596,7 @@ async function translateGemini(texts, targetLangName, config) {
       {
         parts: [
           {
-            text: `Input JSON array of strings to translate:\n${JSON.stringify({ texts }, null, 2)}`
+            text: `Input JSON array of strings to translate:\n${JSON.stringify({ texts })}`
           }
         ]
       }
