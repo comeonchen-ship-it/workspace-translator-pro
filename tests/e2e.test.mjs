@@ -191,6 +191,16 @@ test('notification when the panel is not watching; clicking it opens the copy', 
   assert.equal(fake.record.tabsCreated.length, tabs + 1);
 });
 
+test('without the optional notifications permission a finished job does not crash', async () => {
+  api.files.p40 = { slides: [slide('s1', [['a', 'No notify\n']])] };
+  const saved = globalThis.chrome.notifications;
+  delete globalThis.chrome.notifications;
+  try {
+    const state = await run('p40', 'presentation', {}, { watch: false });
+    assert.equal(state.step, 'done', state.error);
+  } finally { globalThis.chrome.notifications = saved; }
+});
+
 test('multi-language failing part-way keeps finished copies in the error state', async () => {
   api.files.p10 = { slides: [slide('s1', [['a', 'Partial\n']])] };
   api.llm.override = (texts, system) => (system.includes('Japanese')

@@ -359,6 +359,12 @@
             <input type="checkbox" id="fit-text" checked>
             <span data-i18n="settings.fitText">Fit longer text (shrink slide fonts, widen sheet columns)</span>
           </label>
+          <!-- Optional permission, applied immediately (not by Save). -->
+          <label class="checkbox-row" for="notify-done">
+            <input type="checkbox" id="notify-done">
+            <span data-i18n="settings.notifyDone">Notify me when a translation is ready</span>
+          </label>
+          <div class="field-hint" data-i18n="settings.notifyDone.hint">Chrome asks once for permission. Useful when the side panel is closed.</div>
         </div>
         <!-- Interface language. Applies immediately and is NOT governed by the
              Save/Cancel buttons below, hence its own card. -->

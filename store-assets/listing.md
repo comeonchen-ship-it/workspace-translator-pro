@@ -63,7 +63,7 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 | `storage` | Stores the user's settings (API key, engine, translation preferences), translation history, a local translation cache and job progress in chrome.storage.local. |
 | `sidePanel` | The extension's whole interface is a side panel shown next to the open Google file. |
 | `activeTab` | Detects which Google Slides/Docs/Sheets/Forms file is open in the current tab, so the user can translate it. |
-| `notifications` | Shows one notification when a translation finishes, so the user knows the translated copy is ready even if they closed the side panel. Clicking the notification opens the translated file. No other notifications are sent. |
+| `notifications` (optional) | Requested only when the user turns on "Notify me when a translation is ready" in Settings. Shows one notification when a translation finishes; clicking it opens the translated file. |
 | `scripting` | Used only when the user ticks "Only translate the sheet tab I'm on" in Google Sheets: it reads the name of the active sheet tab on the current Google Sheets page, because the tab ID changes when an .xlsx file is copied. Nothing else on the page is read or changed, and no remote code is run. |
 | Host permissions (docs.google.com, googleapis.com, the Gemini/OpenAI/Anthropic APIs) | Read and write the user's Google files through Google's APIs and send text to the translation service the user selected. |
 | Optional host permissions | Requested only when the user adds a custom OpenAI-compatible endpoint, and only for that address. |
@@ -75,7 +75,7 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 
 ## What's new (for the release notes / description footer)
 
-> v1.7.1 — Language names in your interface language with the native name beside them (e.g. “Japanese (日本語)”).
+> v1.7.1 — Completion notifications are now optional (Settings → After Translation) · language names in your interface language with the native name beside them (e.g. “Japanese (日本語)”).
 >
 > v1.7.0 — Coloured or bold words inside a sentence move with the translation · optional "Concise" translation length · slide text shrinks further to fit, with a reminder to take a quick look · Sheets dropdowns translated with the cells · an unusual AI reply no longer stops the job · interface and target language follow your browser (Traditional/Simplified Chinese by region).
 >

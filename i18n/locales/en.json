@@ -402,5 +402,8 @@
   "prefs.toneSeg.neutral.example": "see the attachment",
   "prefs.toneSeg.casual.example": "check the attachment",
   "guide.cl.171.date": "October 2026",
-  "guide.cl.171.1": "Language names now appear in your interface language, with the native name beside them (e.g. “Japanese (日本語)”), so every language is easy to find."
+  "guide.cl.171.1": "Language names now appear in your interface language, with the native name beside them (e.g. “Japanese (日本語)”), so every language is easy to find.",
+  "settings.notifyDone": "Notify me when a translation is ready",
+  "settings.notifyDone.hint": "Chrome asks once for permission. Handy when the side panel is closed.",
+  "guide.cl.171.2": "Completion notifications are now optional: turn them on in Settings → After Translation. Updates no longer ask for new permissions."
 }

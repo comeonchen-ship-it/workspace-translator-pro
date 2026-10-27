@@ -60,6 +60,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnToggleApiKey = document.getElementById('btn-toggle-api-key');
   const apiKeyIndicator = document.getElementById('api-key-indicator');
   const inputAutoOpen = document.getElementById('auto-open-result');
+  // "Notify me when ready" mirrors the optional notifications permission.
+  const inputNotify = document.getElementById('notify-done');
+  if (inputNotify && chrome.permissions?.contains) {
+    chrome.permissions.contains({ permissions: ['notifications'] }).then((on) => { inputNotify.checked = on; }).catch(() => {});
+    inputNotify.addEventListener('change', async () => {
+      const want = inputNotify.checked;
+      try {
+        inputNotify.checked = want
+          ? await chrome.permissions.request({ permissions: ['notifications'] })
+          : !(await chrome.permissions.remove({ permissions: ['notifications'] }));
+      } catch (_) { inputNotify.checked = !want; }
+    });
+  }
   const inputFitText = document.getElementById('fit-text');
   const completionCard = document.getElementById('completion-card');
   const completionTitle = document.getElementById('completion-title');

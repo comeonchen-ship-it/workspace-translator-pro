@@ -374,7 +374,9 @@ async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summa
   if (!isLast) return;
 
   const panelWatching = activePort && activeViewPresentationId === presentationId;
-  if (!panelWatching || !autoOpenResult) {
+  // Notifications are an optional permission, granted only when the user turns
+  // them on in Settings; without it chrome.notifications is undefined.
+  if ((!panelWatching || !autoOpenResult) && chrome.notifications) {
     const lang = getLanguage(summary.targetLang)?.endonym || summary.targetLang;
     chrome.notifications.create(`done:${copyId}`, {
       type: 'basic',
@@ -387,15 +389,22 @@ async function deliverResult(presentationId, sourceTitle, copyId, editUrl, summa
   }
 }
 
-chrome.notifications.onClicked.addListener(async (notificationId) => {
-  const key = `notifUrl_${notificationId}`;
-  const data = await chrome.storage.local.get(key);
-  if (data[key]) {
-    chrome.tabs.create({ url: data[key] });
-    await chrome.storage.local.remove(key);
-  }
-  chrome.notifications.clear(notificationId);
-});
+let notifHooked = false;
+function hookNotifications() {
+  if (notifHooked || !chrome.notifications) return;
+  notifHooked = true;
+  chrome.notifications.onClicked.addListener(async (notificationId) => {
+    const key = `notifUrl_${notificationId}`;
+    const data = await chrome.storage.local.get(key);
+    if (data[key]) {
+      chrome.tabs.create({ url: data[key] });
+      await chrome.storage.local.remove(key);
+    }
+    chrome.notifications.clear(notificationId);
+  });
+}
+hookNotifications();
+chrome.permissions?.onAdded?.addListener(hookNotifications);
 
 /**
  * Main translation workflow orchestration

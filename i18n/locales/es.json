@@ -402,5 +402,8 @@
   "prefs.toneSeg.neutral.example": "consulte el adjunto",
   "prefs.toneSeg.casual.example": "échale un ojo al adjunto",
   "guide.cl.171.date": "Octubre de 2026",
-  "guide.cl.171.1": "Los nombres de los idiomas aparecen en el idioma de la interfaz, junto a su nombre original (p. ej., «Japonés (日本語)»), para encontrar cada idioma fácilmente."
+  "guide.cl.171.1": "Los nombres de los idiomas aparecen en el idioma de la interfaz, junto a su nombre original (p. ej., «Japonés (日本語)»), para encontrar cada idioma fácilmente.",
+  "settings.notifyDone": "Avisarme cuando la traducción esté lista",
+  "settings.notifyDone.hint": "Chrome pide permiso una sola vez. Útil cuando el panel lateral está cerrado.",
+  "guide.cl.171.2": "Las notificaciones de fin ahora son opcionales: actívalas en Ajustes → Después de traducir. Las actualizaciones ya no piden permisos nuevos."
 }

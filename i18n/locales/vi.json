@@ -402,5 +402,8 @@
   "prefs.toneSeg.neutral.example": "xem tệp đính kèm",
   "prefs.toneSeg.casual.example": "xem file đính kèm nhé",
   "guide.cl.171.date": "Tháng 10 năm 2026",
-  "guide.cl.171.1": "Tên ngôn ngữ nay hiển thị bằng ngôn ngữ giao diện, kèm tên gốc bên cạnh (ví dụ “Tiếng Nhật (日本語)”), giúp dễ tìm từng ngôn ngữ."
+  "guide.cl.171.1": "Tên ngôn ngữ nay hiển thị bằng ngôn ngữ giao diện, kèm tên gốc bên cạnh (ví dụ “Tiếng Nhật (日本語)”), giúp dễ tìm từng ngôn ngữ.",
+  "settings.notifyDone": "Thông báo khi bản dịch xong",
+  "settings.notifyDone.hint": "Chrome sẽ hỏi quyền một lần. Tiện khi bạn đóng bảng bên.",
+  "guide.cl.171.2": "Thông báo hoàn tất nay là tùy chọn: bật trong Cài đặt → Sau khi dịch. Các bản cập nhật không còn yêu cầu quyền mới."
 }
