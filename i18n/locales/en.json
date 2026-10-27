@@ -405,5 +405,7 @@
   "guide.cl.171.1": "Language names now appear in your interface language, with the native name beside them (e.g. “Japanese (日本語)”), so every language is easy to find.",
   "settings.notifyDone": "Notify me when a translation is ready",
   "settings.notifyDone.hint": "Chrome asks once for permission. Handy when the side panel is closed.",
-  "guide.cl.171.2": "Completion notifications are now optional: turn them on in Settings → After Translation. Updates no longer ask for new permissions."
+  "guide.cl.171.2": "Completion notifications are now optional: turn them on in Settings → After Translation. Updates no longer ask for new permissions.",
+  "guide.cl.172.1": "Faster translation: several parts of a file are now translated at the same time, while still staying within your AI provider's per-minute limit.",
+  "guide.cl.172.2": "More reliable when many files are translated into many languages at once: saved translations and history no longer run out of space."
 }

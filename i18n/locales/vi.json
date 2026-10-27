@@ -405,5 +405,7 @@
   "guide.cl.171.1": "Tên ngôn ngữ nay hiển thị bằng ngôn ngữ giao diện, kèm tên gốc bên cạnh (ví dụ “Tiếng Nhật (日本語)”), giúp dễ tìm từng ngôn ngữ.",
   "settings.notifyDone": "Thông báo khi bản dịch xong",
   "settings.notifyDone.hint": "Chrome sẽ hỏi quyền một lần. Tiện khi bạn đóng bảng bên.",
-  "guide.cl.171.2": "Thông báo hoàn tất nay là tùy chọn: bật trong Cài đặt → Sau khi dịch. Các bản cập nhật không còn yêu cầu quyền mới."
+  "guide.cl.171.2": "Thông báo hoàn tất nay là tùy chọn: bật trong Cài đặt → Sau khi dịch. Các bản cập nhật không còn yêu cầu quyền mới.",
+  "guide.cl.172.1": "Dịch nhanh hơn: nhiều phần của một tệp được dịch cùng lúc, vẫn tuân thủ giới hạn mỗi phút của dịch vụ AI.",
+  "guide.cl.172.2": "Ổn định hơn khi dịch nhiều tệp sang nhiều ngôn ngữ cùng lúc: bản dịch đã lưu và lịch sử không còn hết dung lượng."
 }

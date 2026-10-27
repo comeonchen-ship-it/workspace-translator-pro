@@ -405,5 +405,7 @@
   "guide.cl.171.1": "Les noms de langues s'affichent dans la langue de l'interface, avec leur nom d'origine à côté (par ex. « Japonais (日本語) ») : chaque langue est facile à trouver.",
   "settings.notifyDone": "M'avertir quand la traduction est prête",
   "settings.notifyDone.hint": "Chrome demande l'autorisation une seule fois. Pratique quand le panneau latéral est fermé.",
-  "guide.cl.171.2": "Les notifications de fin sont désormais facultatives : activez-les dans Paramètres → Après la traduction. Les mises à jour ne demandent plus de nouvelles autorisations."
+  "guide.cl.171.2": "Les notifications de fin sont désormais facultatives : activez-les dans Paramètres → Après la traduction. Les mises à jour ne demandent plus de nouvelles autorisations.",
+  "guide.cl.172.1": "Traduction plus rapide : plusieurs parties d’un fichier sont traduites en même temps, tout en respectant la limite par minute de votre service d’IA.",
+  "guide.cl.172.2": "Plus fiable lorsque de nombreux fichiers sont traduits dans de nombreuses langues à la fois : les traductions enregistrées et l’historique ne manquent plus d’espace."
 }

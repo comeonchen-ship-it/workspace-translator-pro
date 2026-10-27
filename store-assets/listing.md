@@ -65,6 +65,7 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 | `activeTab` | Detects which Google Slides/Docs/Sheets/Forms file is open in the current tab, so the user can translate it. |
 | `notifications` (optional) | Requested only when the user turns on "Notify me when a translation is ready" in Settings. Shows one notification when a translation finishes; clicking it opens the translated file. |
 | `scripting` | Used only when the user ticks "Only translate the sheet tab I'm on" in Google Sheets: it reads the name of the active sheet tab on the current Google Sheets page, because the tab ID changes when an .xlsx file is copied. Nothing else on the page is read or changed, and no remote code is run. |
+| `unlimitedStorage` | Lets the translation cache, job queue and history keep working when many files are translated into many languages at once, instead of failing when Chrome's 10 MB default limit fills up. Everything stays on the user's own device; nothing is uploaded. |
 | Host permissions (docs.google.com, googleapis.com, the Gemini/OpenAI/Anthropic APIs) | Read and write the user's Google files through Google's APIs and send text to the translation service the user selected. |
 | Optional host permissions | Requested only when the user adds a custom OpenAI-compatible endpoint, and only for that address. |
 | Remote code | No — all code is in the package. |
