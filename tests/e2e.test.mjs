@@ -428,3 +428,24 @@ test('slides: the concise preference reaches the AI prompt; off by default', asy
   assert.equal((await run('p32', 'presentation')).step, 'done');
   assert.ok(!api.llm.calls.slice(before).some((c) => /Length \(important\)/.test(c.system)), 'no concise rule by default');
 });
+
+test('a job that fails part-way keeps finished batches, so a retry only sends the rest', async () => {
+  const shapes = [];
+  for (let i = 0; i < 35; i++) shapes.push([`a${i}`, `Alpha line ${i}\n`]);
+  for (let i = 0; i < 5; i++) shapes.push([`b${i}`, `Beta line ${i}\n`]);
+  api.files.p30 = { slides: [slide('s1', shapes)] };
+  api.llm.override = (texts) => (texts.some((t) => t.startsWith('Beta'))
+    ? new Response(JSON.stringify({ error: { message: 'model not found' } }), { status: 404 })
+    : texts.map(api.llm.translate));
+  const first = await run('p30', 'presentation', { targetLang: 'fr' });
+  api.llm.override = null;
+  assert.match(first.error, /404/);
+
+  delete fake.store.taskState_p30; // wait for the retry, not the old error
+  const before = api.llm.calls.length;
+  const second = await run('p30', 'presentation', { targetLang: 'fr' });
+  assert.equal(second.step, 'done', second.error);
+  const sent = api.llm.calls.slice(before).flatMap((c) => c.texts);
+  assert.equal(sent.length, 5);
+  assert.ok(sent.every((t) => t.startsWith('Beta')));
+});

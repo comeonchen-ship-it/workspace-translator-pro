@@ -407,5 +407,8 @@
   "settings.notifyDone.hint": "Chrome demande l'autorisation une seule fois. Pratique quand le panneau latéral est fermé.",
   "guide.cl.171.2": "Les notifications de fin sont désormais facultatives : activez-les dans Paramètres → Après la traduction. Les mises à jour ne demandent plus de nouvelles autorisations.",
   "guide.cl.172.1": "Traduction plus rapide : plusieurs parties d’un fichier sont traduites en même temps, tout en respectant la limite par minute de votre service d’IA.",
-  "guide.cl.172.2": "Plus fiable lorsque de nombreux fichiers sont traduits dans de nombreuses langues à la fois : les traductions enregistrées et l’historique ne manquent plus d’espace."
+  "guide.cl.172.2": "Plus fiable lorsque de nombreux fichiers sont traduits dans de nombreuses langues à la fois : les traductions enregistrées et l’historique ne manquent plus d’espace.",
+  "error.busy": "{engine} est surchargé en ce moment (problème temporaire de leur côté, pas votre quota). Les parties déjà traduites sont enregistrées : réessayez dans quelques minutes, seul le reste sera traduit.",
+  "guide.faq.busy.q": "« Surchargé en ce moment (503) »",
+  "guide.faq.busy.a": "Les serveurs du service d’IA sont occupés. C’est temporaire et cela n’entame pas votre quota. Les parties déjà traduites sont enregistrées : en réessayant dans quelques minutes, seul le reste est traduit. Si cela persiste, changez de modèle dans les Paramètres."
 }

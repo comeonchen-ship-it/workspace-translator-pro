@@ -1644,6 +1644,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         : t('error.429.generic', { engine: engine.toUpperCase() });
     }
 
+    // The provider is overloaded (503 / 529); temporary and not the user's quota.
+    if (/API Error \((503|529)\)/.test(err) || err.includes("UNAVAILABLE") || err.includes("overloaded")) {
+      return t('error.busy', { engine: engine.toUpperCase() });
+    }
+
     // Drive refused to copy: the user can only view/comment, or the owner disabled copying.
     if (err.includes("Drive copy API error") && (err.includes("403") || err.includes("cannotCopyFile") || err.includes("insufficientFilePermissions"))) {
       return t('error.noCopyPermission');

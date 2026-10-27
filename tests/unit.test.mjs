@@ -72,23 +72,24 @@ test('formatShortDateTime: today / yesterday / older without seconds', async () 
 });
 
 test('Gemini spacing stays under each model free-tier RPM', () => {
-  assert.equal(geminiCooldownMs('gemini-3.1-flash-lite'), 4200);      // 15 RPM
-  assert.equal(geminiCooldownMs('gemini-2.5-flash-lite'), 6500);      // 10 RPM
-  assert.equal(geminiCooldownMs('gemini-2.5-flash'), 12500);          // 5 RPM
-  assert.equal(geminiCooldownMs('gemini-3.8-flash'), 12500);
+  assert.equal(geminiCooldownMs('gemini-3.1-flash-lite'), 5000);      // 15 RPM
+  assert.equal(geminiCooldownMs('gemini-2.5-flash-lite'), 8000);      // 10 RPM
+  assert.equal(geminiCooldownMs('gemini-2.5-flash'), 16000);          // 5 RPM
+  assert.equal(geminiCooldownMs('gemini-3.8-flash'), 16000);
   for (const [m, rpm] of [['gemini-3.1-flash-lite', 15], ['gemini-2.5-flash-lite', 10], ['gemini-2.5-flash', 5]]) {
-    assert.ok(60000 / geminiCooldownMs(m) < rpm, m);
+    // most requests that fit in any 60 s window, kept below the limit
+    assert.ok(Math.floor(60000 / geminiCooldownMs(m)) + 1 < rpm, m);
   }
 });
 
 test('a 429 doubles spacing up to 15 s, and it expires after 10 minutes', () => {
   const url = 'https://example.test/rate-boost';
   const t0 = 1_000_000;
-  assert.equal(effectiveCooldownMs(url, 4200, t0), 4200);
-  assert.equal(noteRateLimited(url, 4200, t0), 8400);
-  assert.equal(effectiveCooldownMs(url, 4200, t0 + 1000), 8400);
-  assert.equal(noteRateLimited(url, 4200, t0 + 2000), 15000);
-  assert.equal(noteRateLimited(url, 4200, t0 + 3000), 15000);
-  assert.equal(effectiveCooldownMs(url, 4200, t0 + 3000 + 10 * 60 * 1000), 4200);
+  assert.equal(effectiveCooldownMs(url, 5000, t0), 5000);
+  assert.equal(noteRateLimited(url, 5000, t0), 10000);
+  assert.equal(effectiveCooldownMs(url, 5000, t0 + 1000), 10000);
+  assert.equal(noteRateLimited(url, 5000, t0 + 2000), 15000);
+  assert.equal(noteRateLimited(url, 5000, t0 + 3000), 15000);
+  assert.equal(effectiveCooldownMs(url, 5000, t0 + 3000 + 10 * 60 * 1000), 5000);
   assert.equal(effectiveCooldownMs('https://example.test/other', 2000, t0), 2000);
 });

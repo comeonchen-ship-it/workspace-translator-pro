@@ -407,5 +407,8 @@
   "settings.notifyDone.hint": "Chrome sẽ hỏi quyền một lần. Tiện khi bạn đóng bảng bên.",
   "guide.cl.171.2": "Thông báo hoàn tất nay là tùy chọn: bật trong Cài đặt → Sau khi dịch. Các bản cập nhật không còn yêu cầu quyền mới.",
   "guide.cl.172.1": "Dịch nhanh hơn: nhiều phần của một tệp được dịch cùng lúc, vẫn tuân thủ giới hạn mỗi phút của dịch vụ AI.",
-  "guide.cl.172.2": "Ổn định hơn khi dịch nhiều tệp sang nhiều ngôn ngữ cùng lúc: bản dịch đã lưu và lịch sử không còn hết dung lượng."
+  "guide.cl.172.2": "Ổn định hơn khi dịch nhiều tệp sang nhiều ngôn ngữ cùng lúc: bản dịch đã lưu và lịch sử không còn hết dung lượng.",
+  "error.busy": "{engine} đang quá tải (sự cố tạm thời từ phía họ, không phải hết hạn mức của bạn). Phần đã dịch được lưu lại — hãy thử lại sau vài phút, chỉ phần còn lại sẽ được dịch.",
+  "guide.faq.busy.q": "“Đang quá tải (503)”",
+  "guide.faq.busy.a": "Máy chủ của dịch vụ AI đang bận. Đây là tạm thời và không tốn hạn mức của bạn. Phần đã dịch được lưu, nên thử lại sau vài phút chỉ dịch phần còn lại. Nếu vẫn xảy ra, hãy đổi mô hình khác trong Cài đặt."
 }

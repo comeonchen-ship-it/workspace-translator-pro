@@ -407,5 +407,8 @@
   "settings.notifyDone.hint": "Chrome asks once for permission. Handy when the side panel is closed.",
   "guide.cl.171.2": "Completion notifications are now optional: turn them on in Settings → After Translation. Updates no longer ask for new permissions.",
   "guide.cl.172.1": "Faster translation: several parts of a file are now translated at the same time, while still staying within your AI provider's per-minute limit.",
-  "guide.cl.172.2": "More reliable when many files are translated into many languages at once: saved translations and history no longer run out of space."
+  "guide.cl.172.2": "More reliable when many files are translated into many languages at once: saved translations and history no longer run out of space.",
+  "error.busy": "{engine} is overloaded right now (a temporary problem on their side, not your quota). Parts already translated are saved — try again in a few minutes and only the rest will be translated.",
+  "guide.faq.busy.q": "“Overloaded right now (503)”",
+  "guide.faq.busy.a": "The AI provider's servers are busy. This is temporary and doesn't use up your quota. Parts already translated are saved, so trying again in a few minutes only translates the rest. If it keeps happening, switch to another model in Settings."
 }

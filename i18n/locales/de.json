@@ -407,5 +407,8 @@
   "settings.notifyDone.hint": "Chrome fragt einmal nach der Berechtigung. Praktisch, wenn die Seitenleiste geschlossen ist.",
   "guide.cl.171.2": "Fertig-Benachrichtigungen sind jetzt optional: in Einstellungen → Nach der Übersetzung einschalten. Updates fragen nicht mehr nach neuen Berechtigungen.",
   "guide.cl.172.1": "Schnellere Übersetzung: Mehrere Teile einer Datei werden gleichzeitig übersetzt, das Minutenlimit Ihres KI-Dienstes wird weiterhin eingehalten.",
-  "guide.cl.172.2": "Zuverlässiger, wenn viele Dateien gleichzeitig in viele Sprachen übersetzt werden: Gespeicherte Übersetzungen und Verlauf laufen nicht mehr voll."
+  "guide.cl.172.2": "Zuverlässiger, wenn viele Dateien gleichzeitig in viele Sprachen übersetzt werden: Gespeicherte Übersetzungen und Verlauf laufen nicht mehr voll.",
+  "error.busy": "{engine} ist gerade überlastet (ein vorübergehendes Problem auf deren Seite, nicht Ihr Kontingent). Bereits Übersetztes ist gespeichert – versuchen Sie es in ein paar Minuten erneut, dann wird nur der Rest übersetzt.",
+  "guide.faq.busy.q": "„Gerade überlastet (503)“",
+  "guide.faq.busy.a": "Die Server des KI-Dienstes sind ausgelastet. Das ist vorübergehend und verbraucht kein Kontingent. Bereits Übersetztes wird gespeichert, ein neuer Versuch in ein paar Minuten übersetzt nur den Rest. Wenn es weiter passiert, wählen Sie in den Einstellungen ein anderes Modell."
 }

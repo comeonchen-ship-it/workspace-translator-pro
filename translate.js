@@ -19,11 +19,12 @@ let apiLockPromise = Promise.resolve();
 let lastApiRequestTime = 0;
 
 // Gemini free-tier RPM differs by model (3.x Flash-Lite 15, 2.5 Flash-Lite 10,
-// other Flash models 5). Spacing is set a little under each limit.
+// other Flash models 5). Any 60-second window holds floor(60/spacing)+1
+// requests, so each spacing keeps that at least one below the limit.
 export function geminiCooldownMs(model = '') {
   const m = model.toLowerCase();
-  if (m.includes('lite')) return m.includes('gemini-2') ? 6500 : 4200;
-  return 12500;
+  if (m.includes('lite')) return m.includes('gemini-2') ? 8000 : 5000;
+  return 16000;
 }
 
 // After a 429 the endpoint's spacing doubles (up to 15 s) for the next
@@ -170,6 +171,7 @@ export async function translateTexts(texts, targetLang, config) {
     if (e.message === 'Translation stopped by user.') throw e;
   }
 
+  let failed = null;
   if (engine === 'free') {
     const freeResults = await translateFree(uncachedTexts, targetLang, config);
     // Save to cache and map to final translationsMap
@@ -282,7 +284,6 @@ export async function translateTexts(texts, targetLang, config) {
     const results = new Array(batches.length);
     let nextIdx = 0;
     let doneCount = 0;
-    let failed = null;
     const worker = async () => {
       while (!failed && nextIdx < batches.length) {
         const idx = nextIdx++;
@@ -299,13 +300,15 @@ export async function translateTexts(texts, targetLang, config) {
     };
     await Promise.all(Array.from({ length: Math.min(BATCH_CONCURRENCY, batches.length) }, () =>
       worker().catch((err) => { failed ||= err; })));
-    if (failed) throw failed;
 
     // Map responses and save to cache. After the custom-instruction fallback the
     // results no longer match this cache key's prefs, so they are not cached.
     for (let idx = 0; idx < batches.length; idx++) {
       const batch = batches[idx];
       const batchTranslations = results[idx];
+      // A failed job still keeps the batches that finished, so a retry only
+      // asks for the rest.
+      if (!batchTranslations) continue;
       for (let i = 0; i < batch.length; i++) {
         const original = batch[i];
         const raw = batchTranslations[i] !== undefined ? batchTranslations[i] : original;
@@ -332,6 +335,7 @@ export async function translateTexts(texts, targetLang, config) {
     await logDebug(`Warning: failed to persist translation cache: ${e.message}`, presentationId);
   }
 
+  if (failed) throw failed;
   await logDebug(`Completed translating all ${texts.length} texts.`, presentationId);
   return translationsMap;
 }
