@@ -20,7 +20,7 @@ before(async () => {
   await new Promise((r) => setTimeout(r, 50)); // startup cleanup
 });
 
-const baseConfig = { translationEngine: 'gemini', apiKey: 'AQ.test-key-1234567890', modelName: 'gemini-test' };
+const baseConfig = { translationEngine: 'gemini', apiKey: 'AQ.test-key-1234567890', modelName: 'gemini-test-flash-lite' };
 
 async function run(id, fileType, extra = {}, { watch = true } = {}) {
   panel = fake.connectPanel(watch ? id : 'some-other-file');

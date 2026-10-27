@@ -18,6 +18,29 @@ function langName(code) {
 let apiLockPromise = Promise.resolve();
 let lastApiRequestTime = 0;
 
+// Gemini free-tier RPM differs by model (3.x Flash-Lite 15, 2.5 Flash-Lite 10,
+// other Flash models 5). Spacing is set a little under each limit.
+export function geminiCooldownMs(model = '') {
+  const m = model.toLowerCase();
+  if (m.includes('lite')) return m.includes('gemini-2') ? 6500 : 4200;
+  return 12500;
+}
+
+// After a 429 the endpoint's spacing doubles (up to 15 s) for the next
+// 10 minutes, so paid keys stay fast and lower quotas adapt on their own.
+const RATE_BOOST_MAX_MS = 15000;
+const RATE_BOOST_TTL_MS = 10 * 60 * 1000;
+const rateBoost = new Map();
+export function effectiveCooldownMs(url, cooldownMs, now = Date.now()) {
+  const b = rateBoost.get(url);
+  return b && now - b.at < RATE_BOOST_TTL_MS ? Math.max(cooldownMs, b.ms) : cooldownMs;
+}
+export function noteRateLimited(url, cooldownMs, now = Date.now()) {
+  const ms = Math.min(RATE_BOOST_MAX_MS, effectiveCooldownMs(url, cooldownMs, now) * 2);
+  rateBoost.set(url, { ms, at: now });
+  return ms;
+}
+
 async function acquireApiLock(presentationId, cooldownMs = 4200) {
   const currentPromise = apiLockPromise;
   let releaseLock;
@@ -163,7 +186,7 @@ export async function translateTexts(texts, targetLang, config) {
     if (engine === 'gemini') {
       maxBatchChars = 4000;
       maxBatchItems = 35;
-      cooldownMs = 4200;
+      cooldownMs = geminiCooldownMs(config.modelName || 'gemini-3.1-flash-lite');
     } else if (engine === 'openai') {
       maxBatchChars = 6000;
       maxBatchItems = 50;
@@ -323,7 +346,7 @@ export async function fetchWithRetryAndTimeout(url, options = {}, timeoutMs = 60
   while (true) {
     try {
       if (useLock) {
-        await acquireApiLock(presentationId, cooldownMs);
+        await acquireApiLock(presentationId, effectiveCooldownMs(url, cooldownMs));
       }
       const response = await fetch(url, {
         ...options,
@@ -342,6 +365,8 @@ export async function fetchWithRetryAndTimeout(url, options = {}, timeoutMs = 60
           // A 429 pauses every queued request, not just this one, so batches
           // running side by side don't keep hitting the limit.
           if (response.status === 429 && useLock) {
+            const slower = noteRateLimited(url, cooldownMs);
+            await logDebug(`Rate limited: spacing requests ${slower}ms apart for the next 10 minutes.`, presentationId);
             lastApiRequestTime = Math.max(lastApiRequestTime, Date.now() + delay - cooldownMs);
           }
           await logDebug(`Rate limit/Server error (${response.status}) hit. Retrying in ${Math.round(delay)}ms... (Attempt ${attempt}/${maxRetries})`, presentationId);

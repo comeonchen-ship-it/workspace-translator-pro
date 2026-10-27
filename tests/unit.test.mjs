@@ -2,7 +2,7 @@
 // Zero-dependency unit tests for the pure helpers (no chrome.* needed).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseJsonRobustly, repairJsonEscapes, extractJsonBlock } from '../translate.js';
+import { parseJsonRobustly, repairJsonEscapes, extractJsonBlock, geminiCooldownMs, effectiveCooldownMs, noteRateLimited } from '../translate.js';
 import { isTranslatable, normalizeText, extractTextFromElements } from '../lib/text-extract.js';
 import { classifyApiKey } from '../lib/key-format.js';
 
@@ -69,4 +69,26 @@ test('formatShortDateTime: today / yesterday / older without seconds', async () 
   assert.match(formatShortDateTime(now - 86400e3, now), /^yesterday /);
   const older = formatShortDateTime(now - 5 * 86400e3, now);
   assert.doesNotMatch(older, /:\d\d:\d\d/); // no seconds
+});
+
+test('Gemini spacing stays under each model free-tier RPM', () => {
+  assert.equal(geminiCooldownMs('gemini-3.1-flash-lite'), 4200);      // 15 RPM
+  assert.equal(geminiCooldownMs('gemini-2.5-flash-lite'), 6500);      // 10 RPM
+  assert.equal(geminiCooldownMs('gemini-2.5-flash'), 12500);          // 5 RPM
+  assert.equal(geminiCooldownMs('gemini-3.8-flash'), 12500);
+  for (const [m, rpm] of [['gemini-3.1-flash-lite', 15], ['gemini-2.5-flash-lite', 10], ['gemini-2.5-flash', 5]]) {
+    assert.ok(60000 / geminiCooldownMs(m) < rpm, m);
+  }
+});
+
+test('a 429 doubles spacing up to 15 s, and it expires after 10 minutes', () => {
+  const url = 'https://example.test/rate-boost';
+  const t0 = 1_000_000;
+  assert.equal(effectiveCooldownMs(url, 4200, t0), 4200);
+  assert.equal(noteRateLimited(url, 4200, t0), 8400);
+  assert.equal(effectiveCooldownMs(url, 4200, t0 + 1000), 8400);
+  assert.equal(noteRateLimited(url, 4200, t0 + 2000), 15000);
+  assert.equal(noteRateLimited(url, 4200, t0 + 3000), 15000);
+  assert.equal(effectiveCooldownMs(url, 4200, t0 + 3000 + 10 * 60 * 1000), 4200);
+  assert.equal(effectiveCooldownMs('https://example.test/other', 2000, t0), 2000);
 });
