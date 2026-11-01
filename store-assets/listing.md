@@ -49,6 +49,26 @@ No servers, no tracking. Your API key and settings stay in your browser; the tex
 **Small promo tile**: `small-tile-440x280-en.png` · **Marquee**: `marquee-1400x560-en.png`
 **Localized promo images** (Store listing → choose the language at the top): 繁體中文 `-zh-TW`, 日本語 `-ja`, Español `-es` versions of the marquee and small tile. Every other language shows the English (`-en`) ones.
 
+**「10 LANGUAGES」section for each store language** (Store listing → choose the language at the top). Language names are written in the reader's language; the native name of each is not needed here.
+
+English:
+```
+10 LANGUAGES
+English, Traditional Chinese, Simplified Chinese, Japanese, Korean, Spanish, French, German, Vietnamese and Thai — for translation and for the extension's own interface, which opens in your browser's language automatically.
+```
+
+繁體中文:
+```
+10 種語言
+英文、繁體中文、簡體中文、日文、韓文、西班牙文、法文、德文、越南文、泰文——可翻譯成這些語言，擴充功能的介面也支援這些語言，並會自動依照瀏覽器的語言開啟。
+```
+
+日本語:
+```
+10 言語に対応
+英語、繁体字中国語、簡体字中国語、日本語、韓国語、スペイン語、フランス語、ドイツ語、ベトナム語、タイ語 — 翻訳先として選べるほか、拡張機能の画面もこれらの言語に対応し、ブラウザの言語で自動的に表示されます。
+```
+
 ## Privacy practices tab
 
 **Single purpose**
